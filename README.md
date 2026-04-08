@@ -1,5 +1,11 @@
 ﻿# Kommz Gamer Community
 
+> **Community Edition**  
+> Open-source desktop core for self-hosted usage, customization, and contributions.
+
+![Community Edition](https://img.shields.io/badge/Edition-Community-2563eb?style=for-the-badge)
+![License AGPLv3](https://img.shields.io/badge/License-AGPLv3-16a34a?style=for-the-badge)
+
 Kommz Gamer Community is the open-source edition of Kommz Gamer, a real-time voice translation desktop app designed for gaming, streaming, and multilingual live conversations.
 
 ## What is included
@@ -46,3 +52,4 @@ This repository is prepared as a community edition. Hosted services, commercial 
 
 ## License
 This project is intended to be distributed under the GNU Affero General Public License v3.0. See `LICENSE`.
+
