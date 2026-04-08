@@ -7,6 +7,7 @@
 
 ![Community Edition](https://img.shields.io/badge/Edition-Community-2563eb?style=for-the-badge)
 ![License AGPLv3](https://img.shields.io/badge/License-AGPLv3-16a34a?style=for-the-badge)
+[![Patreon](https://img.shields.io/badge/Soutenir-Patreon-f96854?style=for-the-badge&logo=patreon&logoColor=white)](https://www.patreon.com/KommzInnovations)
 
 Kommz Gamer Community est l’édition open source de Kommz Gamer, une application desktop de traduction vocale bidirectionnelle en temps réel pour le gaming, le streaming et les échanges multilingues en direct.
 
@@ -50,7 +51,7 @@ Ce dépôt est préparé comme édition community. Les services hébergés, le s
 ## Liens du projet
 - Site web: https://kommz.fr
 - Discord: coming soon
-- Patreon: coming soon
+- Patreon: https://www.patreon.com/KommzInnovations
 
 ## Licence
 Ce projet est distribué sous GNU Affero General Public License v3.0. Voir `LICENSE`.
