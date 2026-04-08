@@ -2896,6 +2896,7 @@
 
     const EMAIL_RE = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
     let lastEmailManualEditAt = 0;
+    let IS_COMMUNITY_MODE = false;
 
     function normalizeEmail(email) {
         return String(email || '').trim().toLowerCase();
@@ -2933,6 +2934,10 @@
         const gate = qs('#licenseGateOverlay');
         const gateStatus = qs('#gateStatus');
         if (!gate || !gateStatus) return;
+        if (d && d.community_mode === true) {
+            gate.style.display = 'none';
+            return;
+        }
         const allActivated = desktopActivated && voiceActivated;
         gate.style.display = allActivated ? 'none' : 'flex';
         gateStatus.textContent = allActivated
@@ -3758,23 +3763,27 @@
                     if (allyPicker.value !== d.ally_overlay_color) allyPicker.value = d.ally_overlay_color;
                 }
 
+                IS_COMMUNITY_MODE = (d.community_mode === true);
+                const licenseCard = qs('#licenceCard');
+                if (licenseCard) licenseCard.style.display = IS_COMMUNITY_MODE ? 'none' : 'block';
+
                 // État de la Licence
                 const licBox = qs('#licenceStatusBox');
                 const voiceLicBox = qs('#voiceLicenceStatusBox');
                 const trialBox = qs('#trialStatusBox');
-                                const desktopActivated = (d.licensed === true);
-                const voiceActivated = (d.voice_licensed === true || d.voice_active === true);
+                const desktopActivated = IS_COMMUNITY_MODE ? true : (d.licensed === true);
+                const voiceActivated = IS_COMMUNITY_MODE ? true : (d.voice_licensed === true || d.voice_active === true);
 
-                if(desktopActivated) {
+                if (!IS_COMMUNITY_MODE && desktopActivated) {
                     licBox.innerHTML = `<span style="color:var(--ok);">✅ ACTIVÉ (Exp: ${d.expiration})</span>`;
                     qs('#licenceCard').style.borderColor = "var(--ok)";
-                } else {
+                } else if (!IS_COMMUNITY_MODE) {
                     licBox.innerHTML = '<span style="color:var(--err);">🔒 NON ACTIVÉ</span>';
                     qs('#licenceCard').style.borderColor = "var(--err)";
                 }
 
                 // État licence Voice (si exposé par le backend local)
-                if (voiceLicBox) {
+                if (voiceLicBox && !IS_COMMUNITY_MODE) {
                     if (voiceActivated) {
                         const hasVoiceExp = !!(d.voice_expiration && d.voice_expiration !== 'N/A');
                         const voiceExpLabel = hasVoiceExp ? ` (Exp: ${d.voice_expiration})` : '';
@@ -3839,7 +3848,7 @@
                     }
                 }
 
-                if (trialBox) {
+                if (trialBox && !IS_COMMUNITY_MODE) {
                     if (d.trial_mode === true) {
                         const expTxt = (d.trial_expiration && d.trial_expiration !== 'N/A') ? ` (Exp: ${d.trial_expiration})` : '';
                         const rem = d.trial_voice_remaining_local_mmss || '30:00';
@@ -3850,7 +3859,7 @@
                         trialBox.innerHTML = '';
                     }
                 }
-                if (d.voice_cloud_limit_reached === true) {
+                if (!IS_COMMUNITY_MODE && d.voice_cloud_limit_reached === true) {
                     if (trialBox) {
                         trialBox.style.display = 'block';
                         trialBox.innerHTML = `⏱️ <b>Quota cloud atteint</b><br>${d.voice_cloud_limit_message || 'Les 30 minutes d’essai de clonage ont été consommées.'}`;

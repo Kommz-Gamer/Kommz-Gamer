@@ -3157,6 +3157,7 @@ if str(os.environ.get("KOMMZ_FILTER_NET0001", "1")).strip() not in ("0", "false"
         pass
 
 # ==================== LICENSE ====================
+COMMUNITY_EDITION = str(os.environ.get("KOMMZ_COMMUNITY_EDITION", "1")).strip().lower() not in ("0", "false", "no")
 def get_hwid():
     try:
         if sys.platform == "win32":
@@ -3248,6 +3249,11 @@ class LicenseManager:
 
 LICENSE_MGR = LicenseManager(get_hwid(), voice_mode=False)
 VOICE_LICENSE_MGR = LicenseManager(LICENSE_MGR.hwid, voice_mode=True)
+if COMMUNITY_EDITION:
+    LICENSE_MGR.is_activated = True
+    LICENSE_MGR.expiration_str = "COMMUNITY"
+    VOICE_LICENSE_MGR.is_activated = True
+    VOICE_LICENSE_MGR.expiration_str = "COMMUNITY"
 
 def _has_local_voice_trial_entitlement():
     try:
@@ -3261,6 +3267,8 @@ def _has_local_voice_trial_entitlement():
         return False
 
 def has_voice_license():
+    if COMMUNITY_EDITION:
+        return True
     if VOICE_LICENSE_MGR.is_activated:
         return True
     # Allow the desktop to start from a valid local trial state while the
@@ -3268,6 +3276,12 @@ def has_voice_license():
     return _has_local_voice_trial_entitlement()
 
 def refresh_license_states_from_server():
+    if COMMUNITY_EDITION:
+        LICENSE_MGR.is_activated = True
+        LICENSE_MGR.expiration_str = "COMMUNITY"
+        VOICE_LICENSE_MGR.is_activated = True
+        VOICE_LICENSE_MGR.expiration_str = "COMMUNITY"
+        return
     email = (AUDIO_CONFIG.get("license_email") or "").strip().lower()
     if email:
         key = (AUDIO_CONFIG.get("license_key") or "").strip().upper()
@@ -3589,15 +3603,16 @@ def status_core():
     st = {k: v for k, v in AUDIO_CONFIG.items()}
     desktop_key = (AUDIO_CONFIG.get("license_key") or "").strip().upper()
     voice_key = (AUDIO_CONFIG.get("voice_license_key") or "").strip().upper()
-    trial_desktop = desktop_key.startswith("TRIAL-")
-    trial_voice = voice_key.startswith("TRIAL-")
-    trial_mode = trial_desktop or trial_voice
+    trial_desktop = False if COMMUNITY_EDITION else desktop_key.startswith("TRIAL-")
+    trial_voice = False if COMMUNITY_EDITION else voice_key.startswith("TRIAL-")
+    trial_mode = False if COMMUNITY_EDITION else (trial_desktop or trial_voice)
     trial_expiration = ""
-    if trial_desktop and LICENSE_MGR.expiration_str and LICENSE_MGR.expiration_str != "N/A":
-        trial_expiration = LICENSE_MGR.expiration_str
-    elif trial_voice and VOICE_LICENSE_MGR.expiration_str and VOICE_LICENSE_MGR.expiration_str != "N/A":
-        trial_expiration = VOICE_LICENSE_MGR.expiration_str
-    voice_licensed = has_voice_license()
+    if not COMMUNITY_EDITION:
+        if trial_desktop and LICENSE_MGR.expiration_str and LICENSE_MGR.expiration_str != "N/A":
+            trial_expiration = LICENSE_MGR.expiration_str
+        elif trial_voice and VOICE_LICENSE_MGR.expiration_str and VOICE_LICENSE_MGR.expiration_str != "N/A":
+            trial_expiration = VOICE_LICENSE_MGR.expiration_str
+    voice_licensed = True if COMMUNITY_EDITION else has_voice_license()
     voice_active = voice_licensed and AUDIO_CONFIG.get("tts_engine") == "KOMMZ_VOICE"
     trial_quota_seconds = 1800
     trial_used_local = int(AUDIO_CONFIG.get("trial_voice_seconds_used_local", 0) or 0)
@@ -3617,12 +3632,12 @@ def status_core():
         "local_ip": lan_ip,
         "local_ips": lan_candidates,
         "remote_url": f"http://{lan_ip}:{VTP_CORE_PORT}/remote",
-        "licensed": LICENSE_MGR.is_activated,
-        "expiration": LICENSE_MGR.expiration_str,
+        "licensed": True if COMMUNITY_EDITION else LICENSE_MGR.is_activated,
+        "expiration": "COMMUNITY" if COMMUNITY_EDITION else LICENSE_MGR.expiration_str,
         "license_email": (AUDIO_CONFIG.get("license_email") or "").strip().lower(),
         "voice_licensed": voice_licensed,
         "voice_active": voice_active,
-        "voice_expiration": VOICE_LICENSE_MGR.expiration_str,
+        "voice_expiration": "COMMUNITY" if COMMUNITY_EDITION else VOICE_LICENSE_MGR.expiration_str,
         "trial_mode": trial_mode,
         "trial_desktop": trial_desktop,
         "trial_voice": trial_voice,
@@ -3631,6 +3646,7 @@ def status_core():
         "trial_voice_seconds_used_local": trial_used_local,
         "trial_voice_seconds_remaining_local": trial_remaining_local,
         "trial_voice_remaining_local_mmss": f"{mm:02d}:{ss:02d}",
+        "community_mode": bool(COMMUNITY_EDITION),
         "mobile_connected": _mobile_connected,
         "current_version": CURRENT_VERSION,
         "update_available": bool(UPDATE_STATE.get("update_available")),
@@ -4457,6 +4473,10 @@ def set_windows_voice_api():
 
 @app.route('/license/activate', methods=['POST'])
 def activate_license_route():
+    if COMMUNITY_EDITION:
+        LICENSE_MGR.is_activated = True
+        LICENSE_MGR.expiration_str = "COMMUNITY"
+        return jsonify({"ok": True, "expiration": "COMMUNITY", "community": True})
     try:
         data = request.get_json() or {}
         key = data.get('key', '').strip().upper()
@@ -4482,6 +4502,10 @@ def activate_license_route():
 
 @app.route('/license/voice/activate', methods=['POST'])
 def activate_voice_license_route():
+    if COMMUNITY_EDITION:
+        VOICE_LICENSE_MGR.is_activated = True
+        VOICE_LICENSE_MGR.expiration_str = "COMMUNITY"
+        return jsonify({"ok": True, "expiration": "COMMUNITY", "community": True})
     try:
         data = request.get_json() or {}
         key = str(data.get('key', '')).strip().upper()
@@ -4502,6 +4526,8 @@ def activate_voice_license_route():
 @app.route('/license/trial/activate', methods=['POST'])
 def activate_trial_license_route():
     """Active un essai gratuit desktop 24h (licence desktop + voice)."""
+    if COMMUNITY_EDITION:
+        return jsonify({"ok": True, "expiration": "COMMUNITY", "trial": False, "community": True})
     try:
         data = request.get_json() or {}
         email = normalize_email(data.get('email') or AUDIO_CONFIG.get("license_email") or "")
@@ -7899,7 +7925,7 @@ def start_rec():
     # Ã¢Å¡Â Ã¯Â¸Â MODIFICATION : On a retirÃƒÂ© le blocage "if bypass return" ici.
     # On veut que ÃƒÂ§a enregistre et transcrive (texte), c'est plus loin qu'on bloquera le son (TTS).
     
-    if not LICENSE_MGR.is_activated: 
+    if (not COMMUNITY_EDITION) and (not LICENSE_MGR.is_activated):
         stealth_print("⚠️ Licence non active.")
         return
     
@@ -10306,6 +10332,10 @@ if __name__ == "__main__":
     # (Render peut rÃƒÂ©pondre lentement; on laisse l'UI s'ouvrir puis on met ÃƒÂ  jour en arriÃƒÂ¨re-plan.)
     def _refresh_licenses_safe():
         try:
+            if COMMUNITY_EDITION:
+                if AUDIO_CONFIG.get("tts_engine") == "KOMMZ_VOICE":
+                    prewarm_kommz_xtts(force=False)
+                return
             refresh_license_states_from_server()
             if AUDIO_CONFIG.get("tts_engine") == "KOMMZ_VOICE" and not has_voice_license():
                 AUDIO_CONFIG["tts_engine"] = "WINDOWS"
