@@ -1,5 +1,7 @@
 ﻿# Kommz Gamer Community
 
+[English](README.md) | [Français](README.fr.md)
+
 > **Community Edition**  
 > Open-source desktop core for self-hosted usage, customization, and contributions.
 
@@ -52,4 +54,3 @@ This repository is prepared as a community edition. Hosted services, commercial 
 
 ## License
 This project is intended to be distributed under the GNU Affero General Public License v3.0. See `LICENSE`.
-
