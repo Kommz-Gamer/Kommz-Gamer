@@ -1,5 +1,7 @@
 ﻿# Security Policy
 
+[English](SECURITY.md) | [Français](SECURITY.fr.md)
+
 If you discover a security issue, please do not publish it immediately in a public issue.
 
 Please report it privately with:

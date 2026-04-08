@@ -1,5 +1,7 @@
 ﻿# Contributing
 
+[English](CONTRIBUTING.md) | [Français](CONTRIBUTING.fr.md)
+
 Thanks for your interest in contributing to Kommz Gamer Community.
 
 ## Before opening a PR
