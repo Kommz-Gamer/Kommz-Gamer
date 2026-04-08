@@ -1,4 +1,6 @@
-﻿# Security Policy`r`n`r`n[English](SECURITY.md) | [Français](SECURITY.fr.md) | [Single-page EN+FR](SECURITY.i18n.md)
+﻿# Security Policy
+
+[English](SECURITY.md) | [Français](SECURITY.fr.md)
 
 If you discover a security issue, please do not publish it immediately in a public issue.
 
@@ -14,4 +16,3 @@ Typical sensitive areas:
 - hosted endpoints
 - remote control features
 - local webview / embedded server startup
-

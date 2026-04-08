@@ -1,4 +1,6 @@
-﻿# Contributing`r`n`r`n[English](CONTRIBUTING.md) | [Français](CONTRIBUTING.fr.md) | [Single-page EN+FR](CONTRIBUTING.i18n.md)
+﻿# Contributing
+
+[English](CONTRIBUTING.md) | [Français](CONTRIBUTING.fr.md)
 
 Thanks for your interest in contributing to Kommz Gamer Community.
 
@@ -15,4 +17,3 @@ Thanks for your interest in contributing to Kommz Gamer Community.
 ## Security / privacy
 - Never commit `.env`, `settings.json`, logs, or personal audio assets.
 - If you discover a vulnerability, use the process described in `SECURITY.md`.
-
