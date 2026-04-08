@@ -1,6 +1,4 @@
-﻿# Roadmap
-
-[English](ROADMAP.md) | [Français](ROADMAP.fr.md)
+﻿# Roadmap`r`n`r`n[English](ROADMAP.md) | [Français](ROADMAP.fr.md) | [Single-page EN+FR](ROADMAP.i18n.md)
 
 ## Short term
 - Stabilize the community edition packaging
@@ -17,3 +15,4 @@
 ## Long term
 - Stronger community contribution model
 - Optional ecosystem tooling around support, hosted services, and creator workflows
+

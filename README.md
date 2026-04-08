@@ -16,10 +16,13 @@ Kommz Gamer Community is the open-source edition of Kommz Gamer, a real-time voi
 - README single-page EN+FR: [README.i18n.md](README.i18n.md)
 - Contributing (EN): [CONTRIBUTING.md](CONTRIBUTING.md)
 - Contributing (FR): [CONTRIBUTING.fr.md](CONTRIBUTING.fr.md)
+- Contributing single-page EN+FR: [CONTRIBUTING.i18n.md](CONTRIBUTING.i18n.md)
 - Security (EN): [SECURITY.md](SECURITY.md)
 - Security (FR): [SECURITY.fr.md](SECURITY.fr.md)
+- Security single-page EN+FR: [SECURITY.i18n.md](SECURITY.i18n.md)
 - Roadmap (EN): [ROADMAP.md](ROADMAP.md)
 - Roadmap (FR): [ROADMAP.fr.md](ROADMAP.fr.md)
+- Roadmap single-page EN+FR: [ROADMAP.i18n.md](ROADMAP.i18n.md)
 
 ## What is included
 - Desktop client source code
@@ -65,3 +68,4 @@ This repository is prepared as a community edition. Hosted services, commercial 
 
 ## License
 This project is intended to be distributed under the GNU Affero General Public License v3.0. See `LICENSE`.
+
