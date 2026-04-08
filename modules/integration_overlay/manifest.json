@@ -1,0 +1,17 @@
+{
+  "id": "integration_overlay",
+  "name": "Integration Overlay",
+  "version": "0.1.0",
+  "entry": "integration_overlay.py",
+  "endpoints": {
+    "health": "/api/mod/integration_overlay/health",
+    "configure": "/api/mod/integration_overlay/configure",
+    "enable": "/api/mod/integration_overlay/enable"
+  },
+  "defaultConfig": {
+    "enabled": true,
+    "opacity": 0.85,
+    "position": "top"
+  },
+  "_note": "This is a GENERIC example schema. Your service might expect different keys.\nCommon keys used here:\n- id: unique module id\n- name: human readable name\n- version: semantic version\n- entry: base Python (or executable) file expected by the service\n- endpoints: paths exposed by the service for this module\n- defaultConfig: per-module default configuration (override via API or overrides.json)\n"
+}

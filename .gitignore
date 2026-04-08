@@ -1,0 +1,44 @@
+﻿# Python / build
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.spec
+.cache/
+.run/
+
+# Virtual environments
+.venv/
+.venv311/
+venv/
+venv_cosy/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+settings.json
+license_cache.json
+startup.log
+
+# Generated outputs
+logs/
+outputs/
+uploads/
+dist/
+dist_*/
+_internal/
+*.log
+error_log.txt
+output_log.txt
+CRASH_REPORT_*.txt
+
+# Audio / local assets
+*.wav
+obs_subtitles.txt
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

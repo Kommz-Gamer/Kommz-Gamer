@@ -1,0 +1,16 @@
+{
+  "id": "tts_pwsh",
+  "name": "Tts Pwsh",
+  "version": "0.1.0",
+  "entry": "tts_pwsh.py",
+  "endpoints": {
+    "health": "/api/mod/tts_pwsh/health",
+    "configure": "/api/mod/tts_pwsh/configure",
+    "enable": "/api/mod/tts_pwsh/enable"
+  },
+  "defaultConfig": {
+    "voice": "Microsoft Hortense Desktop",
+    "rate": 0
+  },
+  "_note": "This is a GENERIC example schema. Your service might expect different keys.\nCommon keys used here:\n- id: unique module id\n- name: human readable name\n- version: semantic version\n- entry: base Python (or executable) file expected by the service\n- endpoints: paths exposed by the service for this module\n- defaultConfig: per-module default configuration (override via API or overrides.json)\n"
+}

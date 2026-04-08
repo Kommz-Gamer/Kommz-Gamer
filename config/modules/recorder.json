@@ -1,0 +1,8 @@
+{
+  "enabled": false,
+  "dir": "records",
+  "seconds": 2,
+  "samplerate": 16000,
+  "channels": 1,
+  "autostart": true
+}

@@ -1,0 +1,33 @@
+{
+  "integration_overlay": {
+    "position": "top",
+    "opacity": 0.85,
+    "font_size": 16,
+    "outline": true
+  },
+  "wgc_capture": {
+    "capture_api": "dxgi",
+    "fps_limit": 144,
+    "stealth": true,
+    "ghost": false
+  },
+  "stt_whisper": {
+    "model": "base",
+    "language": "auto"
+  },
+  "tts_edge": {
+    "voice": "fr-FR",
+    "rate": 1,
+    "pitch": 0
+  },
+  "ux_hotkeys": {
+    "push_to_talk": "VK_F10",
+    "mute": "VK_F11"
+  },
+  "obs_websocket": {
+    "host": "127.0.0.1",
+    "port": 4455,
+    "scene": "Game",
+    "source": "Subtitles"
+  }
+}

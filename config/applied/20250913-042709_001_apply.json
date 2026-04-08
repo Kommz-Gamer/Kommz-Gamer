@@ -1,0 +1,19 @@
+[
+  {
+    "mod": "stt_whisper",
+    "data": {
+      "autostart": false
+    }
+  }
+]": "127.0.0.1",
+      "port": 4455,
+      "password": "",
+      "encoder": "x264",
+      "rate_control": "CBR",
+      "bitrate_kbps": 6000,
+      "keyint": 2,
+      "preset": "veryfast",
+      "profile": "high"
+    }
+  }
+]

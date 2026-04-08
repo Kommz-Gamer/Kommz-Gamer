@@ -1,0 +1,6 @@
+{
+  "mod": "integration_discord",
+  "data": {
+    "autostart": false
+  }
+}

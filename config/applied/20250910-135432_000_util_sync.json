@@ -1,0 +1,7 @@
+{
+  "mod": "util_sync",
+  "data": {
+    "autostart": true,
+    "interval_ms": 2000
+  }
+}

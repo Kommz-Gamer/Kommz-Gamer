@@ -1,0 +1,14 @@
+[
+  {
+    "mod": "tts_edge",
+    "data": {
+      "voice": "en-US-JennyNeural"
+    }
+  },
+  {
+    "mod": "ptt",
+    "data": {
+      "tts_voice": "en-US-JennyNeural"
+    }
+  }
+]

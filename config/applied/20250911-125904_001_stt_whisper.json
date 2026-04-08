@@ -1,0 +1,9 @@
+{
+  "mod": "stt_whisper",
+  "data": {
+    "autostart": true,
+    "backend": "faster-whisper",
+    "language": "auto",
+    "device": "auto"
+  }
+}

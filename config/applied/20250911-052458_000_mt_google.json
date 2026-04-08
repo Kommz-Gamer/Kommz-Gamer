@@ -1,0 +1,7 @@
+{
+  "mod": "mt_google",
+  "data": {
+    "autostart": true,
+    "detect_source": true
+  }
+}

@@ -1,0 +1,10 @@
+[
+  {
+    "mod": "tts_edge",
+    "data": {
+      "voice": "en-US-JennyNeural",
+      "rate": 0.95,
+      "volume": 0.4
+    }
+  }
+]

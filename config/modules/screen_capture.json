@@ -1,0 +1,11 @@
+{
+  "autostart": false,
+  "interval_ms": 1000,
+  "region": {
+    "left": 0,
+    "top": 0,
+    "width": 640,
+    "height": 360
+  },
+  "out_dir": "captures"
+}

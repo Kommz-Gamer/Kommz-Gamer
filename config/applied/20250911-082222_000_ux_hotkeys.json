@@ -1,0 +1,8 @@
+{
+  "mod": "ux_hotkeys",
+  "data": {
+    "autostart": true,
+    "ptt": true,
+    "show_text": true
+  }
+}

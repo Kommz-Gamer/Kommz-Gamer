@@ -1,0 +1,9 @@
+[
+  {
+    "mod": "mt_deepl",
+    "data": {
+      "enabled": true,
+      "prefer": true
+    }
+  }
+]

@@ -1,0 +1,260 @@
+{
+  "scan_every_sec": 2,
+  "fallback": "gamer",
+  "rules": [
+    {
+      "name": "Valorant Competitive",
+      "process_names": [
+        "VALORANT-Win64-Shipping.exe"
+      ],
+      "window_title_patterns": [
+        "Competitive",
+        "Class\u00e9",
+        "Ranked",
+        "Comp\u00e9titif",
+        "Premier"
+      ],
+      "profile": "esport",
+      "priority": 100
+    },
+    {
+      "name": "Valorant Any",
+      "process_names": [
+        "VALORANT-Win64-Shipping.exe"
+      ],
+      "window_title_patterns": [],
+      "profile": "gamer",
+      "priority": 90
+    },
+    {
+      "name": "CS2 Competitive",
+      "process_names": [
+        "cs2.exe"
+      ],
+      "window_title_patterns": [
+        "Competitive",
+        "Ranked",
+        "Premier"
+      ],
+      "profile": "esport",
+      "priority": 100
+    },
+    {
+      "name": "CS2 Any",
+      "process_names": [
+        "cs2.exe"
+      ],
+      "window_title_patterns": [],
+      "profile": "gamer",
+      "priority": 90
+    },
+    {
+      "name": "Overwatch Comp",
+      "process_names": [
+        "Overwatch.exe",
+        "Overwatch2.exe"
+      ],
+      "window_title_patterns": [
+        "Competitive",
+        "Class\u00e9",
+        "Ranked"
+      ],
+      "profile": "esport",
+      "priority": 100
+    },
+    {
+      "name": "Overwatch Any",
+      "process_names": [
+        "Overwatch.exe",
+        "Overwatch2.exe"
+      ],
+      "window_title_patterns": [],
+      "profile": "gamer",
+      "priority": 90
+    },
+    {
+      "name": "Apex Ranked",
+      "process_names": [
+        "r5apex.exe"
+      ],
+      "window_title_patterns": [
+        "Ranked",
+        "Class\u00e9"
+      ],
+      "profile": "esport",
+      "priority": 100
+    },
+    {
+      "name": "Apex Any",
+      "process_names": [
+        "r5apex.exe"
+      ],
+      "window_title_patterns": [],
+      "profile": "gamer",
+      "priority": 90
+    },
+    {
+      "name": "Fortnite Arena/Ranked",
+      "process_names": [
+        "FortniteClient-Win64-Shipping.exe"
+      ],
+      "window_title_patterns": [
+        "Ranked",
+        "Arena",
+        "Comp\u00e9titif",
+        "Class\u00e9"
+      ],
+      "profile": "esport",
+      "priority": 100
+    },
+    {
+      "name": "Fortnite Any",
+      "process_names": [
+        "FortniteClient-Win64-Shipping.exe"
+      ],
+      "window_title_patterns": [],
+      "profile": "gamer",
+      "priority": 90
+    },
+    {
+      "name": "Rocket League Ranked",
+      "process_names": [
+        "rocketleague.exe"
+      ],
+      "window_title_patterns": [
+        "Ranked",
+        "Competitive",
+        "Ligue",
+        "Saison",
+        "Class\u00e9"
+      ],
+      "profile": "esport",
+      "priority": 100
+    },
+    {
+      "name": "Rocket League Any",
+      "process_names": [
+        "rocketleague.exe"
+      ],
+      "window_title_patterns": [],
+      "profile": "gamer",
+      "priority": 90
+    },
+    {
+      "name": "R6 Siege Ranked",
+      "process_names": [
+        "RainbowSix.exe",
+        "RainbowSix_Vulkan.exe"
+      ],
+      "window_title_patterns": [
+        "Ranked",
+        "Class\u00e9",
+        "Competitive"
+      ],
+      "profile": "esport",
+      "priority": 100
+    },
+    {
+      "name": "R6 Siege Any",
+      "process_names": [
+        "RainbowSix.exe",
+        "RainbowSix_Vulkan.exe"
+      ],
+      "window_title_patterns": [],
+      "profile": "gamer",
+      "priority": 90
+    },
+    {
+      "name": "LoL Ranked",
+      "process_names": [
+        "League of Legends.exe"
+      ],
+      "window_title_patterns": [
+        "Ranked",
+        "Class\u00e9",
+        "Solo/Duo",
+        "Flex"
+      ],
+      "profile": "esport",
+      "priority": 100
+    },
+    {
+      "name": "LoL Any",
+      "process_names": [
+        "League of Legends.exe"
+      ],
+      "window_title_patterns": [],
+      "profile": "gamer",
+      "priority": 90
+    },
+    {
+      "name": "Dota 2 Ranked",
+      "process_names": [
+        "dota2.exe"
+      ],
+      "window_title_patterns": [
+        "Ranked",
+        "Class\u00e9"
+      ],
+      "profile": "esport",
+      "priority": 100
+    },
+    {
+      "name": "Dota 2 Any",
+      "process_names": [
+        "dota2.exe"
+      ],
+      "window_title_patterns": [],
+      "profile": "gamer",
+      "priority": 90
+    },
+    {
+      "name": "PUBG Ranked",
+      "process_names": [
+        "TslGame.exe"
+      ],
+      "window_title_patterns": [
+        "Ranked",
+        "Class\u00e9"
+      ],
+      "profile": "esport",
+      "priority": 100
+    },
+    {
+      "name": "PUBG Any",
+      "process_names": [
+        "TslGame.exe"
+      ],
+      "window_title_patterns": [],
+      "profile": "gamer",
+      "priority": 90
+    },
+    {
+      "name": "Warzone Ranked",
+      "process_names": [
+        "cod.exe",
+        "mw.exe",
+        "mw2.exe",
+        "codwarzone.exe"
+      ],
+      "window_title_patterns": [
+        "Ranked",
+        "Class\u00e9"
+      ],
+      "profile": "esport",
+      "priority": 100
+    },
+    {
+      "name": "Warzone Any",
+      "process_names": [
+        "cod.exe",
+        "mw.exe",
+        "mw2.exe",
+        "codwarzone.exe"
+      ],
+      "window_title_patterns": [],
+      "profile": "gamer",
+      "priority": 90
+    }
+  ]
+}

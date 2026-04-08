@@ -1,0 +1,7 @@
+{
+  "tesseract_cmd": "",
+  "lang": "eng",
+  "psm": 6,
+  "oem": 3,
+  "autostart": false
+}

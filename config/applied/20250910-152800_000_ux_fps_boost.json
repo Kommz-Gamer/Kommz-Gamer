@@ -1,0 +1,7 @@
+{
+  "mod": "ux_fps_boost",
+  "data": {
+    "autostart": true,
+    "mode": "balanced"
+  }
+}

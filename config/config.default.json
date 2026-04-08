@@ -1,0 +1,37 @@
+{
+  "branding": {
+    "author": "By MrHealy",
+    "theme": "classic-neon"
+  },
+  "network": {
+    "api_port": 8771,
+    "dashboard_port": 8765,
+    "overlay_port": 8790,
+    "host": "0.0.0.0"
+  },
+  "profiles": {
+    "active": "gamer",
+    "rules": {
+      "valorant": {
+        "ranked_esport_auto": true
+      },
+      "overwatch": {
+        "ranked_esport_auto": true
+      },
+      "apex": {
+        "ranked_esport_auto": true
+      },
+      "fortnite": {
+        "ranked_esport_auto": true
+      }
+    }
+  },
+  "mobile": {
+    "qr_with_logo": true
+  },
+  "tts": {
+    "engine": "pyttsx3-sapi5",
+    "rate": 185,
+    "volume": 0.9
+  }
+}

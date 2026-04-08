@@ -1,0 +1,68 @@
+{
+  "api": {
+    "host": "127.0.0.1",
+    "port": 8770
+  },
+  "dashboard": {
+    "path": "dashboard",
+    "index": "index.html"
+  },
+  "overlay": {
+    "path": "overlay",
+    "file": "overlay.html"
+  },
+  "window": {
+    "enable": false,
+    "width": 1280,
+    "height": 800,
+    "fullscreen": false
+  },
+  "autoOpenBrowser": false,
+  "logLevel": "info"
+  
+  },
+  "language_input": "auto",
+  "language_output": "fr",
+  "tts_engine": "pyttsx3",
+  "branding": {
+    "author": "By MrHealy",
+    "theme": "classic-neon"
+  },
+  "network": {
+    "api_port": 8771,
+    "dashboard_port": 8765,
+    "overlay_port": 8790,
+    "host": "0.0.0.0"
+  },
+  "profiles": {
+    "active": "gamer",
+    "rules": {
+      "valorant": {
+        "ranked_esport_auto": true
+      },
+      "overwatch": {
+        "ranked_esport_auto": true
+      },
+      "apex": {
+        "ranked_esport_auto": true
+      },
+      "fortnite": {
+        "ranked_esport_auto": true
+      }
+    }
+  },
+  "mobile": {
+    "qr_with_logo": true
+  },
+  "tts": {
+    "engine": "pyttsx3-sapi5",
+    "rate": 185,
+    "volume": 0.9
+  }
+}
+
+{
+  "modules": {
+    "path": "C:\Users\nicol\Desktop\ValorantTranslatorPro_AllInOne\dist\ValorantTranslatorPro\modules"
+  }
+}

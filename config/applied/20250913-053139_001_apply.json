@@ -1,0 +1,16 @@
+[
+  {
+    "mod": "stt_whisper",
+    "data": {
+      "autostart": false
+    }
+  }
+]provider": "local",
+      "model": "small",
+      "context_mode": "gamer"
+    }
+  }
+]lt"
+    }
+  }
+]

@@ -1,0 +1,16 @@
+{
+  "id": "util_sync",
+  "name": "Util Sync",
+  "version": "0.1.0",
+  "entry": "util_sync.py",
+  "endpoints": {
+    "health": "/api/mod/util_sync/health",
+    "configure": "/api/mod/util_sync/configure",
+    "enable": "/api/mod/util_sync/enable"
+  },
+  "defaultConfig": {
+    "enabled": true,
+    "interval_ms": 2000
+  },
+  "_note": "This is a GENERIC example schema. Your service might expect different keys.\nCommon keys used here:\n- id: unique module id\n- name: human readable name\n- version: semantic version\n- entry: base Python (or executable) file expected by the service\n- endpoints: paths exposed by the service for this module\n- defaultConfig: per-module default configuration (override via API or overrides.json)\n"
+}

@@ -1,0 +1,10 @@
+{
+  "name": "hello",
+  "entry": "hello.py",
+  "version": "1.0.0",
+  "type": "python",
+  "endpoints": {
+    "health": "health",
+    "configure": "configure"
+  }
+}

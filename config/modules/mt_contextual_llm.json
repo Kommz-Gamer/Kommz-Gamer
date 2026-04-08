@@ -1,0 +1,6 @@
+{
+  "autostart": true,
+  "provider": "local",
+  "model": "small",
+  "context_mode": "gamer"
+}

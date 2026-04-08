@@ -1,0 +1,5 @@
+{
+  "autostart": true,
+  "token": "<DISCORD_BOT_TOKEN>",
+  "channel_id": "<channel_id>"
+}

@@ -1,0 +1,8 @@
+{
+  "mod": "stt_whisper",
+  "data": {
+    "autostart": true,
+    "language": "fr",
+    "model": "small"
+  }
+}

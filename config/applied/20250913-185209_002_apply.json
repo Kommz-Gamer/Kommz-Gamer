@@ -1,0 +1,17 @@
+[
+  {
+    "mod": "mt_deepl",
+    "data": {
+      "default_to": "fr"
+    }
+  },
+  {
+    "mod": "tts_edge",
+    "data": {
+      "lang_out": "fr"
+    }
+  }
+]eural"
+    }
+  }
+]

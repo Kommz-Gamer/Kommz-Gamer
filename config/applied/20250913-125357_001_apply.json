@@ -1,0 +1,10 @@
+[
+  {
+    "mod": "tts_edge",
+    "data": {
+      "voice": "es-ES-ElviraNeural",
+      "rate": 1,
+      "volume": 1
+    }
+  }
+]

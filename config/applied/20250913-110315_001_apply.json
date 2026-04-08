@@ -1,0 +1,14 @@
+[
+  {
+    "mod": "util_logging",
+    "data": {
+      "enabled": true
+    }
+  }
+]lang": "auto",
+      "target_lang": "FR",
+      "tier": "free",
+      "formality": "default"
+    }
+  }
+]

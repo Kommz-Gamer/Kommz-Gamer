@@ -1,0 +1,7 @@
+{
+  "autostart": false,
+  "stealth": true,
+  "mode": "voice_text",
+  "ptt_key": "VK_F10",
+  "mute_key": "VK_F11"
+}

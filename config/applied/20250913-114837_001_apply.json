@@ -1,0 +1,11 @@
+[
+  {
+    "mod": "tts_edge",
+    "data": {
+      "autostart": true,
+      "voice": "en-US-GuyNeural",
+      "rate": 1,
+      "volume": 0.49
+    }
+  }
+]

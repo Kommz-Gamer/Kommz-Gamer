@@ -1,0 +1,10 @@
+[
+  {
+    "mod": "integration_overlay",
+    "data": {
+      "enabled": true,
+      "font_size": 24,
+      "position": "top"
+    }
+  }
+]

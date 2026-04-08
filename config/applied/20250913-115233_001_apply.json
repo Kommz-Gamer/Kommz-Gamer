@@ -1,0 +1,13 @@
+[
+  {
+    "mod": "integration_overlay",
+    "data": {
+      "autostart": true,
+      "enabled": true
+    }
+  }
+]: 1,
+      "volume": 0.49
+    }
+  }
+]

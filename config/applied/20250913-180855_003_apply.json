@@ -1,0 +1,23 @@
+[
+  {
+    "mod": "mt_deepl",
+    "data": {
+      "autostart": true,
+      "to": "fr"
+    }
+  },
+  {
+    "mod": "stt_whisper",
+    "data": {
+      "autostart": true,
+      "ptt": false,
+      "language": "auto"
+    }
+  },
+  {
+    "mod": "audio_vad",
+    "data": {
+      "autostart": true
+    }
+  }
+]

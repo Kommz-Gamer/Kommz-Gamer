@@ -1,0 +1,18 @@
+[
+  {
+    "mod": "mt_contextual_llm",
+    "data": {
+      "autostart": true,
+      "provider": "local",
+      "model": "small",
+      "context_mode": "gamer"
+    }
+  }
+]   "rate_control": "CBR",
+      "bitrate_kbps": 6000,
+      "keyint": 2,
+      "preset": "veryfast",
+      "profile": "high"
+    }
+  }
+]

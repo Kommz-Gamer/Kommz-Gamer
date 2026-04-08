@@ -1,0 +1,14 @@
+[
+  {
+    "mod": "tts_edge",
+    "data": {
+      "voice": "en-US-JennyNeural",
+      "rate": 1,
+      "volume": 1
+    }
+  }
+]   "tier": "free",
+      "formality": "default"
+    }
+  }
+]

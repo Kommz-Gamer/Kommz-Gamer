@@ -1,0 +1,20 @@
+[
+  {
+    "mod": "mt_deepl",
+    "data": {
+      "autostart": true
+    }
+  },
+  {
+    "mod": "stt_whisper",
+    "data": {
+      "autostart": false
+    }
+  },
+  {
+    "mod": "audio_vad",
+    "data": {
+      "autostart": false
+    }
+  }
+]

@@ -1,0 +1,16 @@
+[
+  {
+    "data": {
+      "enabled": false,
+      "autostart": false
+    },
+    "mod": "lang_detect"
+  },
+  {
+    "data": {
+      "autostart": false,
+      "level": "off"
+    },
+    "mod": "util_logging"
+  }
+]

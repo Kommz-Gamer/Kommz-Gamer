@@ -1,0 +1,16 @@
+{
+  "autostart": true,
+  "capture_api": "dxgi",
+  "fps_limit": 240,
+  "stealth": false,
+  "ghost": false,
+  "hide_cursor": false,
+  "window_regex": "VALORANT",
+  "enabled": true,
+  "mode": "desktop",
+  "monitor": 0,
+  "method": "dxgi",
+  "target": "Valorant",
+  "source": "desktop",
+  "dxgi": true
+}

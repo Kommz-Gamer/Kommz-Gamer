@@ -1,0 +1,12 @@
+[
+  {
+    "mod": "integration_overlay",
+    "data": {
+      "autostart": false
+    }
+  }
+]"VK_F10",
+      "modifier": "CTRL_SHIFT"
+    }
+  }
+]

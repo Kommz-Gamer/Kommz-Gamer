@@ -1,0 +1,7 @@
+{
+  "mod": "ux_hotkeys",
+  "data": {
+    "autostart": true,
+    "push_to_talk": "CTRL"
+  }
+}

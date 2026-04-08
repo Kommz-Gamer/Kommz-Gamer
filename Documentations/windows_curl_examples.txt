@@ -1,0 +1,6 @@
+CMD.exe:
+curl -s -H "Content-Type: application/json" -d "{"text":"Hello team","from":"auto","to":"fr","voice":"fr-FR-DeniseNeural"}" http://127.0.0.1:8781/ptt/text
+
+PowerShell:
+$body = @{ text="Hello team"; from="auto"; to="fr"; voice="fr-FR-DeniseNeural" } | ConvertTo-Json
+curl.exe -s -H "Content-Type: application/json" -d $body http://127.0.0.1:8781/ptt/text

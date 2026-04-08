@@ -1,0 +1,5 @@
+{
+  "cloud_base": "https://example.invalid/vtp",
+  "api_key": "replace-me",
+  "enabled": false
+}

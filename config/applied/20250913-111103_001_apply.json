@@ -1,0 +1,8 @@
+[
+  {
+    "mod": "stt_whisper",
+    "data": {
+      "autostart": true
+    }
+  }
+]

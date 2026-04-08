@@ -1,0 +1,18 @@
+[
+  {
+    "mod": "mt_deepl",
+    "data": {
+      "autostart": true,
+      "source_lang": "auto",
+      "target_lang": "FR",
+      "tier": "free",
+      "formality": "default"
+    }
+  },
+  {
+    "mod": "mt_google",
+    "data": {
+      "autostart": false
+    }
+  }
+]

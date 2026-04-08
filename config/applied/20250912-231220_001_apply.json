@@ -1,0 +1,14 @@
+[
+  {
+    "mod": "integration_overlay",
+    "data": {
+      "autostart": true,
+      "enabled": true,
+      "opacity": 0.9,
+      "position": "top"
+    }
+  }
+]y": "default"
+    }
+  }
+]

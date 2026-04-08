@@ -1,0 +1,7 @@
+{
+  "autostart": true,
+  "level": "info",
+  "file": "logs/app.log",
+  "rotate": "10MB",
+  "enabled": true
+}

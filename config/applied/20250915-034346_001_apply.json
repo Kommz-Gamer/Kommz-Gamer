@@ -1,0 +1,9 @@
+[
+  {
+    "mod": "tts_edge",
+    "data": {
+      "autostart": true,
+      "multi_output": true
+    }
+  }
+]

@@ -1,0 +1,8 @@
+{
+  "autostart": true,
+  "style": "subtle",
+  "position": "top",
+  "opacity": 0.9,
+  "enabled": true,
+  "show_transcript": true
+}

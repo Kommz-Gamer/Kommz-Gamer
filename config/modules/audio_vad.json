@@ -1,0 +1,7 @@
+{
+  "autostart": true,
+  "aggressiveness": 2,
+  "engine": "silero",
+  "model": "silero",
+  "threshold": 0.5
+}

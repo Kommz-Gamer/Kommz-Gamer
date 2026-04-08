@@ -1,0 +1,18 @@
+[
+  {
+    "mod": "mt_deepl",
+    "data": {
+      "from": "auto"
+    }
+  },
+  {
+    "mod": "mt_google",
+    "data": {
+      "from": "auto"
+    }
+  }
+],
+      "from": "auto"
+    }
+  }
+]

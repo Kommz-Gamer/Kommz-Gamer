@@ -1,0 +1,19 @@
+[
+  {
+    "mod": "mt_deepl",
+    "data": {
+      "autostart": true,
+      "source_lang": "auto",
+      "target_lang": "EN"
+    }
+  }
+]: "123456",
+      "encoder": "x264",
+      "rate_control": "CBR",
+      "bitrate_kbps": 6000,
+      "keyint": 2,
+      "preset": "veryfast",
+      "profile": "high"
+    }
+  }
+]

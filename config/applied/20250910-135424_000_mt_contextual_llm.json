@@ -1,0 +1,6 @@
+{
+  "mod": "mt_contextual_llm",
+  "data": {
+    "autostart": true
+  }
+}

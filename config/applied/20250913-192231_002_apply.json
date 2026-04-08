@@ -1,0 +1,15 @@
+[
+  {
+    "mod": "tts_edge",
+    "data": {
+      "voice": "fr-FR-AlainNeural"
+    }
+  },
+  {
+    "mod": "ptt",
+    "data": {
+      "tts_voice": "fr-FR-AlainNeural"
+    }
+  }
+]
+]

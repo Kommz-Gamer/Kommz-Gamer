@@ -1,0 +1,23 @@
+[
+  {
+    "mod": "mt_deepl",
+    "data": {
+      "default_to": "fr"
+    }
+  },
+  {
+    "mod": "tts_edge",
+    "data": {
+      "lang_out": "fr"
+    }
+  }
+]ity": "default"
+    }
+  },
+  {
+    "mod": "mt_google",
+    "data": {
+      "autostart": false
+    }
+  }
+]

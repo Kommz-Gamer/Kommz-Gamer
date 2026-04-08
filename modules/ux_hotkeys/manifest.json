@@ -1,0 +1,16 @@
+{
+  "id": "ux_hotkeys",
+  "name": "Ux Hotkeys",
+  "version": "0.1.0",
+  "entry": "ux_hotkeys.py",
+  "endpoints": {
+    "health": "/api/mod/ux_hotkeys/health",
+    "configure": "/api/mod/ux_hotkeys/configure",
+    "enable": "/api/mod/ux_hotkeys/enable"
+  },
+  "defaultConfig": {
+    "push_to_talk": "VK_F10",
+    "mute": "VK_F11"
+  },
+  "_note": "This is a GENERIC example schema. Your service might expect different keys.\nCommon keys used here:\n- id: unique module id\n- name: human readable name\n- version: semantic version\n- entry: base Python (or executable) file expected by the service\n- endpoints: paths exposed by the service for this module\n- defaultConfig: per-module default configuration (override via API or overrides.json)\n"
+}

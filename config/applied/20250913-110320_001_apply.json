@@ -1,0 +1,13 @@
+[
+  {
+    "mod": "lang_detect",
+    "data": {
+      "autostart": true
+    }
+  }
+]"provider": "local",
+      "model": "small",
+      "context_mode": "gamer"
+    }
+  }
+]

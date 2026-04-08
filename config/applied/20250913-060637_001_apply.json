@@ -1,0 +1,11 @@
+[
+  {
+    "mod": "tts_edge",
+    "data": {
+      "autostart": true,
+      "voice": "fr-FR-DeniseNeural",
+      "rate": 1,
+      "volume": 85
+    }
+  }
+]

@@ -1,0 +1,6 @@
+{
+  "voice": "Microsoft Hortense Desktop",
+  "rate": 0,
+  "out_dir": "tts_out",
+  "autostart": true
+}

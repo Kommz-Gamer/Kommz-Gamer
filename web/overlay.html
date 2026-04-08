@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kommz Overlay</title>
+  <style>
+    :root{
+      --user-color:#00FFFF;
+      --ally-color:#FFFF00;
+      --sys-color:#FF00FF;
+    }
+    body{
+      margin:0;
+      overflow:hidden;
+      background:transparent;
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-end;
+      align-items:center;
+      height:100vh;
+      font-family:'Segoe UI', Arial, sans-serif;
+    }
+    #subtitle-container{
+      margin-bottom:20px;
+      text-align:center;
+      transition:opacity 0.5s;
+      width:100%;
+      display:flex;
+      justify-content:center;
+      padding:0 16px;
+      box-sizing:border-box;
+    }
+    .sub-line{
+      display:inline-block;
+      background-color:rgba(0,0,0,0.70);
+      color:var(--user-color);
+      padding:8px 16px;
+      border-radius:10px;
+      font-size:32px;
+      font-weight:700;
+      text-shadow:2px 2px 0 #000;
+      box-shadow:0 4px 10px rgba(0,0,0,0.35);
+      max-width:min(92vw, 1400px);
+      line-height:1.35;
+      white-space:pre-wrap;
+      animation:popIn 0.26s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .sub-line.ally{ color:var(--ally-color); }
+    .sub-line.sys{ color:var(--sys-color); }
+    @keyframes popIn{
+      from{ transform:scale(0.88); opacity:0; }
+      to{ transform:scale(1); opacity:1; }
+    }
+  </style>
+</head>
+<body>
+  <div id="subtitle-container"></div>
+  <script>
+    const box = document.getElementById('subtitle-container');
+    let lastKey = "";
+    let clearTimer = null;
+
+    function escHtml(s){
+      return String(s).replace(/[&<>"']/g, (c) => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+      }[c]));
+    }
+
+    async function refreshColors(){
+      try{
+        const r = await fetch('/status', { cache: 'no-store' });
+        const d = await r.json();
+        if (d && d.user_overlay_color) document.documentElement.style.setProperty('--user-color', d.user_overlay_color);
+        if (d && d.ally_overlay_color) document.documentElement.style.setProperty('--ally-color', d.ally_overlay_color);
+      }catch(e){}
+    }
+
+    function extractLastCue(vttText){
+      const lines = (vttText || '').split('\n');
+      for (let i = lines.length - 1; i >= 0; i--){
+        const line = (lines[i] || '').trim();
+        if (!line) continue;
+        if (line.includes('-->')) continue;
+        if (line.toUpperCase().startsWith('WEBVTT')) continue;
+        if (/^\d+$/.test(line)) continue;
+
+        // Exemple: <v USER>texte</v>
+        const m = line.match(/<v\s+([^>]+)>/i);
+        const role = (m ? m[1] : 'USER').trim().toUpperCase();
+        const text = line.replace(/<[^>]*>/g, '').trim();
+        return { role, text };
+      }
+      return { role:'', text:'' };
+    }
+
+    async function updateSubs(){
+      try{
+        const res = await fetch('/subs/live.vtt', { cache: 'no-store' });
+        const vtt = await res.text();
+        const cue = extractLastCue(vtt);
+        if (!cue.text) return;
+
+        const cls = cue.role.includes('ALLY') ? 'ally' : (cue.role.includes('SYS') ? 'sys' : 'user');
+        const key = cls + '|' + cue.text;
+        if (key !== lastKey){
+          lastKey = key;
+          box.innerHTML = `<div class="sub-line ${cls}">${escHtml(cue.text)}</div>`;
+          if (clearTimer) clearTimeout(clearTimer);
+          clearTimer = setTimeout(() => {
+            box.innerHTML = '';
+            lastKey = '';
+          }, 6500);
+        }
+      }catch(e){}
+    }
+
+    refreshColors();
+    setInterval(refreshColors, 2000);
+    setInterval(updateSubs, 500);
+  </script>
+</body>
+</html>
+

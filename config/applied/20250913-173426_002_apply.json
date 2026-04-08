@@ -1,0 +1,22 @@
+[
+  {
+    "mod": "stt_whisper",
+    "data": {
+      "autostart": false
+    }
+  },
+  {
+    "mod": "audio_vad",
+    "data": {
+      "autostart": false
+    }
+  }
+]    "data": {
+      "autostart": true,
+      "source_lang": "auto",
+      "target_lang": "FR",
+      "tier": "free",
+      "formality": "default"
+    }
+  }
+]

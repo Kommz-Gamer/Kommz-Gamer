@@ -1,0 +1,273 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guide Streamer - Kommz Diamond V4.5</title>
+    <style>
+        :root { 
+            --bg-dark: #09090b; 
+            --bg-card: #14141a; 
+            --text-primary: #e2e8f0; 
+            --text-muted: #94a3b8; 
+            --twitch: #a855f7; 
+            --obs: #2563eb; 
+            --privacy: #f43f5e; 
+            --marker: #eab308;
+            --stealth: #52525b;
+            --border: #27272a; 
+            --success: #10b981; 
+        }
+        
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-dark); color: var(--text-primary); margin: 0; padding: 40px; line-height: 1.6; }
+        .container { max-width: 950px; margin: 0 auto; }
+        
+        header { text-align: center; margin-bottom: 50px; border-bottom: 1px solid var(--border); padding-bottom: 40px; }
+        h1 { font-size: 3em; margin: 0; background: linear-gradient(to right, var(--twitch), var(--obs)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .subtitle { color: var(--text-muted); font-size: 1.2em; display: block; margin-top: 10px; font-weight: 300; letter-spacing: 1px; }
+
+        /* TITRES AVEC BARRE COLORÉE */
+        h2 { color: #fff; border-left: 4px solid var(--twitch); padding-left: 15px; margin-top: 60px; font-size: 1.8em; display: flex; align-items: center; gap: 10px; }
+        h3 { color: #fff; margin-top: 0; font-size: 1.1em; font-weight: 600; margin-bottom: 10px; }
+        p { color: var(--text-muted); font-size: 0.9em; margin-bottom: 5px; }
+
+        /* STYLE DES ETAPES (COMME SUR L'IMAGE) */
+        .step-container { display: flex; gap: 15px; margin-bottom: 20px; align-items: flex-start; }
+        .step-circle { 
+            min-width: 28px; height: 28px; 
+            background: var(--twitch); 
+            color: white; 
+            border-radius: 50%; 
+            text-align: center; 
+            line-height: 28px; 
+            font-weight: bold; 
+            font-size: 0.9em;
+            margin-top: 2px;
+        }
+        .step-content strong { color: #fff; display: block; margin-bottom: 4px; }
+        
+        /* BOITES ET CARTES */
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 30px; margin: 20px 0; }
+        
+        .alert-obs { 
+            background: rgba(37, 99, 235, 0.08); 
+            border: 1px solid var(--obs); 
+            color: #93c5fd; 
+            padding: 20px; 
+            border-radius: 8px; 
+            margin: 20px 0; 
+            display: block; 
+        }
+
+        .alert-tip {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            color: #6ee7b7;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            margin-bottom: 40px;
+        }
+
+        /* GRILLE MODULES */
+        .module-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top:20px; }
+        .module-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; justify-content: flex-start; }
+
+        code { background: #000; padding: 3px 8px; border-radius: 4px; font-family: monospace; color: var(--twitch); border: 1px solid var(--border); font-size: 0.9em; }
+        
+        .badge { padding: 3px 8px; border-radius: 4px; font-size: 0.7em; font-weight: bold; border: 1px solid rgba(255,255,255,0.1); text-transform: uppercase; float: right; }
+        .b-obs { background: rgba(37, 99, 235, 0.15); color: #60a5fa; border-color: var(--obs); }
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>GUIDE STREAMER & OBS</h1>
+            <span class="subtitle">Intégration Pro • Sous-titres • Discrétion</span>
+        </header>
+
+        <div class="alert-tip">
+            👋 <strong>Pour les Créateurs :</strong> Ce guide vous explique comment afficher les traductions directement sur votre stream (OBS/Streamlabs) sans capturer l'overlay Windows.
+        </div>
+
+        <h2 id="licence">0. Licence & Services Cloud (Nouveau)</h2>
+        <div class="card">
+            <div class="step-container">
+                <div class="step-circle">1</div>
+                <div class="step-content">
+                    <strong>Activez vos clés dans l'onglet Licence :</strong>
+                    Clé <code>VTP-...</code> pour le logiciel, puis <code>VCV-...</code> pour débloquer Kommz Voice Cloud.
+                </div>
+            </div>
+            <div class="step-container">
+                <div class="step-circle">2</div>
+                <div class="step-content">
+                    <strong>Whisper / XTTS doivent être en ligne :</strong>
+                    En cas d'erreur de transcription ou de clone, vérifiez les URLs Modal configurées côté serveur.
+                </div>
+            </div>
+            <div class="step-container">
+                <div class="step-circle">3</div>
+                <div class="step-content">
+                    <strong>Le mode Hybrid est optionnel mais utile pour le rendu vocal :</strong>
+                    il ameliore le timbre et la couleur de voix. Il est surtout utile si vous voulez un rendu plus naturel sur la sortie vocale, sans changer votre configuration OBS.
+                </div>
+            </div>
+            <div class="alert-obs">
+                <strong>Variables Render à vérifier :</strong><br>
+                <code>MODAL_WHISPER_URL</code> (Whisper), <code>MODAL_XTTS_URL</code> (XTTS) et <code>MODAL_GPTSOVITS_URL</code> (Hybrid distant si activé).
+            </div>
+        </div>
+
+        <h2 id="hybrid" style="border-color: var(--success);">I.bis Mode Hybrid (Rendu Vocal)</h2>
+        <div class="card" style="border-left: 4px solid var(--success);">
+            <div class="step-container">
+                <div class="step-circle">1</div>
+                <div class="step-content">
+                    <strong>Activez Hybrid dans l'onglet Intelligence Artificielle :</strong>
+                    ce mode est recommande si vous voulez un meilleur timbre et une voix plus naturelle en sortie.
+                </div>
+            </div>
+            <div class="step-container">
+                <div class="step-circle">2</div>
+                <div class="step-content">
+                    <strong>Renseignez une reference audio propre :</strong>
+                    utilisez une courte reference vocale propre et exploitable. Sans reference valide, le logiciel retombera sur le flux vocal standard.
+                </div>
+            </div>
+            <div class="step-container">
+                <div class="step-circle">3</div>
+                <div class="step-content">
+                    <strong>Langues conseillees :</strong>
+                    FR, EN, JA, KO et ZH. Pour les autres langues, le logiciel peut revenir automatiquement sur le pipeline vocal classique.
+                </div>
+            </div>
+            <div class="alert-tip" style="margin-bottom:0;">
+                Le mode Hybrid change la qualite de la voix, pas la methode d'affichage dans OBS. Vos sous-titres continuent de fonctionner via <code>obs_subtitles.txt</code>.
+            </div>
+        </div>
+
+        <h2 id="setup">I. Activation du Module "Stream Connect"</h2>
+        <div class="card">
+            <div class="step-container">
+                <div class="step-circle">1</div>
+                <div class="step-content">
+                    <strong>Dans l'interface Kommz (Navigateur) :</strong>
+                    Allez dans l'onglet <em>Modules Système</em> et activez le bouton <code>Stream Connect</code>.
+                </div>
+            </div>
+            <div class="step-container">
+                <div class="step-circle">2</div>
+                <div class="step-content">
+                    <strong>Parlez une fois :</strong>
+                    Dites une phrase au micro. Cela va créer automatiquement un fichier nommé <code>obs_subtitles.txt</code> dans le dossier du logiciel.
+                </div>
+            </div>
+        </div>
+
+        <h2 id="obs" style="border-color: var(--obs);">II. Intégration OBS Studio (Overlay Pro)</h2>
+        <p>Suivez ces étapes pour avoir des sous-titres dynamiques qui ne bougent pas.</p>
+
+        <div class="card" style="border-left: 4px solid var(--obs);">
+            <h3>1. Ajouter la Source</h3>
+            <ul style="color:var(--text-muted); padding-left:20px; margin-top:5px;">
+                <li>Dans OBS, panneau <strong>Sources</strong>, cliquez sur <code>+</code>.</li>
+                <li>Choisissez <strong>Texte (GDI+)</strong>.</li>
+                <li>Nommez-la "Sous-titres IA".</li>
+            </ul>
+
+            <h3 style="margin-top:25px;">2. Configuration (Critique)</h3>
+            <div class="alert-obs">
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <span style="font-size:1.5em;">⚠️</span>
+                    <div>
+                        <strong>RÉGLAGE IMPORTANT :</strong><br>
+                        Cochez la case ☑️ <strong>Lire à partir d'un fichier</strong> (Read from file).<br>
+                        Cliquez sur "Parcourir" et sélectionnez le fichier <code>obs_subtitles.txt</code>.
+                    </div>
+                </div>
+            </div>
+
+            <h3>3. Le Secret du Centrage Parfait (Anti-Décalage)</h3>
+            <p>Pour éviter que le texte ne se décale quand la phrase change de longueur :</p>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:15px;">
+                <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:6px; border:1px solid #333;">
+                    <span style="display:block; font-size:0.7em; text-transform:uppercase; color:#777;">Tout en bas des propriétés</span>
+                    <strong style="color:#fff;">☑️ Utiliser des extensions de texte personnalisées</strong>
+                </div>
+                <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:6px; border:1px solid #333;">
+                    <span style="display:block; font-size:0.7em; text-transform:uppercase; color:#777;">Largeur (Width)</span>
+                    <strong style="color:#fff;">1920 (Taille écran)</strong>
+                </div>
+                <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:6px; border:1px solid #333;">
+                    <span style="display:block; font-size:0.7em; text-transform:uppercase; color:#777;">Alignement</span>
+                    <strong style="color:#fff;">Centré (Center)</strong>
+                </div>
+                <div style="background:rgba(0,0,0,0.3); padding:10px; border-radius:6px; border:1px solid #333;">
+                    <span style="display:block; font-size:0.7em; text-transform:uppercase; color:#777;">Retour à la ligne</span>
+                    <strong style="color:#fff;">Word Wrap</strong>
+                </div>
+            </div>
+        </div>
+
+        <h2 id="studio" style="border-color: var(--privacy);">III. Nouveautés Studio & Sécurité</h2>
+        
+        <div class="card" style="border-left: 4px solid var(--privacy);">
+            <div style="display:flex; justify-content:space-between;">
+                <h3 style="color:var(--privacy);">🛡️ Privacy Sentinel (TUTO)</h3>
+            </div>
+            <p>Ce module coupe le son si vous leakez une info privée.</p>
+            
+            <div style="background:rgba(244, 63, 94, 0.05); border:1px solid var(--privacy); padding:15px; border-radius:8px; margin-top:15px;">
+                <strong>Comment gérer la liste (Zone Rouge) :</strong>
+                <ul style="color:#fca5a5; margin-top:10px; padding-left:20px;">
+                    <li><strong>Bouton 👁️ (Cacher/Voir) :</strong> Cliquez dessus pour flouter vos mots secrets si vous montrez l'écran en live.</li>
+                    <li><strong>Ajouter un mot :</strong> Tapez votre adresse ou nom de famille et faites "Ajouter".</li>
+                    <li><strong>Détection Auto :</strong> Les numéros de téléphone (06...) sont bloqués automatiquement sans rien faire.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card" style="border-left: 4px solid var(--obs);">
+            <div style="display:flex; justify-content:space-between;">
+                <h3 style="color:#60a5fa;">🌍 Polyglot (2ème Langue)</h3>
+                <span class="badge b-obs">OBS</span>
+            </div>
+            <p>Pour afficher une traduction (ex: Espagnol) en plus du Français.</p>
+            <ul style="margin-top:10px; padding-left:20px; color:var(--text-muted);">
+                <li>Activez le module <strong>Polyglot</strong>.</li>
+                <li>Dans OBS, créez une <strong>DEUXIÈME</strong> source texte.</li>
+                <li>Sélectionnez le fichier : <code>obs_subtitles_ES.txt</code>.</li>
+            </ul>
+        </div>
+
+        <h2 id="classic" style="border-color: var(--stealth);">IV. Modules Essentiels pour Streamer</h2>
+        <div class="module-grid">
+            <div class="module-card" style="border-top: 3px solid var(--stealth);">
+                <h3>🥷 Stealth Mode</h3>
+                <p>Cache la fenêtre noire (CMD) de la barre des tâches. Indispensable pour ne pas leaker votre IP en Alt-Tab.</p>
+            </div>
+            <div class="module-card" style="border-top: 3px solid #f472b6;">
+                <h3>🛡️ Tilt Shield</h3>
+                <p>Remplace les insultes par des mots gentils. Idéal pour éviter les bannissements Twitch dus aux textes toxiques à l'écran.</p>
+            </div>
+            <div class="module-card" style="border-top: 3px solid #fff;">
+                <h3>🎙️ Tactical Macros</h3>
+                <p>Commandes vocales :<br>• "Clip ça" -> Lance un replay (Alt+F10)<br>• "Mute Discord" -> Coupe le son (Ctrl+Maj+M)</p>
+            </div>
+            <div class="module-card" style="border-top: 3px solid var(--marker);">
+                <h3>📌 Smart Marker</h3>
+                <p>Dites <strong>"Marqueur"</strong> pour noter un timecode. Un petit "Bip" confirme l'action. Fichier CSV généré à la fin.</p>
+            </div>
+        </div>
+
+        <footer style="text-align:center; margin-top:60px; color:var(--text-muted); font-size:0.8em; border-top:1px solid var(--border); padding-top:20px;">
+            GÉNÉRÉ PAR KOMMZ CORE • DIAMOND EDITION V4.5
+        </footer>
+    </div>
+</body>
+</html>
+

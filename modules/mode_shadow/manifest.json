@@ -1,0 +1,15 @@
+{
+  "id": "mode_shadow",
+  "name": "Mode Shadow",
+  "version": "0.1.0",
+  "entry": "mode_shadow.py",
+  "endpoints": {
+    "health": "/api/mod/mode_shadow/health",
+    "configure": "/api/mod/mode_shadow/configure",
+    "enable": "/api/mod/mode_shadow/enable"
+  },
+  "defaultConfig": {
+    "enabled": false
+  },
+  "_note": "This is a GENERIC example schema. Your service might expect different keys.\nCommon keys used here:\n- id: unique module id\n- name: human readable name\n- version: semantic version\n- entry: base Python (or executable) file expected by the service\n- endpoints: paths exposed by the service for this module\n- defaultConfig: per-module default configuration (override via API or overrides.json)\n"
+}

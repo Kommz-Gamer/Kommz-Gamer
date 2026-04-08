@@ -1,0 +1,9 @@
+{
+  "hosts": [
+    "1.1.1.1",
+    "8.8.8.8"
+  ],
+  "timeout_ms": 1700,
+  "autostart": true,
+  "nic_hint": "wifi"
+}

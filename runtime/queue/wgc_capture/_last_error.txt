@@ -1,0 +1,10 @@
+dxcam.grab returned None
+Traceback (most recent call last):
+  File "C:\Users\nicol\Desktop\ValorantTranslatorPro_AllInOne\dist\ValorantTranslatorPro\modules\wgc_capture\wgc_capture.py", line 259, in _worker
+    _capture_once(profile)
+  File "C:\Users\nicol\Desktop\ValorantTranslatorPro_AllInOne\dist\ValorantTranslatorPro\modules\wgc_capture\wgc_capture.py", line 231, in _capture_once
+    return _grab_dxcam(profile)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\nicol\Desktop\ValorantTranslatorPro_AllInOne\dist\ValorantTranslatorPro\modules\wgc_capture\wgc_capture.py", line 192, in _grab_dxcam
+    raise RuntimeError("dxcam.grab returned None")
+RuntimeError: dxcam.grab returned None

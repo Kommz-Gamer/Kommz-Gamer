@@ -1,0 +1,9 @@
+[
+  {
+    "mod": "integration_overlay",
+    "data": {
+      "autostart": true,
+      "map_hints": true
+    }
+  }
+]

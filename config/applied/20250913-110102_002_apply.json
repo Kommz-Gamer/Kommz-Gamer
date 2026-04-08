@@ -1,0 +1,14 @@
+[
+  {
+    "mod": "lang_detect",
+    "data": {
+      "enabled": true
+    }
+  },
+  {
+    "mod": "stt_whisper",
+    "data": {
+      "auto_detect": true
+    }
+  }
+]

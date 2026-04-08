@@ -1,0 +1,7 @@
+{
+  "mod": "integration_overlay",
+  "data": {
+    "enabled": true,
+    "position": "top"
+  }
+}

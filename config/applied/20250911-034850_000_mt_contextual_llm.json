@@ -1,0 +1,8 @@
+{
+  "mod": "mt_contextual_llm",
+  "data": {
+    "autostart": true,
+    "provider": "local",
+    "model": "small"
+  }
+}
