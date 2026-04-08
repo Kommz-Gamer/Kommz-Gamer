@@ -1,5 +1,7 @@
 ﻿# Roadmap
 
+[English](ROADMAP.md) | [Français](ROADMAP.fr.md)
+
 ## Short term
 - Stabilize the community edition packaging
 - Improve setup documentation
