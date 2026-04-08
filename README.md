@@ -14,17 +14,21 @@ Kommz Gamer Community is the open-source edition of Kommz Gamer, a real-time voi
 - Hosted voice endpoints and managed support services
 - Internal build artifacts, local secrets, and personal test assets
 
-## Community vs supported offering
-### Community Edition
-- Source code access
+## Community vs Pro
+### Community Edition (this repository)
+- Full source code for the desktop app
 - Self-hosted and self-configured workflow
-- Community discussions and contributions
+- Community contributions and discussions
+- No built-in managed licensing gate in community mode
+- You run and maintain your own local/cloud stack
 
-### Supported / hosted offering
-- Stable Windows builds
-- Priority support and setup help
-- Hosted voice / cloud services
-- Early access and premium workflows
+### Pro / Supported Offering (outside this repository)
+- Stable Windows releases and guided onboarding
+- Hosted voice endpoints and managed cloud services
+- Priority support (setup, troubleshooting, optimization)
+- Early access workflows and production-oriented assistance
+
+This repo is designed for transparency and extensibility. The supported offering is designed for teams who prefer speed, reliability, and managed operations.
 
 ## Quick start
 1. Copy `.env.example` to `.env` and fill in the values you want to use.
