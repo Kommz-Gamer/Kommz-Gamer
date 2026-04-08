@@ -1,6 +1,6 @@
 ﻿# Kommz Gamer Community
 
-[English](README.md) | [Français](README.fr.md) | [Single-page EN+FR](README.i18n.md)
+[English](README.md) | [Français](README.fr.md)
 
 > **Community Edition**  
 > Open-source desktop core for self-hosted usage, customization, and contributions.
@@ -9,17 +9,6 @@
 ![License AGPLv3](https://img.shields.io/badge/License-AGPLv3-16a34a?style=for-the-badge)
 
 Kommz Gamer Community is the open-source edition of Kommz Gamer, a real-time voice translation desktop app designed for gaming, streaming, and multilingual live conversations.
-
-## Docs
-- README (EN): [README.md](README.md)
-- README (FR): [README.fr.md](README.fr.md)
-- README single-page EN+FR: [README.i18n.md](README.i18n.md)
-- Contributing (EN): [CONTRIBUTING.md](CONTRIBUTING.md)
-- Contributing (FR): [CONTRIBUTING.fr.md](CONTRIBUTING.fr.md)
-- Security (EN): [SECURITY.md](SECURITY.md)
-- Security (FR): [SECURITY.fr.md](SECURITY.fr.md)
-- Roadmap (EN): [ROADMAP.md](ROADMAP.md)
-- Roadmap (FR): [ROADMAP.fr.md](ROADMAP.fr.md)
 
 ## What is included
 - Desktop client source code
