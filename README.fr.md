@@ -7,6 +7,8 @@
 
 ![Community Edition](https://img.shields.io/badge/Edition-Community-2563eb?style=for-the-badge)
 ![License AGPLv3](https://img.shields.io/badge/License-AGPLv3-16a34a?style=for-the-badge)
+[![GitHub Release](https://img.shields.io/github/v/release/Kommz-Gamer/Kommz-Gamer?style=for-the-badge)](https://github.com/Kommz-Gamer/Kommz-Gamer/releases)
+[![Discord](https://img.shields.io/badge/Discord-Communaute-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/uv25d6uGKZ)
 [![Patreon](https://img.shields.io/badge/Soutenir-Patreon-f96854?style=for-the-badge&logo=patreon&logoColor=white)](https://www.patreon.com/KommzInnovations)
 
 Kommz Gamer Community est l’édition open source de Kommz Gamer, une application desktop de traduction vocale bidirectionnelle en temps réel pour le gaming, le streaming et les échanges multilingues en direct.
@@ -54,7 +56,8 @@ Ce dépôt est préparé comme édition community. Les services hébergés, le s
 - Patreon: https://www.patreon.com/KommzInnovations
 
 ## Template de release
-- Template GitHub release: `.github/release-template.md`
+- Template de release EN: `.github/release-template.en.md`
+- Template de release FR: `.github/release-template.fr.md`
 
 ## Structure du dépôt
 - Guide de structure recommandé: `docs/REPO_STRUCTURE.md`

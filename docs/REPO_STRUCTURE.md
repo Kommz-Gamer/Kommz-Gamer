@@ -10,7 +10,8 @@ This structure keeps the project clear and easy to maintain while preserving exi
 - `.github/`: GitHub templates and CI/CD helpers
 
 ## Current release template
-- `.github/release-template.md`
+- `.github/release-template.en.md`
+- `.github/release-template.fr.md`
 
 ## Suggested docs to keep in `docs/`
 - setup guide
