@@ -76,6 +76,7 @@ This repository is prepared as a community edition. Hosted services, commercial 
 
 ## Contribution workflow
 - Pull request template: `.github/pull_request_template.md`
+- Issue templates: `.github/ISSUE_TEMPLATE/`
 
 ## License
 This project is intended to be distributed under the GNU Affero General Public License v3.0. See `LICENSE`.

@@ -76,6 +76,7 @@ Ce dépôt est préparé comme édition community. Les services hébergés, le s
 
 ## Workflow de contribution
 - Template de pull request: `.github/pull_request_template.md`
+- Templates d'issues: `.github/ISSUE_TEMPLATE/`
 
 ## Licence
 Ce projet est distribué sous GNU Affero General Public License v3.0. Voir `LICENSE`.
