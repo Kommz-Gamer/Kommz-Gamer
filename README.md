@@ -13,6 +13,17 @@
 
 Kommz Gamer Community is the open-source edition of Kommz Gamer, a real-time voice translation desktop app designed for gaming, streaming, and multilingual live conversations.
 
+## Start here
+- Latest releases: https://github.com/Kommz-Gamer/Kommz-Gamer/releases
+- Join the community: https://discord.gg/uv25d6uGKZ
+- Support the project: https://www.patreon.com/KommzInnovations
+- Official website: https://kommz.fr
+
+## Community and support
+- GitHub: source code, issues, releases, contributions
+- Discord: help, feedback, roadmap, community discussions
+- Patreon: support, early access context, project sustainability
+
 ## What is included
 - Desktop client source code
 - UI and runtime modules
