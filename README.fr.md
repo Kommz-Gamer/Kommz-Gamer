@@ -63,5 +63,8 @@ Ce dépôt est préparé comme édition community. Les services hébergés, le s
 ## Structure du dépôt
 - Guide de structure recommandé: `docs/REPO_STRUCTURE.md`
 
+## Workflow de contribution
+- Template de pull request: `.github/pull_request_template.md`
+
 ## Licence
 Ce projet est distribué sous GNU Affero General Public License v3.0. Voir `LICENSE`.

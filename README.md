@@ -63,5 +63,8 @@ This repository is prepared as a community edition. Hosted services, commercial 
 ## Repository structure
 - Recommended structure guide: `docs/REPO_STRUCTURE.md`
 
+## Contribution workflow
+- Pull request template: `.github/pull_request_template.md`
+
 ## License
 This project is intended to be distributed under the GNU Affero General Public License v3.0. See `LICENSE`.
