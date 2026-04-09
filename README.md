@@ -50,8 +50,14 @@ This repository is prepared as a community edition. Hosted services, commercial 
 
 ## Project links
 - Website: https://kommz.fr
-- Discord: coming soon
+- Discord: https://discord.gg/uv25d6uGKZ
 - Patreon: https://www.patreon.com/KommzInnovations
+
+## Release template
+- GitHub release template: `.github/release-template.md`
+
+## Repository structure
+- Recommended structure guide: `docs/REPO_STRUCTURE.md`
 
 ## License
 This project is intended to be distributed under the GNU Affero General Public License v3.0. See `LICENSE`.
