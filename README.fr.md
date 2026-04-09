@@ -58,6 +58,7 @@ Ce dépôt est préparé comme édition community. Les services hébergés, le s
 ## Template de release
 - Template de release EN: `.github/release-template.en.md`
 - Template de release FR: `.github/release-template.fr.md`
+- Checklist de release: `.github/release-checklist.md`
 
 ## Structure du dépôt
 - Guide de structure recommandé: `docs/REPO_STRUCTURE.md`

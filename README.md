@@ -58,6 +58,7 @@ This repository is prepared as a community edition. Hosted services, commercial 
 ## Release template
 - English release template: `.github/release-template.en.md`
 - French release template: `.github/release-template.fr.md`
+- Release checklist: `.github/release-checklist.md`
 
 ## Repository structure
 - Recommended structure guide: `docs/REPO_STRUCTURE.md`
