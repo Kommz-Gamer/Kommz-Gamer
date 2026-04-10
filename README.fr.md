@@ -12,6 +12,7 @@
 [![Patreon](https://img.shields.io/badge/Soutenir-Patreon-f96854?style=for-the-badge&logo=patreon&logoColor=white)](https://www.patreon.com/KommzInnovations)
 
 Kommz Gamer Community est l’édition open source de Kommz Gamer, une application desktop de traduction vocale bidirectionnelle en temps réel pour le gaming, le streaming et les échanges multilingues en direct.
+La couche moteur vocale est portée par une brique séparée: `Kommz Voice` (XTTS + GPT-SoVITS).
 
 ## Commencer ici
 - Dernieres releases: https://github.com/Kommz-Gamer/Kommz-Gamer/releases
@@ -21,6 +22,7 @@ Kommz Gamer Community est l’édition open source de Kommz Gamer, une applicati
 
 ## Communaute et support
 - GitHub: code source, issues, releases, contributions
+- Kommz Voice: couche backend moteur dediee (XTTS + GPT-SoVITS)
 - Discord: aide, retours, roadmap, discussions
 - Patreon: soutien, contexte d'acces anticipe, durabilite du projet
 

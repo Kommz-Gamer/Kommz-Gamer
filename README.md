@@ -12,6 +12,7 @@
 [![Patreon](https://img.shields.io/badge/Support-Patreon-f96854?style=for-the-badge&logo=patreon&logoColor=white)](https://www.patreon.com/KommzInnovations)
 
 Kommz Gamer Community is the open-source edition of Kommz Gamer, a real-time voice translation desktop app designed for gaming, streaming, and multilingual live conversations.
+The speech engine layer is carried by the separate `Kommz Voice` brick (XTTS + GPT-SoVITS backend flows).
 
 ## Start here
 - Latest releases: https://github.com/Kommz-Gamer/Kommz-Gamer/releases
@@ -21,6 +22,7 @@ Kommz Gamer Community is the open-source edition of Kommz Gamer, a real-time voi
 
 ## Community and support
 - GitHub: source code, issues, releases, contributions
+- Kommz Voice: dedicated backend engine layer (XTTS + GPT-SoVITS)
 - Discord: help, feedback, roadmap, community discussions
 - Patreon: support, early access context, project sustainability
 
