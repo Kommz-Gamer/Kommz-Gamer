@@ -1,6 +1,6 @@
 ﻿# Kommz Gamer Community
 
-[English](README.md) | [Français](README.fr.md)
+[Français](README.md) | [English](README.en.md)
 
 > **Édition Community**  
 > Noyau desktop open source, auto-hébergeable, conçu pour la personnalisation et les contributions.
@@ -82,3 +82,4 @@ Ce dépôt est préparé comme édition community. Les services hébergés, le s
 
 ## Licence
 Ce projet est distribué sous GNU Affero General Public License v3.0. Voir `LICENSE`.
+
