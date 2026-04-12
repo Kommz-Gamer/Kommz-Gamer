@@ -16,13 +16,14 @@ The speech engine layer is carried by the separate `Kommz Voice` brick (XTTS + G
 
 ## Start here
 - Latest releases: https://github.com/Kommz-Gamer/Kommz-Gamer/releases
+- Kommz Voice engine repo: https://github.com/Kommz-Gamer/Kommz-Voice
 - Join the community: https://discord.gg/uv25d6uGKZ
 - Support the project: https://www.patreon.com/KommzInnovations
 - Official website: https://kommz.fr
 
 ## Community and support
 - GitHub: source code, issues, releases, contributions
-- Kommz Voice: dedicated backend engine layer (XTTS + GPT-SoVITS)
+- Kommz Voice: dedicated backend engine layer (XTTS + GPT-SoVITS) -> https://github.com/Kommz-Gamer/Kommz-Voice
 - Discord: help, feedback, roadmap, community discussions
 - Patreon: support, early access context, project sustainability
 

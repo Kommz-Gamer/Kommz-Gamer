@@ -16,13 +16,14 @@ La couche moteur vocale est portée par une brique séparée: `Kommz Voice` (XTT
 
 ## Commencer ici
 - Dernieres releases: https://github.com/Kommz-Gamer/Kommz-Gamer/releases
+- Repo moteur Kommz Voice: https://github.com/Kommz-Gamer/Kommz-Voice
 - Rejoindre la communaute: https://discord.gg/uv25d6uGKZ
 - Soutenir le projet: https://www.patreon.com/KommzInnovations
 - Site officiel: https://kommz.fr
 
 ## Communaute et support
 - GitHub: code source, issues, releases, contributions
-- Kommz Voice: couche backend moteur dediee (XTTS + GPT-SoVITS)
+- Kommz Voice: couche backend moteur dediee (XTTS + GPT-SoVITS) -> https://github.com/Kommz-Gamer/Kommz-Voice
 - Discord: aide, retours, roadmap, discussions
 - Patreon: soutien, contexte d'acces anticipe, durabilite du projet
 
