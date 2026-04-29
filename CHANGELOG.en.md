@@ -1,0 +1,52 @@
+﻿# CHANGELOG
+
+[Français](CHANGELOG.md) | [English](CHANGELOG.en.md)
+
+## Kommz Gamer 4.6 - 2026-03-22
+
+### Audio and stability
+- Fixed microphone selection to prioritize the configured input device (`game_input_device`) instead of blindly forcing Windows default.
+- Improved input-device resolution with clean fallback logic (config -> system default -> safe detection).
+- Stabilized Hybrid Activation to reuse a valid and consistent microphone context.
+
+### Modules and UI
+- Added `Scenes Vocales` tab to save/apply full presets (language, engine, modules, voice) in one click.
+- Added auto-apply by active process (for example `cod.exe`).
+- Unified all 16 modules into a single compact grid in the Modules tab.
+- Hybrid Activation now appears in the same runtime area as other modules.
+- Added `Voix Studio` tab to save, activate, test, and remove `voice_id` profiles.
+- Added `default voice on startup` mode.
+
+### UX cleanup
+- Cleaned visible audio-engine messages (micro/log errors) and removed malformed strings.
+
+## Kommz Gamer 4.5 - 2026-03-19
+
+### UI and readability
+- Added vocal pipeline card with separate transcription, Hybrid, and final synthesis states.
+- Added runtime module supervision card for key modules.
+- Reworked updater card for clearer target version, install status, and release notes.
+- Additional cleanup for visible UI and embedded guide strings.
+
+### Runtime and diagnostics
+- Exposed more runtime details on `/status` for STT engine, Hybrid routing, and active TTS engine.
+- Improved backend module-state reporting (warmups, boosts, caches, OBS export).
+- Cleaned update-system messages to avoid unreadable/malformed output.
+
+### Versioning
+- Client and embedded guides updated to `4.5`.
+- Release tooling kept compatible.
+
+## Kommz Gamer 4.4 - 2026-03-18
+
+### Major changes
+- Significant reinforcement of Hybrid `GPT-SoVITS -> XTTS` mode.
+- Better timbre fidelity and more natural voice output in real usage.
+- Extended Hybrid language support (`FR`, `EN`, `JA`, `KO`, `ZH`).
+- Consolidated remote pipeline with `Whisper Modal`, `GPT-SoVITS Modal`, and `XTTS Modal`.
+
+### Fixes and stability
+- Improved fallback behavior when services are unavailable.
+- Improved routing between `voice_id`, direct clone, and Hybrid pipeline.
+- Fixed multiple encoding/display issues.
+- Improved overall real-time pipeline stability.

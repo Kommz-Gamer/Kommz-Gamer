@@ -1,4 +1,6 @@
-# Kommz Gamer Community vX.Y.Z
+﻿# Kommz Gamer Community vX.Y.Z
+
+[Français](release-template.fr.md) | [English](release-template.en.md)
 
 ## Resume
 - Resume court de la release :
@@ -41,20 +43,20 @@
 
 ## Message Discord
 ```md
-🚀 **Kommz Gamer Community vX.Y.Z est disponible**
+Kommz Gamer Community vX.Y.Z est disponible
 
-**Points cles**
+Points cles
 - 
 - 
 - 
 
-**Notes**
+Notes
 - Migration requise : Oui/Non
 - Details :
 
-🔗 Release complete : [lien GitHub release]
-💬 Discord : https://discord.gg/uv25d6uGKZ
-❤️ Patreon : https://www.patreon.com/KommzInnovations
+Release complete : [lien GitHub release]
+Discord : https://discord.gg/uv25d6uGKZ
+Patreon : https://www.patreon.com/KommzInnovations
 ```
 
 ## Liens
