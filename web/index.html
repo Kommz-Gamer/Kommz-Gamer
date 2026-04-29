@@ -511,7 +511,7 @@
     .startup-log{margin-top:10px;font-family:monospace;color:#a5b4fc;font-size:12px;min-height:18px}
 
     .license-gate-overlay{
-      position:fixed;inset:0;z-index:19900;display:none;align-items:center;justify-content:center;
+      position:fixed;inset:0;z-index:19900;display:flex;align-items:center;justify-content:center;
       background:rgba(2,6,12,.72);backdrop-filter: blur(4px);
     }
     .license-gate-modal{
@@ -582,7 +582,7 @@
 <body>
 
   <aside>
-    <div class="logo">KOMMZ <span style="color:var(--acc); font-size:14px; vertical-align: super;">4.9</span></div>
+      <div class="logo">KOMMZ <span style="color:var(--acc); font-size:14px; vertical-align: super;">V5</span></div>
     
     <div class="nav-btn active" onclick="showTab('tab-home')">🏠 Accueil</div>
     <div class="nav-btn" onclick="showTab('tab-audio')">🎧 Audio & Micro</div>
@@ -593,7 +593,7 @@
     <div class="nav-btn" onclick="showTab('tab-mods')">⚙️ Modules Système</div>
 
     <div style="margin-top: auto; font-size: 11px; color: var(--muted); text-align: center;">
-      Diamond Edition<br>Build 2026.5
+          Community Edition<br>Build V5
     </div>
   </aside>
 
@@ -830,10 +830,14 @@
                         <span style="font-size:11px; color:#94a3b8; min-width:80px;">Preset jeu</span>
                         <select id="selListenGamePreset" class="compact-select" style="flex:0 1 260px; width:260px; min-width:190px; max-width:260px;">
                             <option value="custom">Custom / Manuel</option>
-                            <option value="cs2">CS2 / FPS compétitif</option>
-                            <option value="valorant">Valorant / FPS tactique</option>
-                            <option value="warzone">Warzone / FPS bruyant</option>
-                            <option value="fortnite">Fortnite / BR</option>
+                            <option value="cs2">CS2 / Agressif</option>
+                            <option value="cs2_safe">CS2 / Safe</option>
+                            <option value="valorant">Valorant / Agressif</option>
+                            <option value="valorant_safe">Valorant / Safe</option>
+                            <option value="warzone">Warzone / Agressif</option>
+                            <option value="warzone_safe">Warzone / Safe</option>
+                            <option value="fortnite">Fortnite / Agressif</option>
+                            <option value="fortnite_safe">Fortnite / Safe</option>
                             <option value="apex">Apex Legends / BR</option>
                             <option value="overwatch">Overwatch / Hero Shooter</option>
                             <option value="r6">Rainbow Six / Tactical Voice</option>
@@ -893,6 +897,8 @@
                         </div>
                         <div style="display:flex; gap:8px; align-items:center; justify-content:flex-end; flex-wrap:wrap;">
                             <button id="btnResetListenStats" class="btn-secondary" type="button" title="Remise à zéro des compteurs écoute" style="min-width:106px; padding:8px 14px;">Reset stats</button>
+                            <button id="btnResetListenHealth" class="btn-secondary" type="button" title="Remise à zéro des indicateurs santé/watchdog écoute" style="min-width:122px; padding:8px 14px;">Reset santé</button>
+                            <button id="btnExportListenSessionReport" class="btn-secondary" type="button" title="Exporter le rapport session test V5 (JSON)" style="min-width:132px; padding:8px 14px;">Rapport session</button>
                             <button id="btnApplyCompetitiveListen" class="btn-secondary" type="button" title="Applique des réglages optimisés pour le vocal en jeu" style="min-width:122px; padding:8px 14px;">🎮 Profil Jeu</button>
                             <button id="btnListenToggle" class="primary" style="width: 120px;">ACTIVER</button>
                         </div>
@@ -952,6 +958,11 @@
             </div>
             <details id="engineHealthWrap" style="margin-bottom:12px; border:1px solid #334155; border-radius:8px; background:rgba(2,6,23,0.35);">
                 <summary style="padding:8px 10px; cursor:pointer; font-size:12px; color:#cbd5e1;">🩺 État moteur (compact)</summary>
+                <div style="padding:8px 10px 0 10px; display:flex; justify-content:flex-end;">
+                    <button id="btnCloudDiagRetest" type="button" style="padding:6px 10px; font-size:11px; background:#0f172a; border:1px solid #334155; color:#cbd5e1;">
+                        🔄 Retest cloud maintenant
+                    </button>
+                </div>
                 <div id="engineHealthCompact" style="padding:8px 10px; border-top:1px solid #1e293b; font-size:12px; color:#94a3b8;">
                     STT: en attente · TTS: en attente · Quota: vérification...
                 </div>
@@ -1113,6 +1124,7 @@
                             <div id="pipelineHybridCard" class="runtime-card tone-info"></div>
                             <div id="pipelineTtsCard" class="runtime-card tone-info"></div>
                             <div id="pipelineLatencyCard" class="runtime-card tone-info"></div>
+                            <div id="pipelineFallbackCard" class="runtime-card tone-info"></div>
                         </div>
 
                         <div style="margin-top:10px; padding:10px; border:1px solid #334155; border-radius:10px; background:rgba(2,6,23,0.45);">
@@ -1225,7 +1237,7 @@
                                 <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
                                     <input type="checkbox" id="cfgExpressiveSounds" checked />
                                     <span style="font-size:12px;color:#e2e8f0;"><strong>Sons expressifs</strong></span>
-                                    <span style="padding:2px 8px; border-radius:999px; background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.28); color:#86efac; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em;">V4.9</span>
+                    <span style="padding:2px 8px; border-radius:999px; background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.28); color:#86efac; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em;">V5</span>
                                 </label>
                                 <div style="font-size:11px; color:#94a3b8; line-height:1.4;">
                                     Préserve ou lisse rire, hésitation, souffle, soupir et interjections pour garder une voix plus naturelle sans casser l’intelligibilité.
@@ -1672,7 +1684,7 @@
 
   <div id="startupOverlay" class="startup-overlay">
     <div class="startup-card">
-      <div class="startup-title">KOMMZ GAMER 4.9 · Initialisation</div>
+      <div class="startup-title">KOMMZ GAMER V5 · Initialisation</div>
       <div class="startup-sub">Chargement sécurisé du moteur, audio, licences et modules.</div>
       <div class="startup-progress"><div id="startupBar" class="startup-bar"></div></div>
       <div id="startupLog" class="startup-log">Boot sequence...</div>
@@ -1860,7 +1872,14 @@
         const selPreset = qs('#selListenGamePreset');
         const gamePreset = String(data?.ally_game_preset || 'custom').trim().toLowerCase();
         if (selPreset && document.activeElement !== selPreset) {
-            if (['custom', 'cs2', 'valorant', 'warzone', 'fortnite', 'apex', 'overwatch', 'r6', 'discord_party'].includes(gamePreset)) {
+            if ([
+                'custom',
+                'cs2', 'cs2_safe',
+                'valorant', 'valorant_safe',
+                'warzone', 'warzone_safe',
+                'fortnite', 'fortnite_safe',
+                'apex', 'overwatch', 'r6', 'discord_party'
+            ].includes(gamePreset)) {
                 selPreset.value = gamePreset;
             } else {
                 selPreset.value = 'custom';
@@ -1975,7 +1994,9 @@
         const txt = Number(rt.ally_text_events || 0);
         const played = Number(rt.ally_voice_played || 0);
         const skipped = Number(rt.ally_voice_skipped || 0);
-        el.textContent = `Rendu voix alliés: ${played} / ${txt}  (skip: ${skipped})`;
+        const rateLimited = Number(rt.ally_voice_rate_limited || 0);
+        const merged = Number(rt.ally_short_merged || 0);
+        el.textContent = `Rendu voix alliés: ${played} / ${txt}  (skip: ${skipped} · anti-rafale: ${rateLimited} · fusion: ${merged})`;
         if (txt > 0 && played === 0) {
             el.style.color = '#fca5a5';
         } else if (txt > 0 && played / txt < 0.5) {
@@ -2036,31 +2057,44 @@
         const state = String(rt.listen_conn_state || 'idle').toLowerCase();
         const detail = String(rt.listen_conn_detail || '').trim();
         const retry = Number(rt.listen_conn_retry_after || 0);
+        const restarts = Number(rt.watchdog_restarts || 0);
+        const flaps = Number(rt.watchdog_flaps || 0);
+        const cooldownHits = Number(rt.watchdog_cooldown_hits || 0);
+
+        let text = 'Connexion ecoute: en attente';
+        let color = '#94a3b8';
 
         if (state === 'connected') {
-            el.textContent = 'Connexion ?coute: connect?e';
-            el.style.color = '#86efac';
-            return;
-        }
-        if (state === 'connecting') {
-            el.textContent = 'Connexion ?coute: connexion...';
-            el.style.color = '#93c5fd';
-            return;
-        }
-        if (state === 'reconnecting') {
+            text = 'Connexion ecoute: cloud OK';
+            color = '#86efac';
+        } else if (state === 'connecting') {
+            text = 'Connexion ecoute: connexion cloud...';
+            color = '#93c5fd';
+        } else if (state === 'reconnecting') {
             const s = (Number.isFinite(retry) && retry > 0) ? ` (${Math.ceil(retry)}s)` : '';
-            el.textContent = `Connexion ?coute: reconnexion${s}`;
-            el.style.color = '#fcd34d';
-            return;
+            text = `Connexion ecoute: reconnexion${s}`;
+            color = '#fcd34d';
+        } else if (state === 'restarting') {
+            text = 'Connexion ecoute: watchdog relance';
+            color = '#f59e0b';
+        } else if (state === 'paused') {
+            text = 'Connexion ecoute: en pause (PTT/Hybrid)';
+            color = '#c4b5fd';
+        } else if (detail) {
+            text = `Connexion ecoute: fallback (${detail})`;
+            color = '#94a3b8';
         }
-        if (state === 'paused') {
-            el.textContent = 'Connexion ?coute: en pause (PTT/Hybrid)';
-            el.style.color = '#c4b5fd';
-            return;
+
+        const parts = [];
+        if (restarts > 0) parts.push(`wd:${restarts}`);
+        if (flaps > 0) parts.push(`flap:${flaps}`);
+        if (cooldownHits > 0) parts.push(`cooldown:${cooldownHits}`);
+        if (parts.length > 0) {
+            text += ` · ${parts.join(' · ')}`;
         }
-        const fallback = detail || 'En attente audio';
-        el.textContent = `Connexion ?coute: ${fallback}`;
-        el.style.color = '#94a3b8';
+
+        el.textContent = text;
+        el.style.color = color;
     }
 
     function syncListenProfileButton(data) {
@@ -2169,7 +2203,7 @@
         `;
     }
 
-    function renderPipelineRuntime(runtime = {}) {
+    function renderPipelineRuntime(runtime = {}, fallbackRuntime = {}) {
         renderStatusCard(
             'pipelineSttCard',
             'Transcription',
@@ -2193,6 +2227,41 @@
             runtime.tts_route || 'XTTS, Edge ou voice_id apparaîtront ici.',
             runtime.age_seconds,
             runtime.tts_engine ? null : 'info'
+        );
+        const fbCount = Number(fallbackRuntime.count || 0);
+        const fbCode = String(fallbackRuntime.last_code || '').trim();
+        const fbMsg = String(fallbackRuntime.last_message || '').trim();
+        const fbDetail = String(fallbackRuntime.last_detail || '').trim();
+        const fbEndpoint = String(fallbackRuntime.last_endpoint || '').trim();
+        const fbHttpStatus = Number(fallbackRuntime.last_http_status || 0);
+        const fbAttempts = String(fallbackRuntime.last_attempts || '').trim();
+        const fbAge = Number(fallbackRuntime.age_seconds || -1);
+        let fbStatus = 'Stable';
+        let fbDetailText = 'Aucun fallback récent côté TTS cloud.';
+        let fbTone = 'ok';
+        if (fbCount > 0) {
+            fbStatus = fbMsg ? `${fbMsg}` : 'Fallback détecté';
+            const detailParts = [`Code: ${fbCode || 'UNKNOWN'}`, `total: ${fbCount}`];
+            if (fbHttpStatus > 0) detailParts.push(`HTTP ${fbHttpStatus}`);
+            if (fbEndpoint) detailParts.push(`endpoint: ${fbEndpoint}`);
+            if (fbDetail) detailParts.push(fbDetail);
+            if (fbAttempts) detailParts.push(`tentatives: ${fbAttempts}`);
+            fbDetailText = detailParts.join(' · ');
+            if (/TRIAL_QUOTA_REACHED|ALL_MODAL_ENDPOINTS_FAILED|EXCEPTION_DURING_KOMMZ_TTS|VOICE_ID_TRIAL_QUOTA|VOICE_ID_URL_MISSING/.test(fbCode)) {
+                fbTone = 'err';
+            } else if (fbAge >= 0 && fbAge < 600) {
+                fbTone = 'warn';
+            } else {
+                fbTone = 'info';
+            }
+        }
+        renderStatusCard(
+            'pipelineFallbackCard',
+            'Fallback TTS',
+            fbStatus,
+            fbDetailText,
+            fbAge,
+            fbTone
         );
     }
 
@@ -2382,12 +2451,64 @@
             ? (d.voice_cloud_limit_message || 'Quota cloud atteint')
             : 'OK';
         const quota = String(quotaRaw).slice(0, 110);
+        const listenHealthLevel = String(d.listen_health_level || 'info');
+        const listenHealthSummary = String(d.listen_health_summary || 'Santé écoute indisponible');
+        const lrt = d.listen_runtime || {};
+        const idleRestarts = Number(lrt.watchdog_idle_restarts || 0);
+        const idleAge = Number(lrt.watchdog_last_idle_age_s || 0);
+        const idleAgeTxt = Number.isFinite(idleAge) ? `${Math.max(0, Math.round(idleAge))}s` : 'n/a';
+        const diag = d.cloud_endpoints_diag || {};
+        const diagSummary = String(diag.summary || 'Diagnostic cloud en attente');
+        const diagItems = Array.isArray(diag.items) ? diag.items.slice(0, 4) : [];
+        const diagLine = diagItems.length
+            ? diagItems.map(it => {
+                const nm = String(it?.name || 'endpoint');
+                const ok = !!it?.ok;
+                const hs = Number(it?.http_status || 0);
+                const lt = Number(it?.latency_ms || -1);
+                const stamp = ok ? 'OK' : 'KO';
+                return `${nm}:${stamp}${hs > 0 ? `(${hs})` : ''}${lt >= 0 ? ` ${lt}ms` : ''}`;
+            }).join(' · ')
+            : 'Aucun endpoint sondé';
         box.innerHTML = `
             <div><b>STT:</b> ${escapeHtml(stt)}</div>
             <div><b>TTS:</b> ${escapeHtml(tts)} <span style="color:#64748b;">(${escapeHtml(route)})</span></div>
             <div><b>File utilisateur:</b> ${queueSize} en attente <span style="color:#64748b;">(${escapeHtml(queueState)})</span></div>
             <div><b>Quota voice_id:</b> ${escapeHtml(quota)}</div>
+            <div><b>Santé écoute:</b> <span style="color:${listenHealthLevel === 'err' ? '#fca5a5' : (listenHealthLevel === 'warn' ? '#fcd34d' : '#86efac')};">${escapeHtml(listenHealthSummary)}</span></div>
+            <div><b>Watchdog idle:</b> relances ${idleRestarts} · inactif ${escapeHtml(idleAgeTxt)}</div>
+            <div><b>Cloud:</b> ${escapeHtml(diagSummary)}</div>
+            <div style="color:#94a3b8;"><b>Détail:</b> ${escapeHtml(diagLine)}</div>
         `;
+    }
+
+    async function retestCloudDiagNow() {
+        const btn = qs('#btnCloudDiagRetest');
+        if (!btn) return;
+        const oldTxt = btn.textContent || '🔄 Retest cloud maintenant';
+        btn.disabled = true;
+        btn.textContent = '⏳ Test cloud...';
+        try {
+            const r = await fetch(CORE_URL + '/cloud/diag/retest', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({})
+            });
+            const d = await r.json();
+            if (d && d.ok) {
+                const diag = d.diag || {};
+                const statusPayload = { cloud_endpoints_diag: diag };
+                renderEngineHealthCompact(statusPayload);
+                showToast(`☁️ ${diag.summary || 'Diagnostic cloud mis à jour'}`);
+            } else {
+                showToast(`❌ ${d?.error || 'Retest cloud impossible'}`);
+            }
+        } catch (e) {
+            showToast('❌ Erreur retest cloud');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = oldTxt;
+        }
     }
 
     function renderModuleInlineRuntime(cardId, label, status, detail, ageSeconds, toneOverride = null) {
@@ -2897,6 +3018,8 @@
     const EMAIL_RE = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
     let lastEmailManualEditAt = 0;
     let IS_COMMUNITY_MODE = false;
+    let CLOUD_FEATURES_ENABLED = true;
+    const FORCE_UNLOCK_VOICE = false;
 
     function normalizeEmail(email) {
         return String(email || '').trim().toLowerCase();
@@ -2938,11 +3061,14 @@
             gate.style.display = 'none';
             return;
         }
+        const trialMode = d.trial_mode === true;
         const allActivated = desktopActivated && voiceActivated;
         gate.style.display = allActivated ? 'none' : 'flex';
         gateStatus.textContent = allActivated
             ? 'Licences actives.'
-            : `Desktop: ${desktopActivated ? 'ACTIVÉE' : 'NON ACTIVÉE'} | Voice: ${voiceActivated ? 'ACTIVÉE' : 'NON ACTIVÉE'}`;
+            : (trialMode
+                ? 'Mode essai actif. Entrez votre email et vos deux clés définitives pour déverrouiller la version complète.'
+                : `Desktop: ${desktopActivated ? 'ACTIVÉE' : 'NON ACTIVÉE'} | Voice: ${voiceActivated ? 'ACTIVÉE' : 'NON ACTIVÉE'}`);
         if (d.license_email) syncGateEmail(d.license_email);
     }
     async function playStartupOverlay() {
@@ -2994,6 +3120,7 @@
     }
 
     function applyVoiceLock(locked) {
+        if (FORCE_UNLOCK_VOICE) locked = false;
         voiceLicensed = !locked;
         const notice = qs('#kommzLockNotice');
         if (notice) notice.style.display = locked ? 'block' : 'none';
@@ -3693,7 +3820,7 @@
                 const expressiveRtsMode = qs('#cfgExpressiveRtsMode');
                 if (expressiveRtsMode && d.expressive_rts_mode && document.activeElement !== expressiveRtsMode) expressiveRtsMode.value = d.expressive_rts_mode;
                 updateHybridUiState(d);
-                renderPipelineRuntime(d.pipeline_runtime || {});
+                renderPipelineRuntime(d.pipeline_runtime || {}, d.tts_fallback_runtime || {});
                 renderLatencyRuntime(d.latency_runtime || {});
                 renderHybridFastRuntime(d.hybrid_fast_runtime || {});
                 renderExpressiveRuntime(d.expressive_runtime || {});
@@ -3764,15 +3891,20 @@
                 }
 
                 IS_COMMUNITY_MODE = (d.community_mode === true);
+                CLOUD_FEATURES_ENABLED = (d.cloud_features_enabled !== false);
                 const licenseCard = qs('#licenceCard');
                 if (licenseCard) licenseCard.style.display = IS_COMMUNITY_MODE ? 'none' : 'block';
+                if (IS_COMMUNITY_MODE) {
+                    // En Community, verrouille le cloud si non disponible.
+                    applyVoiceLock(!CLOUD_FEATURES_ENABLED);
+                }
 
                 // État de la Licence
                 const licBox = qs('#licenceStatusBox');
                 const voiceLicBox = qs('#voiceLicenceStatusBox');
                 const trialBox = qs('#trialStatusBox');
                 const desktopActivated = IS_COMMUNITY_MODE ? true : (d.licensed === true);
-                const voiceActivated = IS_COMMUNITY_MODE ? true : (d.voice_licensed === true || d.voice_active === true);
+                const voiceActivated = CLOUD_FEATURES_ENABLED && (IS_COMMUNITY_MODE ? true : (d.voice_licensed === true || d.voice_active === true));
 
                 if (!IS_COMMUNITY_MODE && desktopActivated) {
                     licBox.innerHTML = `<span style="color:var(--ok);">✅ ACTIVÉ (Exp: ${d.expiration})</span>`;
@@ -3893,14 +4025,14 @@
                 const activationArea = qs('#activationArea');
                 const activationDoneInfo = qs('#activationDoneInfo');
 
-                if (desktopRow) desktopRow.style.display = desktopActivated ? 'none' : 'flex';
+                const trialMode = (d.trial_mode === true);
+                if (desktopRow) desktopRow.style.display = (desktopActivated && !trialMode) ? 'none' : 'flex';
                 if (trialRow) trialRow.style.display = desktopActivated ? 'none' : 'flex';
-                if (voiceWrap) voiceWrap.style.display = voiceActivated ? 'none' : 'block';
-
+                if (voiceWrap) voiceWrap.style.display = (voiceActivated && !trialMode) ? 'none' : 'block';
                 const allActivated = desktopActivated && voiceActivated;
                 if (activationArea) activationArea.style.display = allActivated ? 'none' : 'block';
                 if (activationDoneInfo) activationDoneInfo.style.display = allActivated ? 'block' : 'none';
-                if (startupDone) updateLicenseGateUI(d, desktopActivated, voiceActivated);
+                updateLicenseGateUI(d, desktopActivated, voiceActivated);
 
                 if(d.ptt_key) qs('#currentHotkeyLabel').textContent = d.ptt_key.toUpperCase();
                 
@@ -4044,7 +4176,7 @@
                     if (qs('#cfgExpressiveRtsMode') && st.expressive_rts_mode) qs('#cfgExpressiveRtsMode').value = st.expressive_rts_mode;
                 }
                 updateHybridUiState(st);
-                renderPipelineRuntime(st.pipeline_runtime || {});
+                renderPipelineRuntime(st.pipeline_runtime || {}, st.tts_fallback_runtime || {});
                 renderLatencyRuntime(st.latency_runtime || {});
                 renderHybridFastRuntime(st.hybrid_fast_runtime || {});
                 renderExpressiveRuntime(st.expressive_runtime || {});
@@ -4095,7 +4227,7 @@
         if (speedSlider) updateKommzSpeedLabel(speedSlider.value);
         updateKommzAdvancedVisibility();
         updateHybridUiState();
-        renderPipelineRuntime();
+        renderPipelineRuntime({}, {});
         renderLatencyRuntime();
         renderHybridFastRuntime();
         renderExpressiveRuntime();
@@ -4139,16 +4271,16 @@
         };
 
         qs('#selEngine').onchange = async (e) => {
-            if (e.target.value === 'KOMMZ_VOICE' && !voiceLicensed) {
-                showToast("🔒 Licence Voice requise");
+            if (e.target.value === 'KOMMZ_VOICE' && ((!CLOUD_FEATURES_ENABLED) || (!voiceLicensed && !FORCE_UNLOCK_VOICE))) {
+                showToast(!CLOUD_FEATURES_ENABLED ? "🧩 Édition Community: cloud désactivé" : "🔒 Licence Voice requise");
                 e.target.value = 'WINDOWS';
                 updateUIBasedOnEngine('WINDOWS');
                 return;
             }
             updateUIBasedOnEngine(e.target.value);
             const r = await fetch(CORE_URL + '/config/full', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ engine: e.target.value }) });
-            if (r.status === 403) {
-                showToast("🔒 Accès refusé: licence Voice requise");
+            if (r.status === 403 && !FORCE_UNLOCK_VOICE) {
+                showToast(!CLOUD_FEATURES_ENABLED ? "🧩 Cloud désactivé pour cette édition" : "🔒 Accès refusé: licence Voice requise");
                 qs('#selEngine').value = 'WINDOWS';
                 updateUIBasedOnEngine('WINDOWS');
             }
@@ -4157,8 +4289,8 @@
         qs('#btnSaveFullConfig').onclick = async () => {
             lastModClickTime = Date.now();
             const r = await fetch(CORE_URL + '/config/full', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ engine: qs('#selEngine').value, edge_voice: qs('#selEdgeVoice').value }) });
-            if (r.status === 403) {
-                showToast("🔒 Accès refusé: licence Voice requise");
+            if (r.status === 403 && !FORCE_UNLOCK_VOICE) {
+                showToast(!CLOUD_FEATURES_ENABLED ? "🧩 Cloud désactivé pour cette édition" : "🔒 Accès refusé: licence Voice requise");
                 qs('#selEngine').value = 'WINDOWS';
                 updateUIBasedOnEngine('WINDOWS');
                 return;
@@ -4343,6 +4475,58 @@
                     lastModClickTime = 0;
                 } catch (e) {
                     showToast('❌ Erreur reset stats écoute');
+                }
+            };
+        }
+
+        const btnResetListenHealth = qs('#btnResetListenHealth');
+        if (btnResetListenHealth) {
+            btnResetListenHealth.onclick = async () => {
+                try {
+                    const r = await fetch(CORE_URL + '/audio/listen/health/reset', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({})
+                    });
+                    const d = await r.json().catch(() => ({}));
+                    if (!r.ok || !d.ok) {
+                        showToast(`❌ ${d.error || 'Reset santé indisponible'}`);
+                        return;
+                    }
+                    showToast('🩺 Santé écoute réinitialisée');
+                    lastModClickTime = 0;
+                    try {
+                        const rs = await fetch(CORE_URL + '/status');
+                        const ds = await rs.json().catch(() => ({}));
+                        syncListenRuntimeHint(ds);
+                        syncListenConnHint(ds);
+                        renderEngineHealthCompact(ds);
+                    } catch (_) {}
+                } catch (e) {
+                    showToast('❌ Erreur reset santé écoute');
+                }
+            };
+        }
+
+        const btnExportListenSessionReport = qs('#btnExportListenSessionReport');
+        if (btnExportListenSessionReport) {
+            btnExportListenSessionReport.onclick = async () => {
+                try {
+                    const r = await fetch(CORE_URL + '/audio/listen/session_report/export');
+                    const d = await r.json().catch(() => ({}));
+                    if (!r.ok || !d.ok || !d.report) {
+                        showToast(`❌ ${d.error || 'Export rapport indisponible'}`);
+                        return;
+                    }
+                    const txt = JSON.stringify(d.report, null, 2);
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        await navigator.clipboard.writeText(txt);
+                        showToast('📋 Rapport session copié (JSON)');
+                    } else {
+                        showToast('📋 Rapport session généré');
+                    }
+                } catch (e) {
+                    showToast('❌ Erreur export rapport session');
                 }
             };
         }
@@ -4800,6 +4984,9 @@
         qs('#btnUpdateNotes').onclick = async () => {
             await openUpdateNotes();
         };
+        if (qs('#btnCloudDiagRetest')) {
+            qs('#btnCloudDiagRetest').onclick = retestCloudDiagNow;
+        }
         qs('#updateModalClose').onclick = closeUpdateModal;
         qs('#updateModalClose2').onclick = closeUpdateModal;
         qs('#updateModalInstallBtn').onclick = async () => {
@@ -5068,8 +5255,8 @@
 }
 
     async function saveKommz() {
-        if (!voiceLicensed) {
-            showToast("🔒 Licence Voice requise");
+        if ((!CLOUD_FEATURES_ENABLED) || (!voiceLicensed && !FORCE_UNLOCK_VOICE)) {
+            showToast(!CLOUD_FEATURES_ENABLED ? "🧩 Édition Community: cloud désactivé" : "🔒 Licence Voice requise");
             return;
         }
         const key = document.getElementById('cfgKommzKey').value.trim();
@@ -5172,8 +5359,8 @@
                 updateHybridUiState(d);
                 showToast("🎙️ Kommz Voice Activé !");
                 qs('#selEngine').value = "KOMMZ_VOICE";
-            } else if (r.status === 403 || d.error === "VOICE_LICENSE_REQUIRED") {
-                showToast("🔒 Accès refusé: licence Voice requise");
+            } else if ((r.status === 403 || d.error === "VOICE_LICENSE_REQUIRED" || d.error === "CLOUD_DISABLED") && !FORCE_UNLOCK_VOICE) {
+                showToast(d.error === "CLOUD_DISABLED" ? "🧩 Cloud désactivé pour cette édition" : "🔒 Accès refusé: licence Voice requise");
                 qs('#selEngine').value = "WINDOWS";
                 updateUIBasedOnEngine("WINDOWS");
             }
@@ -5380,6 +5567,3 @@
 </script>
 </body>
 </html>
-
-
-

@@ -100,7 +100,18 @@ def load_local_env_file():
 
 load_local_env_file()
 
-# Optional cloud defaults for the community edition.
+# Edition profile:
+# - private   : full cloud stack (Modal/Supabase/License)
+# - community : local/community mode (no cloud keys required)
+EDITION_PROFILE = str(os.environ.get("KOMMZ_EDITION_PROFILE", "private") or "private").strip().lower()
+if EDITION_PROFILE not in {"private", "community"}:
+    EDITION_PROFILE = "private"
+COMMUNITY_EDITION = EDITION_PROFILE == "community"
+CLOUD_FEATURES_ENABLED = str(
+    os.environ.get("KOMMZ_CLOUD_FEATURES", "1" if EDITION_PROFILE == "private" else "0") or "0"
+).strip().lower() in {"1", "true", "yes", "on"}
+
+# Optional cloud defaults.
 DEFAULT_KOMMZ_CLONE_URL = os.environ.get(
     "KOMMZ_DEFAULT_CLONE_URL",
     "",
@@ -120,6 +131,10 @@ DEFAULT_KOMMZ_WHISPER_MODEL = (
     str(os.environ.get("KOMMZ_DEFAULT_WHISPER_MODEL", "small") or "small").strip().lower()
     or "small"
 )
+if not CLOUD_FEATURES_ENABLED:
+    DEFAULT_KOMMZ_CLONE_URL = ""
+    DEFAULT_KOMMZ_SYNTHESIS_URL = ""
+    DEFAULT_KOMMZ_WHISPER_URL = ""
 
 # 1. UNE SEULE DÃƒâ€°FINITION COMPLÃƒË†TE (Ne pas en remettre une autre plus bas !)
 AUDIO_CONFIG = {
@@ -146,7 +161,7 @@ AUDIO_CONFIG = {
     "hybrid_fast_rts": True,
     "hybrid_rts_preset": "fast",
     "quality_preset": "balanced",
-    "gpt_api_url": "",
+    "gpt_api_url": os.environ.get("KOMMZ_GPTSOVITS_URL", "").strip(),
     "gpt_ref_audio_path": "",
     "gpt_prompt_text": "",
     "gpt_prompt_lang": "ja",
@@ -204,6 +219,11 @@ AUDIO_CONFIG = {
     "ally_tts_force_on_speech_final": True,
     "ally_tts_force_min_chars": 8,
     "ally_tts_min_gap_s": 0.55,
+    "ally_tts_short_merge_words": 3,
+    "ally_tts_short_merge_chars": 18,
+    "ally_tts_short_merge_window_s": 1.25,
+    "ally_tts_rate_limit_window_s": 10.0,
+    "ally_tts_rate_limit_max_plays": 5,
     # Focus voix (écoute joueurs): limite le son jeu dans la transcription.
     # off | balanced | aggressive
     "ally_voice_focus_mode": "balanced",
@@ -231,6 +251,10 @@ AUDIO_CONFIG = {
     "ptt_hotkey": "ctrl+shift",
     # Small tail capture to avoid cutting final syllables on key release.
     "ptt_release_tail_ms": 180,
+    # Debounce clavier pour éviter les doubles triggers press/release en jeu.
+    "ptt_debounce_ms": 35,
+    # Ignore les captures trop courtes (parasites de touche).
+    "ptt_min_record_ms": 90,
     "is_capturing": False,
     # Suivi local du quota cloud en mode essai (30 min = 1800s).
     "trial_voice_seconds_used_local": 0
@@ -311,6 +335,34 @@ def _repair_payload_strings(value):
 # pour éviter que des chaînes historiques mojibakées ne réapparaissent
 # avant même le chargement du settings.json.
 AUDIO_CONFIG = _repair_payload_strings(AUDIO_CONFIG)
+CONFIG_FILE = str(os.environ.get("KOMMZ_SETTINGS_FILE", "settings.json") or "settings.json").strip() or "settings.json"
+
+
+def _apply_edition_profile_constraints() -> bool:
+    changed = False
+    if not CLOUD_FEATURES_ENABLED:
+        cloud_fields = (
+            "kommz_api_url",
+            "kommz_synthesis_url",
+            "kommz_api_key",
+            "kommz_client_id",
+            "gpt_api_url",
+            "whisper_api_url",
+            "license_key",
+            "voice_license_key",
+            "license_email",
+        )
+        for k in cloud_fields:
+            if str(AUDIO_CONFIG.get(k, "") or "").strip():
+                AUDIO_CONFIG[k] = ""
+                changed = True
+        if bool(AUDIO_CONFIG.get("gpt_style_to_xtts_fr", False)):
+            AUDIO_CONFIG["gpt_style_to_xtts_fr"] = False
+            changed = True
+        if str(AUDIO_CONFIG.get("tts_engine", "WINDOWS") or "WINDOWS").upper() == "KOMMZ_VOICE":
+            AUDIO_CONFIG["tts_engine"] = "WINDOWS"
+            changed = True
+    return changed
 
 
 def _utc_now_iso() -> str:
@@ -567,9 +619,9 @@ def scene_auto_apply_loop():
         time.sleep(1.2)
 
 def save_config():
-    """Sauvegarde la configuration actuelle dans settings.json"""
+    """Sauvegarde la configuration actuelle dans le fichier de profil."""
     try:
-        with open("settings.json", "w", encoding="utf-8") as f:
+        with open(CONFIG_FILE, "w", encoding="utf-8") as f:
             json.dump(_repair_payload_strings(AUDIO_CONFIG), f, indent=4, ensure_ascii=False)
         # On utilise stealth_print si dispo, sinon print
         try:
@@ -672,7 +724,7 @@ def stealth_print_rl(key: str, message: str, cooldown: float = 20.0) -> bool:
 def save_settings():
     """Sauvegarde universelle pour Kommz V8.3"""
     try:
-        with open("settings.json", 'w', encoding='utf-8') as f:
+        with open(CONFIG_FILE, 'w', encoding='utf-8') as f:
             json.dump(_repair_payload_strings(AUDIO_CONFIG), f, indent=4, ensure_ascii=False)
         stealth_print("💾 Configuration sauvegardée.")
     except Exception as e:
@@ -710,9 +762,9 @@ def _is_stealth_critical_message(text: str) -> bool:
 
 def load_settings():
     global AUDIO_CONFIG, CURRENT_TARGET_LANG
-    if os.path.exists("settings.json"):
+    if os.path.exists(CONFIG_FILE):
         try:
-            with open("settings.json", 'r', encoding='utf-8-sig') as f:
+            with open(CONFIG_FILE, 'r', encoding='utf-8-sig') as f:
                 saved_data = json.load(f)
                 saved_data_repaired = _repair_payload_strings(saved_data)
                 saved_data_was_repaired = saved_data_repaired != saved_data
@@ -760,6 +812,8 @@ def load_settings():
                 if _maybe_enable_hybrid_fr_default():
                     changed = True
                     stealth_print("🧪 Hybrid auto-activé au démarrage.")
+                if _apply_edition_profile_constraints():
+                    changed = True
                 
                 if changed:
                     save_settings()
@@ -769,6 +823,9 @@ def load_settings():
                 stealth_print(f"✅ CONFIG CHARGÉE : Sortie ID={AUDIO_CONFIG['game_output_device']} | Langue={CURRENT_TARGET_LANG}")
         except Exception as e:
             stealth_print(f"⚠️ Erreur lecture settings : {e}")
+    else:
+        if _apply_edition_profile_constraints():
+            save_settings()
 
 
             
@@ -906,7 +963,8 @@ except Exception:
     # Si Nuitka a totalement verrouillÃƒÂ© la console
     pass
 
-CONFIG_FILE = "settings.json" # <--- DÃƒÂ©finition globale
+# CONFIG_FILE est défini plus haut via la variable d'environnement
+# KOMMZ_SETTINGS_FILE (fallback: settings.json).
 # MÃƒÂ©morise les traductions pour une rÃƒÂ©ponse instantanÃƒÂ©e
 SHADOW_CACHE = collections.OrderedDict()
 SHADOW_AUDIO_CACHE = collections.OrderedDict()
@@ -1693,7 +1751,7 @@ VOICES_LIBRARY = {
 DEFAULT_VOICE_ID = ""
 VTP_CORE_PORT = 8770
 UPDATE_URL = "https://pastebin.com/raw/dummy" 
-APP_BUILD_VERSION = "4.9"
+APP_BUILD_VERSION = "5.0"
 
 def _load_current_version(default: str = APP_BUILD_VERSION) -> str:
     # In packaged builds, rely on the embedded build version instead of an
@@ -1800,6 +1858,16 @@ HYBRID_FAST_RUNTIME_STATE = {
 QUALITY_LOG_MAX_ITEMS = 40
 QUALITY_LOG_STATE = collections.deque(maxlen=QUALITY_LOG_MAX_ITEMS)
 _quality_log_lock = threading.Lock()
+TTS_FALLBACK_RUNTIME_STATE = {
+    "count": 0,
+    "last_code": "",
+    "last_message": "Aucun fallback recent",
+    "last_detail": "",
+    "last_endpoint": "",
+    "last_http_status": 0,
+    "last_attempts": "",
+    "last_at": 0.0,
+}
 
 MODULE_RUNTIME_STATE = {
     "updated_at": 0.0,
@@ -1827,6 +1895,22 @@ def _short_runtime_text(value, limit=140):
     if len(txt) <= limit:
         return txt
     return txt[: limit - 1].rstrip() + "…"
+
+
+def _short_runtime_url(url: str, limit: int = 96) -> str:
+    value = str(url or "").strip()
+    if not value:
+        return ""
+    try:
+        parsed = urlsplit(value)
+        host = (parsed.netloc or "").strip()
+        path = (parsed.path or "").strip()
+        compact = host + path
+        if compact:
+            value = compact
+    except Exception:
+        pass
+    return _short_runtime_text(value, limit)
 
 
 def _set_pipeline_runtime(**kwargs):
@@ -1878,6 +1962,12 @@ def _build_modules_runtime_payload():
     return out
 
 
+def _build_tts_fallback_runtime_payload():
+    payload = dict(TTS_FALLBACK_RUNTIME_STATE)
+    payload["age_seconds"] = _runtime_age_seconds(payload.get("last_at", 0.0))
+    return payload
+
+
 def _normalize_quality_preset(preset) -> str:
     value = str(preset or "balanced").strip().lower()
     if value in {"ultra", "ultrafast", "ultra_fast", "ultra-fast"}:
@@ -1925,6 +2015,68 @@ def _push_quality_log(level: str, code: str, message: str, detail: str = ""):
     }
     with _quality_log_lock:
         QUALITY_LOG_STATE.append(entry)
+
+
+TTS_FALLBACK_REASON_MAP = {
+    "NO_REFERENCE_AUDIO_BUFFER": "Aucune reference audio disponible (micro/preset).",
+    "EMPTY_MODAL_URL": "Endpoint XTTS non configure.",
+    "NO_MODAL_CANDIDATE_URL": "Aucun endpoint XTTS exploitable.",
+    "ALL_MODAL_ENDPOINTS_FAILED": "Tous les endpoints XTTS ont echoue.",
+    "TRIAL_QUOTA_REACHED": "Quota cloud atteint, bascule automatique Windows.",
+    "VOICE_ID_TRIAL_QUOTA": "Quota essai voice_id atteint, bascule clone direct.",
+    "VOICE_ID_URL_MISSING": "Endpoint voice_id non configure, bascule clone direct.",
+    "VOICE_ID_UNAVAILABLE": "Voice_id indisponible, bascule clone direct.",
+    "HTTP_ERROR": "Erreur HTTP sur le moteur cloud.",
+    "EXCEPTION_DURING_KOMMZ_TTS": "Exception pendant generation cloud.",
+}
+
+
+def _register_tts_fallback(
+    reason_code: str,
+    detail: str = "",
+    endpoint: str = "",
+    http_status: int | None = None,
+    attempts: str = "",
+):
+    code = str(reason_code or "UNKNOWN").strip().upper()
+    friendly = TTS_FALLBACK_REASON_MAP.get(code, "Fallback moteur cloud.")
+    msg = f"{friendly} ({code})"
+    detail_txt = _short_runtime_text(detail or "", 220)
+    endpoint_txt = _short_runtime_url(endpoint or "", 120)
+    attempts_txt = _short_runtime_text(attempts or "", 280)
+    status_num = 0
+    try:
+        status_num = int(http_status or 0)
+    except Exception:
+        status_num = 0
+    try:
+        TTS_FALLBACK_RUNTIME_STATE["count"] = int(TTS_FALLBACK_RUNTIME_STATE.get("count", 0) or 0) + 1
+        TTS_FALLBACK_RUNTIME_STATE["last_code"] = code
+        TTS_FALLBACK_RUNTIME_STATE["last_message"] = friendly
+        TTS_FALLBACK_RUNTIME_STATE["last_detail"] = detail_txt
+        TTS_FALLBACK_RUNTIME_STATE["last_endpoint"] = endpoint_txt
+        TTS_FALLBACK_RUNTIME_STATE["last_http_status"] = status_num
+        TTS_FALLBACK_RUNTIME_STATE["last_attempts"] = attempts_txt
+        TTS_FALLBACK_RUNTIME_STATE["last_at"] = time.time()
+    except Exception:
+        pass
+    pipeline_detail_parts = []
+    if endpoint_txt:
+        pipeline_detail_parts.append(endpoint_txt)
+    if status_num > 0:
+        pipeline_detail_parts.append(f"HTTP {status_num}")
+    if detail_txt:
+        pipeline_detail_parts.append(detail_txt)
+    if attempts_txt:
+        pipeline_detail_parts.append(attempts_txt)
+    _set_pipeline_runtime(
+        tts_engine="Fallback",
+        tts_route=_short_runtime_text(
+            f"{msg} · {' | '.join(pipeline_detail_parts)}" if pipeline_detail_parts else msg,
+            160,
+        ),
+    )
+    _push_quality_log("warn", f"tts_fallback_{code.lower()}", friendly, detail_txt or attempts_txt)
 
 
 def _build_quality_log_payload():
@@ -2953,6 +3105,11 @@ _xtts_runtime_cache = {
     "message": "VÃƒÂ©rification en cours...",
     "checked_at": 0.0,
 }
+_cloud_diag_cache = {
+    "checked_at": 0.0,
+    "summary": "Diagnostic cloud en attente",
+    "items": [],
+}
 # Cache court pour éviter de régénérer la référence Hybrid à chaque phrase RTS.
 _hybrid_style_ref_cache = {
     "bytes": None,
@@ -3049,6 +3206,104 @@ def get_kommz_xtts_runtime_status(force=False, cache_ttl=20):
     _xtts_runtime_cache["message"] = message if state != "offline" else "Serveur clonage: hors ligne"
     _xtts_runtime_cache["checked_at"] = now
     return dict(_xtts_runtime_cache)
+
+
+def _probe_cloud_endpoint(url: str, method: str = "GET", timeout=(2.5, 6)):
+    endpoint = _short_runtime_url(url or "", 120)
+    out = {
+        "endpoint": endpoint,
+        "ok": False,
+        "http_status": 0,
+        "latency_ms": -1,
+        "detail": "",
+    }
+    raw = str(url or "").strip()
+    if not raw:
+        out["detail"] = "URL vide"
+        return out
+    start = time.time()
+    try:
+        if str(method or "GET").upper() == "OPTIONS":
+            r = _HTTP.options(raw, timeout=timeout)
+        else:
+            r = _HTTP.get(raw, timeout=timeout)
+        out["http_status"] = int(getattr(r, "status_code", 0) or 0)
+        out["latency_ms"] = int(max(0.0, (time.time() - start) * 1000))
+        status = out["http_status"]
+        out["ok"] = 200 <= status < 500
+        out["detail"] = f"HTTP {status}" if status else "Réponse vide"
+    except Exception as ex:
+        out["latency_ms"] = int(max(0.0, (time.time() - start) * 1000))
+        out["detail"] = _short_runtime_text(str(ex), 160)
+    return out
+
+
+def get_cloud_endpoints_diag(force=False, cache_ttl=25):
+    now = time.time()
+    if (
+        not force
+        and _cloud_diag_cache.get("checked_at")
+        and (now - float(_cloud_diag_cache.get("checked_at", 0.0))) < cache_ttl
+    ):
+        return dict(_cloud_diag_cache)
+
+    items = []
+
+    whisper_base = _resolve_kommz_whisper_endpoint()
+    whisper_url = ""
+    for cand in _build_kommz_whisper_candidates(whisper_base):
+        whisper_url = cand
+        break
+    items.append({
+        "name": "Whisper",
+        **_probe_cloud_endpoint(whisper_url, "GET", timeout=(2.5, 6)),
+    })
+
+    xtts_health = ""
+    for cand in _build_kommz_aux_candidates("health"):
+        xtts_health = str(cand.get("url") or "").strip()
+        if xtts_health:
+            break
+    items.append({
+        "name": "XTTS health",
+        **_probe_cloud_endpoint(xtts_health, "GET", timeout=(2.5, 6)),
+    })
+
+    gpt_url = str(AUDIO_CONFIG.get("gpt_api_url", "") or "").strip()
+    items.append({
+        "name": "GPT-SoVITS",
+        **_probe_cloud_endpoint(gpt_url, "GET", timeout=(2.5, 6)),
+    })
+
+    synth_url = ""
+    for cand in _build_kommz_synthesis_candidates(_resolve_kommz_synthesis_base()):
+        if "/v1/synthesis" in cand or "/api/v1/synthesis" in cand:
+            synth_url = cand
+            break
+        if not synth_url:
+            synth_url = cand
+    synth_probe = _probe_cloud_endpoint(synth_url, "OPTIONS", timeout=(2.5, 6))
+    if (not synth_probe.get("ok")) and synth_url:
+        synth_probe = _probe_cloud_endpoint(synth_url, "GET", timeout=(2.5, 6))
+    items.append({
+        "name": "Voice API",
+        **synth_probe,
+    })
+
+    ok_count = sum(1 for it in items if it.get("ok"))
+    total = len(items)
+    summary = f"{ok_count}/{total} endpoints joignables"
+    if ok_count == 0:
+        summary = "0 endpoint joignable (vérifier URLs Modal / cloud)"
+    elif ok_count < total:
+        summary = f"{ok_count}/{total} endpoints joignables (fallback probable)"
+    else:
+        summary = "Tous les endpoints cloud répondent"
+
+    _cloud_diag_cache["checked_at"] = now
+    _cloud_diag_cache["summary"] = summary
+    _cloud_diag_cache["items"] = items
+    return dict(_cloud_diag_cache)
 
 
 def _get_xtts_warmup_retry_after_seconds(now_ts: float | None = None) -> int:
@@ -3157,7 +3412,6 @@ if str(os.environ.get("KOMMZ_FILTER_NET0001", "1")).strip() not in ("0", "false"
         pass
 
 # ==================== LICENSE ====================
-COMMUNITY_EDITION = str(os.environ.get("KOMMZ_COMMUNITY_EDITION", "1")).strip().lower() not in ("0", "false", "no")
 def get_hwid():
     try:
         if sys.platform == "win32":
@@ -3267,6 +3521,8 @@ def _has_local_voice_trial_entitlement():
         return False
 
 def has_voice_license():
+    if not CLOUD_FEATURES_ENABLED:
+        return False
     if COMMUNITY_EDITION:
         return True
     if VOICE_LICENSE_MGR.is_activated:
@@ -3276,6 +3532,12 @@ def has_voice_license():
     return _has_local_voice_trial_entitlement()
 
 def refresh_license_states_from_server():
+    if not CLOUD_FEATURES_ENABLED:
+        LICENSE_MGR.is_activated = False
+        LICENSE_MGR.expiration_str = "N/A"
+        VOICE_LICENSE_MGR.is_activated = False
+        VOICE_LICENSE_MGR.expiration_str = "N/A"
+        return
     if COMMUNITY_EDITION:
         LICENSE_MGR.is_activated = True
         LICENSE_MGR.expiration_str = "COMMUNITY"
@@ -3336,6 +3598,8 @@ _ptt_lock = threading.Lock(); _ptt_chunks = []; _ptt_rec = False; _ptt_stream = 
 # Pre-roll micro pour ne pas couper le debut de phrase (actif surtout en mode Turbo).
 _ptt_preroll = collections.deque(maxlen=16)  # ~250-350ms selon samplerate/blocksize
 _ptt_stream_device = None
+_ptt_last_start_ts = 0.0
+_ptt_last_stop_ts = 0.0
 _listen_buffer = []; _listen_lock = threading.Lock(); _listen_stream = None
 _is_speaking = False 
 _last_bypass_release_time = 0 
@@ -3347,11 +3611,21 @@ _listen_runtime = {
     "ally_text_events": 0,
     "ally_voice_played": 0,
     "ally_voice_skipped": 0,
+    "ally_voice_rate_limited": 0,
+    "ally_short_merged": 0,
     "last_event_at": 0.0,
     "listen_conn_state": "idle",
     "listen_conn_detail": "En attente audio",
     "listen_conn_retry_after": 0.0,
     "listen_conn_updated_at": 0.0,
+    "watchdog_restarts": 0,
+    "watchdog_flaps": 0,
+    "watchdog_cooldown_hits": 0,
+    "watchdog_last_restart_at": 0.0,
+    "watchdog_last_restart_reason": "",
+    "watchdog_last_tick_at": 0.0,
+    "watchdog_idle_restarts": 0,
+    "watchdog_last_idle_age_s": 0.0,
 }
 _listen_decisions = collections.deque(maxlen=24)  # 1=played, 0=skipped
 _listen_autotune_state = {
@@ -3361,6 +3635,7 @@ _listen_autotune_state = {
 }
 _listen_engine_guard = threading.Lock()
 _listen_engine_active = False
+_listen_watchdog_last_restart_ts = 0.0
 
 
 def _bump_listen_runtime(kind: str):
@@ -3378,6 +3653,8 @@ def _reset_listen_runtime_stats():
         _listen_runtime["ally_text_events"] = 0
         _listen_runtime["ally_voice_played"] = 0
         _listen_runtime["ally_voice_skipped"] = 0
+        _listen_runtime["ally_voice_rate_limited"] = 0
+        _listen_runtime["ally_short_merged"] = 0
         _listen_runtime["last_event_at"] = time.time()
         _listen_decisions.clear()
         _listen_autotune_state["level"] = 0
@@ -3387,6 +3664,28 @@ def _reset_listen_runtime_stats():
         _listen_runtime["listen_conn_detail"] = "En attente audio"
         _listen_runtime["listen_conn_retry_after"] = 0.0
         _listen_runtime["listen_conn_updated_at"] = time.time()
+        _listen_runtime["watchdog_restarts"] = 0
+        _listen_runtime["watchdog_flaps"] = 0
+        _listen_runtime["watchdog_cooldown_hits"] = 0
+        _listen_runtime["watchdog_last_restart_at"] = 0.0
+        _listen_runtime["watchdog_last_restart_reason"] = ""
+        _listen_runtime["watchdog_last_tick_at"] = time.time()
+        _listen_runtime["watchdog_idle_restarts"] = 0
+        _listen_runtime["watchdog_last_idle_age_s"] = 0.0
+    except Exception:
+        pass
+
+
+def _reset_listen_health_runtime():
+    try:
+        _listen_runtime["watchdog_restarts"] = 0
+        _listen_runtime["watchdog_flaps"] = 0
+        _listen_runtime["watchdog_cooldown_hits"] = 0
+        _listen_runtime["watchdog_idle_restarts"] = 0
+        _listen_runtime["watchdog_last_restart_at"] = 0.0
+        _listen_runtime["watchdog_last_restart_reason"] = ""
+        _listen_runtime["watchdog_last_idle_age_s"] = 0.0
+        _listen_runtime["watchdog_last_tick_at"] = time.time()
     except Exception:
         pass
 
@@ -3418,6 +3717,140 @@ def _register_listen_decision(played: bool):
         _listen_autotune_state["last_update_at"] = time.time()
     except Exception:
         pass
+
+
+def _build_listen_health_snapshot() -> dict:
+    try:
+        state = str(_listen_runtime.get("listen_conn_state", "idle") or "idle").strip().lower()
+        idle_restarts = int(_listen_runtime.get("watchdog_idle_restarts", 0) or 0)
+        flaps = int(_listen_runtime.get("watchdog_flaps", 0) or 0)
+        cooldown_hits = int(_listen_runtime.get("watchdog_cooldown_hits", 0) or 0)
+        voice_played = int(_listen_runtime.get("ally_voice_played", 0) or 0)
+        voice_skipped = int(_listen_runtime.get("ally_voice_skipped", 0) or 0)
+        idle_age = float(_listen_runtime.get("watchdog_last_idle_age_s", 0.0) or 0.0)
+
+        level = "ok"
+        summary = "Écoute stable"
+        if state in {"reconnecting", "restarting"}:
+            level = "warn"
+            summary = f"Écoute en reprise ({state})"
+        if cooldown_hits >= 3 or flaps >= 3:
+            level = "warn"
+            summary = f"Écoute instable ({flaps} flaps, {cooldown_hits} cooldown hits)"
+        if idle_restarts >= 4:
+            level = "err"
+            summary = f"Écoute fragile (relances idle: {idle_restarts})"
+        elif idle_restarts >= 1 and level == "ok":
+            level = "warn"
+            summary = f"Écoute auto-réparée (relances idle: {idle_restarts})"
+        if (voice_played + voice_skipped) == 0 and idle_age > 120 and state in {"connected", "waiting_audio"}:
+            level = "warn"
+            summary = "Aucun événement voix récent (session silencieuse)"
+        return {
+            "level": level,
+            "summary": summary,
+            "state": state,
+        }
+    except Exception:
+        return {
+            "level": "info",
+            "summary": "Santé écoute indisponible",
+            "state": "unknown",
+        }
+
+
+def _restart_listen_engine(reason: str = "") -> bool:
+    global DG_ENGINE, _listen_watchdog_last_restart_ts
+    now = time.time()
+    previous_restart_ts = float(_listen_watchdog_last_restart_ts or 0.0)
+    if (now - previous_restart_ts) < 8.0:
+        try:
+            _listen_runtime["watchdog_cooldown_hits"] = int(_listen_runtime.get("watchdog_cooldown_hits", 0) or 0) + 1
+            _listen_runtime["watchdog_last_restart_reason"] = f"cooldown:{str(reason or '').strip()[:120]}"
+        except Exception:
+            pass
+        return False
+    if not bool(AUDIO_CONFIG.get("is_listening", True)):
+        return False
+    try:
+        _set_listen_conn_state("restarting", "Relance auto mode ecoute...", 2.0)
+        _push_quality_log("warn", "listen_watchdog_restart", "Relance auto mode ecoute", reason)
+        try:
+            if "DG_ENGINE" in globals() and DG_ENGINE:
+                DG_ENGINE.is_running = False
+        except Exception:
+            pass
+        time.sleep(0.25)
+        try:
+            listen_dev_id = int(AUDIO_CONFIG.get("game_input_device", 0) or 0)
+        except Exception:
+            listen_dev_id = 0
+        DG_ENGINE = DeepgramEngine()
+        threading.Thread(target=DG_ENGINE.start_streaming, args=(listen_dev_id,), daemon=True).start()
+        _listen_watchdog_last_restart_ts = time.time()
+        try:
+            last_restart_at = float(_listen_runtime.get("watchdog_last_restart_at", 0.0) or 0.0)
+            if last_restart_at > 0.0 and (now - last_restart_at) < 25.0:
+                _listen_runtime["watchdog_flaps"] = int(_listen_runtime.get("watchdog_flaps", 0) or 0) + 1
+            _listen_runtime["watchdog_restarts"] = int(_listen_runtime.get("watchdog_restarts", 0) or 0) + 1
+            _listen_runtime["watchdog_last_restart_at"] = now
+            _listen_runtime["watchdog_last_restart_reason"] = str(reason or "").strip()[:120]
+        except Exception:
+            pass
+        stealth_print(f"♻️ Watchdog écoute: relance effectuée ({reason})")
+        return True
+    except Exception as e:
+        stealth_print(f"⚠️ Watchdog écoute: relance impossible ({e})")
+        return False
+
+
+def listen_watchdog_loop():
+    while True:
+        try:
+            time.sleep(1.5)
+            _listen_runtime["watchdog_last_tick_at"] = time.time()
+            if not bool(AUDIO_CONFIG.get("is_listening", True)):
+                continue
+            state = str(_listen_runtime.get("listen_conn_state", "idle") or "idle").strip().lower()
+            updated_at = float(_listen_runtime.get("listen_conn_updated_at", 0.0) or 0.0)
+            retry_after = float(_listen_runtime.get("listen_conn_retry_after", 0.0) or 0.0)
+            if updated_at <= 0:
+                continue
+            age = time.time() - updated_at
+            now_ts = time.time()
+            try:
+                last_evt = float(_listen_runtime.get("last_event_at", 0.0) or 0.0)
+            except Exception:
+                last_evt = 0.0
+            idle_age = (now_ts - last_evt) if last_evt > 0 else 999999.0
+            _listen_runtime["watchdog_last_idle_age_s"] = max(0.0, float(idle_age))
+            if state in {"connecting", "reconnecting"}:
+                threshold = max(14.0, retry_after + 8.0)
+                if age > threshold:
+                    _restart_listen_engine(f"etat {state} bloque depuis {int(age)}s")
+            elif state == "restarting" and age > 18.0:
+                _restart_listen_engine(f"restarting bloque depuis {int(age)}s")
+            elif state == "paused" and age > 4.0:
+                # Auto-récupération: si la pause PTT/Hybrid est terminée,
+                # on force un retour "waiting_audio" pour relancer la connexion live.
+                if (not _ptt_rec) and (not _hybrid_running) and (not _is_speaking):
+                    _set_listen_conn_state("waiting_audio", "Reprise auto après pause", 0.0)
+            elif state in {"connected", "waiting_audio"}:
+                # Longue session: si on reste "connecté" mais sans activité trop longtemps,
+                # on relance le stream pour éviter les sessions silencieuses bloquées.
+                try:
+                    idle_threshold_s = int(AUDIO_CONFIG.get("listen_watchdog_idle_threshold_s", 75) or 75)
+                except Exception:
+                    idle_threshold_s = 75
+                idle_threshold_s = max(25, min(180, idle_threshold_s))
+                if idle_age > idle_threshold_s and (not _ptt_rec) and (not _hybrid_running) and (not _is_speaking):
+                    if _restart_listen_engine(f"idle {state} depuis {int(idle_age)}s"):
+                        try:
+                            _listen_runtime["watchdog_idle_restarts"] = int(_listen_runtime.get("watchdog_idle_restarts", 0) or 0) + 1
+                        except Exception:
+                            pass
+        except Exception:
+            time.sleep(1.0)
 
 # ==================== API ====================
 app = Flask('vtp_core', static_folder=str(WEB_DIR), template_folder=str(WEB_DIR))
@@ -3603,16 +4036,16 @@ def status_core():
     st = {k: v for k, v in AUDIO_CONFIG.items()}
     desktop_key = (AUDIO_CONFIG.get("license_key") or "").strip().upper()
     voice_key = (AUDIO_CONFIG.get("voice_license_key") or "").strip().upper()
-    trial_desktop = False if COMMUNITY_EDITION else desktop_key.startswith("TRIAL-")
-    trial_voice = False if COMMUNITY_EDITION else voice_key.startswith("TRIAL-")
-    trial_mode = False if COMMUNITY_EDITION else (trial_desktop or trial_voice)
+    trial_desktop = False if (COMMUNITY_EDITION or (not CLOUD_FEATURES_ENABLED)) else desktop_key.startswith("TRIAL-")
+    trial_voice = False if (COMMUNITY_EDITION or (not CLOUD_FEATURES_ENABLED)) else voice_key.startswith("TRIAL-")
+    trial_mode = False if (COMMUNITY_EDITION or (not CLOUD_FEATURES_ENABLED)) else (trial_desktop or trial_voice)
     trial_expiration = ""
-    if not COMMUNITY_EDITION:
+    if (not COMMUNITY_EDITION) and CLOUD_FEATURES_ENABLED:
         if trial_desktop and LICENSE_MGR.expiration_str and LICENSE_MGR.expiration_str != "N/A":
             trial_expiration = LICENSE_MGR.expiration_str
         elif trial_voice and VOICE_LICENSE_MGR.expiration_str and VOICE_LICENSE_MGR.expiration_str != "N/A":
             trial_expiration = VOICE_LICENSE_MGR.expiration_str
-    voice_licensed = True if COMMUNITY_EDITION else has_voice_license()
+    voice_licensed = False if (not CLOUD_FEATURES_ENABLED) else (True if COMMUNITY_EDITION else has_voice_license())
     voice_active = voice_licensed and AUDIO_CONFIG.get("tts_engine") == "KOMMZ_VOICE"
     trial_quota_seconds = 1800
     trial_used_local = int(AUDIO_CONFIG.get("trial_voice_seconds_used_local", 0) or 0)
@@ -3621,7 +4054,9 @@ def status_core():
     mm = trial_remaining_local // 60
     ss = trial_remaining_local % 60
     xtts_runtime = get_kommz_xtts_runtime_status(force=False)
+    cloud_diag = get_cloud_endpoints_diag(force=False)
     hybrid_cfg = _get_hybrid_fr_config_status()
+    listen_health = _build_listen_health_snapshot()
     
     # 3. --- AJOUT CRITIQUE POUR REMOTE V5 ---
     global app_state
@@ -3634,6 +4069,8 @@ def status_core():
         "remote_url": f"http://{lan_ip}:{VTP_CORE_PORT}/remote",
         "licensed": True if COMMUNITY_EDITION else LICENSE_MGR.is_activated,
         "expiration": "COMMUNITY" if COMMUNITY_EDITION else LICENSE_MGR.expiration_str,
+        "edition_profile": EDITION_PROFILE,
+        "cloud_features_enabled": bool(CLOUD_FEATURES_ENABLED),
         "license_email": (AUDIO_CONFIG.get("license_email") or "").strip().lower(),
         "voice_licensed": voice_licensed,
         "voice_active": voice_active,
@@ -3665,10 +4102,12 @@ def status_core():
         "xtts_runtime_state": xtts_runtime.get("state", "unknown"),
         "xtts_runtime_message": xtts_runtime.get("message", "VÃƒÂ©rification en cours..."),
         "xtts_runtime_checked_at": xtts_runtime.get("checked_at", 0),
+        "cloud_endpoints_diag": cloud_diag,
         "xtts_warmup_cooldown_seconds": int(KOMMZ_XTTS_WARMUP_COOLDOWN or 0),
         "xtts_warmup_last_ts": float(_last_xtts_warmup_ts or 0.0),
         "xtts_warmup_retry_after": _get_xtts_warmup_retry_after_seconds(),
         "pipeline_runtime": _build_pipeline_runtime_payload(),
+        "tts_fallback_runtime": _build_tts_fallback_runtime_payload(),
         "latency_runtime": _build_latency_runtime_payload(),
         "expressive_runtime": _build_expressive_runtime_payload(),
         "hybrid_fast_runtime": _build_hybrid_fast_runtime_payload(),
@@ -3775,10 +4214,15 @@ def status_core():
         ),
         "ally_competitive_lock_auto": bool(AUDIO_CONFIG.get("ally_competitive_lock_auto", True)),
         "ally_preset_library": [str(it.get("name") or "") for it in listen_preset_library],
+        "listen_health_level": str(listen_health.get("level", "info") or "info"),
+        "listen_health_summary": str(listen_health.get("summary", "Santé écoute indisponible") or "Santé écoute indisponible"),
+        "listen_health_state": str(listen_health.get("state", "unknown") or "unknown"),
         "listen_runtime": {
             "ally_text_events": int(_listen_runtime.get("ally_text_events", 0) or 0),
             "ally_voice_played": int(_listen_runtime.get("ally_voice_played", 0) or 0),
             "ally_voice_skipped": int(_listen_runtime.get("ally_voice_skipped", 0) or 0),
+            "ally_voice_rate_limited": int(_listen_runtime.get("ally_voice_rate_limited", 0) or 0),
+            "ally_short_merged": int(_listen_runtime.get("ally_short_merged", 0) or 0),
             "last_event_at": float(_listen_runtime.get("last_event_at", 0.0) or 0.0),
             "autotune_level": int(_listen_autotune_state.get("level", 0) or 0),
             "autotune_ratio": float(_listen_autotune_state.get("ratio", 1.0) or 1.0),
@@ -3788,6 +4232,14 @@ def status_core():
             "listen_conn_detail": str(_listen_runtime.get("listen_conn_detail", "") or ""),
             "listen_conn_retry_after": float(_listen_runtime.get("listen_conn_retry_after", 0.0) or 0.0),
             "listen_conn_updated_at": float(_listen_runtime.get("listen_conn_updated_at", 0.0) or 0.0),
+            "watchdog_restarts": int(_listen_runtime.get("watchdog_restarts", 0) or 0),
+            "watchdog_flaps": int(_listen_runtime.get("watchdog_flaps", 0) or 0),
+            "watchdog_cooldown_hits": int(_listen_runtime.get("watchdog_cooldown_hits", 0) or 0),
+            "watchdog_idle_restarts": int(_listen_runtime.get("watchdog_idle_restarts", 0) or 0),
+            "watchdog_last_idle_age_s": float(_listen_runtime.get("watchdog_last_idle_age_s", 0.0) or 0.0),
+            "watchdog_last_restart_at": float(_listen_runtime.get("watchdog_last_restart_at", 0.0) or 0.0),
+            "watchdog_last_restart_reason": str(_listen_runtime.get("watchdog_last_restart_reason", "") or ""),
+            "watchdog_last_tick_at": float(_listen_runtime.get("watchdog_last_tick_at", 0.0) or 0.0),
         },
     })
 
@@ -3813,6 +4265,17 @@ def kommz_xtts_warmup():
         })
     except Exception as e:
         logger.exception("kommz_xtts_warmup failed")
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@app.route("/cloud/diag/retest", methods=["POST"])
+def cloud_diag_retest():
+    """Force un re-test immédiat des endpoints cloud (V5)."""
+    try:
+        payload = get_cloud_endpoints_diag(force=True, cache_ttl=0)
+        return jsonify({"ok": True, "diag": payload})
+    except Exception as e:
+        logger.exception("cloud_diag_retest failed")
         return jsonify({"ok": False, "error": str(e)}), 500
 
 
@@ -5035,7 +5498,7 @@ def scenes_duplicate():
 def scenes_export():
     try:
         data = {
-            "version": "4.9",
+            "version": "5.0",
             "exported_at": _scene_now_utc_iso(),
             "active_name": str(AUDIO_CONFIG.get("scene_active_name") or ""),
             "last_applied_at": str(AUDIO_CONFIG.get("scene_last_applied_at") or ""),
@@ -5129,6 +5592,14 @@ def set_full_config():
     
     # 1. Moteur & Langue
     requested_engine = d.get("engine")
+    if requested_engine == "KOMMZ_VOICE" and not CLOUD_FEATURES_ENABLED:
+        AUDIO_CONFIG["tts_engine"] = "WINDOWS"
+        save_settings()
+        return jsonify({
+            "ok": False,
+            "error": "CLOUD_DISABLED",
+            "message": "Kommz Voice Cloud est désactivé en édition Community."
+        }), 403
     if requested_engine == "KOMMZ_VOICE" and not has_voice_license():
         AUDIO_CONFIG["tts_engine"] = "WINDOWS"
         save_settings()
@@ -5156,6 +5627,14 @@ def set_kommz_config():
     try:
         d = request.get_json() or {}
         global AUDIO_CONFIG
+        if not CLOUD_FEATURES_ENABLED:
+            AUDIO_CONFIG["tts_engine"] = "WINDOWS"
+            save_settings()
+            return jsonify({
+                "ok": False,
+                "error": "CLOUD_DISABLED",
+                "message": "Configuration cloud désactivée en édition Community."
+            }), 403
         if not has_voice_license():
             AUDIO_CONFIG["tts_engine"] = "WINDOWS"
             save_settings()
@@ -5431,9 +5910,14 @@ def kommz_tts_generator(text):
             synth_candidates = _build_kommz_synthesis_candidates(synth_base)
             stealth_print(f"🎯 Mode voice_id forcé actif: {client_id_cfg}")
             last_api_err = ""
+            last_api_status = 0
+            last_api_url = ""
+            attempt_notes = []
+            trial_quota_hit = False
             for idx, api_url in enumerate(synth_candidates, start=1):
                 try:
                     stealth_print(f"📤 API synthesis -> {api_url} ({idx}/{len(synth_candidates)})")
+                    last_api_url = api_url
                     r = _HTTP.post(
                         api_url,
                         headers={
@@ -5459,15 +5943,19 @@ def kommz_tts_generator(text):
                         timeout=(4, 60) if turbo_mode else 120,
                     )
                     if not r.ok:
+                        last_api_status = int(r.status_code or 0)
                         body = _repair_display_text((r.text or "")[:240])
                         if _looks_like_cloud_trial_limit(r.status_code, body):
                             last_api_err = "Quota essai voice_id atteint ou expiré"
+                            trial_quota_hit = True
                         else:
                             last_api_err = _repair_display_text(f"HTTP {r.status_code} {body}")
+                        attempt_notes.append(f"{idx}:{_short_runtime_url(api_url, 72)}=HTTP{r.status_code}")
                         continue
 
                     ctype = (r.headers.get("Content-Type") or "").lower()
                     if "audio/wav" in ctype or "audio/x-wav" in ctype:
+                        attempt_notes.append(f"{idx}:{_short_runtime_url(api_url, 72)}=OK")
                         stealth_print("✅ Voice_id forcé OK (audio direct).")
                         _set_pipeline_runtime(
                             hybrid_engine="Bypass Hybrid",
@@ -5481,11 +5969,14 @@ def kommz_tts_generator(text):
                     audio_url = (payload or {}).get("audio_url", "")
                     if not audio_url:
                         last_api_err = "audio_url manquante dans réponse /v1/synthesis"
+                        attempt_notes.append(f"{idx}:{_short_runtime_url(api_url, 72)}=NO_AUDIO_URL")
                         continue
                     dl = _HTTP.get(audio_url, timeout=(4, 60) if turbo_mode else 120)
                     if not dl.ok:
                         last_api_err = f"download audio_url HTTP {dl.status_code}"
+                        attempt_notes.append(f"{idx}:{_short_runtime_url(api_url, 72)}=DL_HTTP{dl.status_code}")
                         continue
+                    attempt_notes.append(f"{idx}:{_short_runtime_url(api_url, 72)}=OK_URL")
                     stealth_print("✅ Voice_id forcé OK (audio_url).")
                     _set_pipeline_runtime(
                         hybrid_engine="Bypass Hybrid",
@@ -5496,6 +5987,7 @@ def kommz_tts_generator(text):
                     return dl.content
                 except Exception as api_ex:
                     last_api_err = _repair_display_text(str(api_ex))
+                    attempt_notes.append(f"{idx}:{_short_runtime_url(api_url, 72)}=ERR")
                     continue
 
             stealth_print_rl(
@@ -5503,12 +5995,31 @@ def kommz_tts_generator(text):
                 f"⚠️ Voice_id forcé indisponible, fallback clone. Détail: {last_api_err}",
                 cooldown=30.0,
             )
+            _register_tts_fallback(
+                "VOICE_ID_TRIAL_QUOTA" if trial_quota_hit else "VOICE_ID_UNAVAILABLE",
+                last_api_err or "voice_id fallback clone",
+                endpoint=_short_runtime_url(last_api_url or synth_base, 120),
+                http_status=last_api_status,
+                attempts=" | ".join(attempt_notes[-6:]),
+            )
             return None
 
         if client_id_cfg and api_key_cfg and not synth_base:
             stealth_print("⚠️ Voice_id forcé ignoré: Synthesis URL non configurée.")
             stealth_print("ℹ️ Définir kommz_synthesis_url (ou env KOMMZ_SYNTHESIS_URL) vers votre serveur web /v1/synthesis.")
+            _register_tts_fallback(
+                "VOICE_ID_URL_MISSING",
+                "synth_base vide",
+            )
         return None
+
+    # V5: si un voice_id est configuré, on le tente en priorité stricte
+    # avant Hybrid/clone pour respecter la voix demandée par l'utilisateur.
+    if client_id_cfg and api_key_cfg:
+        voice_audio = _try_voice_id_api()
+        if voice_audio:
+            yield voice_audio
+            return
 
     # Sur FR/EN/JA/KO/ZH, on privilÃƒÂ©gie d'abord Hybrid pour le timbre.
     # Si GPT ÃƒÂ©choue, on repasse automatiquement sur voice_id API.
@@ -5609,6 +6120,7 @@ def kommz_tts_generator(text):
         else:
             stealth_print("⚠️ Kommz Voice ignoré: aucune référence audio en RAM (micro/preset).")
             stealth_print("ℹ️ Fallback reason: NO_REFERENCE_AUDIO_BUFFER")
+            _register_tts_fallback("NO_REFERENCE_AUDIO_BUFFER", "reference audio buffer absent")
             return
 
     stealth_print(
@@ -5627,12 +6139,17 @@ def kommz_tts_generator(text):
         tts_route=route_labels.get(source_mode, f"Clone direct · {source_mode}") + (" · turbo" if turbo_mode else ""),
     )
     if client_id_cfg:
-        stealth_print("ℹ️ Note: en mode clone direct, CLIENT ID n'est pas utilisé pour sélectionner la voix.")
+        stealth_print("ℹ️ Note: clone direct en fallback (voice_id indisponible/non configuré).")
 
     try:
         if not base_url_modal:
             stealth_print("⚠️ Kommz Voice ignoré: URL Modal vide.")
             stealth_print("ℹ️ Fallback reason: EMPTY_MODAL_URL")
+            _register_tts_fallback(
+                "EMPTY_MODAL_URL",
+                "base_url_modal vide",
+                endpoint=_short_runtime_url(_resolve_kommz_voice_endpoint(), 120),
+            )
             return
         candidate_urls = _build_kommz_generate_candidates(base_url_modal)
         if hybrid_enabled and turbo_mode and _get_hybrid_rts_preset() == "fast":
@@ -5640,6 +6157,11 @@ def kommz_tts_generator(text):
         if not candidate_urls:
             stealth_print("⚠️ Kommz Voice ignoré: aucune URL Modal candidate.")
             stealth_print("ℹ️ Fallback reason: NO_MODAL_CANDIDATE_URL")
+            _register_tts_fallback(
+                "NO_MODAL_CANDIDATE_URL",
+                "candidate_urls vide",
+                endpoint=_short_runtime_url(base_url_modal, 120),
+            )
             return
         prewarm_kommz_xtts(force=False, timeout_connect=2 if turbo_mode else 3, timeout_read=10 if turbo_mode else 20)
 
@@ -5664,6 +6186,7 @@ def kommz_tts_generator(text):
         response = None
         used_url = ""
         last_err = ""
+        attempt_notes = []
         for idx, url_modal in enumerate(candidate_urls, start=1):
             try:
                 stealth_print(f"📤 Envoi requête vers {url_modal}... ({idx}/{len(candidate_urls)})")
@@ -5676,9 +6199,11 @@ def kommz_tts_generator(text):
                 if r.status_code == 200:
                     response = r
                     used_url = url_modal
+                    attempt_notes.append(f"{idx}:{_short_runtime_url(url_modal, 72)}=OK")
                     break
                 body = r.text[:300] if r.text else ""
                 last_err = f"HTTP {r.status_code} {body}"
+                attempt_notes.append(f"{idx}:{_short_runtime_url(url_modal, 72)}=HTTP{r.status_code}")
                 # 400/404/405 => on teste URL suivante (souvent mauvais path worker)
                 if r.status_code in (400, 404, 405):
                     continue
@@ -5688,11 +6213,18 @@ def kommz_tts_generator(text):
                 break
             except Exception as ex_try:
                 last_err = str(ex_try)
+                attempt_notes.append(f"{idx}:{_short_runtime_url(url_modal, 72)}=ERR")
                 continue
 
         if response is None:
             stealth_print(f"❌ Erreur Serveur: aucune URL Modal valide. Dernière erreur: {last_err}")
             stealth_print("ℹ️ Fallback reason: ALL_MODAL_ENDPOINTS_FAILED")
+            _register_tts_fallback(
+                "ALL_MODAL_ENDPOINTS_FAILED",
+                str(last_err or ""),
+                endpoint=_short_runtime_url(base_url_modal, 120),
+                attempts=" | ".join(attempt_notes[-6:]),
+            )
             return
 
         # Auto-rÃƒÂ©paration: si une variante a marchÃƒÂ©, on la mÃƒÂ©morise.
@@ -5759,12 +6291,25 @@ def kommz_tts_generator(text):
                 add_subtitle("SYSTEM >> QUOTA ESSAI VOICE ATTEINT (30 MIN)", "SYS")
                 stealth_print(f"⚠️ {msg}")
                 stealth_print("ℹ️ Fallback reason: TRIAL_QUOTA_REACHED -> WINDOWS")
+                _register_tts_fallback("TRIAL_QUOTA_REACHED", "quota essai 30m atteint")
             else:
                 stealth_print(f"ℹ️ Fallback reason: HTTP_{response.status_code}")
+                _register_tts_fallback(
+                    "HTTP_ERROR",
+                    f"HTTP_{response.status_code} {body[:140]}",
+                    endpoint=_short_runtime_url(used_url or base_url_modal, 120),
+                    http_status=response.status_code,
+                    attempts=" | ".join(attempt_notes[-6:]),
+                )
 
     except Exception as e:
         stealth_print(f"❌ Erreur lors de l'envoi : {e}")
         stealth_print("ℹ️ Fallback reason: EXCEPTION_DURING_KOMMZ_TTS")
+        _register_tts_fallback(
+            "EXCEPTION_DURING_KOMMZ_TTS",
+            str(e),
+            endpoint=_short_runtime_url(_resolve_kommz_voice_endpoint(), 120),
+        )
         import traceback
         traceback.print_exc()
 
@@ -6014,6 +6559,11 @@ def apply_competitive_listen_profile():
         AUDIO_CONFIG["ally_tts_force_on_speech_final"] = True
         AUDIO_CONFIG["ally_tts_force_min_chars"] = 8
         AUDIO_CONFIG["ally_tts_min_gap_s"] = 0.55
+        AUDIO_CONFIG["ally_tts_short_merge_words"] = 3
+        AUDIO_CONFIG["ally_tts_short_merge_chars"] = 18
+        AUDIO_CONFIG["ally_tts_short_merge_window_s"] = 1.20
+        AUDIO_CONFIG["ally_tts_rate_limit_window_s"] = 9.0
+        AUDIO_CONFIG["ally_tts_rate_limit_max_plays"] = 5
         AUDIO_CONFIG["ally_voice_focus_mode"] = "aggressive"
         AUDIO_CONFIG["ally_autotune_enabled"] = True
         AUDIO_CONFIG["ally_listen_profile"] = "competitive"
@@ -6037,6 +6587,11 @@ def apply_competitive_listen_profile():
             "ally_tts_force_on_speech_final": AUDIO_CONFIG["ally_tts_force_on_speech_final"],
             "ally_tts_force_min_chars": AUDIO_CONFIG["ally_tts_force_min_chars"],
             "ally_tts_min_gap_s": AUDIO_CONFIG["ally_tts_min_gap_s"],
+            "ally_tts_short_merge_words": AUDIO_CONFIG["ally_tts_short_merge_words"],
+            "ally_tts_short_merge_chars": AUDIO_CONFIG["ally_tts_short_merge_chars"],
+            "ally_tts_short_merge_window_s": AUDIO_CONFIG["ally_tts_short_merge_window_s"],
+            "ally_tts_rate_limit_window_s": AUDIO_CONFIG["ally_tts_rate_limit_window_s"],
+            "ally_tts_rate_limit_max_plays": AUDIO_CONFIG["ally_tts_rate_limit_max_plays"],
             "ally_voice_focus_mode": AUDIO_CONFIG["ally_voice_focus_mode"],
             "ally_autotune_enabled": AUDIO_CONFIG["ally_autotune_enabled"],
             "vad_threshold": AUDIO_CONFIG["vad_threshold"],
@@ -6051,40 +6606,103 @@ def apply_competitive_listen_profile():
 
 LISTEN_GAME_PRESETS = {
     "cs2": {
-        "label": "CS2 / FPS compétitif",
+        "label": "CS2 / FPS compétitif (Agressif)",
         "ally_voice_focus_mode": "aggressive",
         "ally_sentence_punct_min_words": 2,
         "ally_sentence_hard_flush_words": 6,
-        "ally_tts_similarity_play_below": 0.94,
-        "ally_tts_duplicate_window_s": 1.4,
-        "ally_tts_force_min_chars": 7,
-        "ally_tts_min_gap_s": 0.50,
-        "vad_threshold": 0.017,
+        "ally_tts_similarity_play_below": 0.92,
+        "ally_tts_duplicate_window_s": 1.7,
+        "ally_tts_force_min_chars": 8,
+        "ally_tts_min_gap_s": 0.58,
+        "ally_tts_short_merge_words": 3,
+        "ally_tts_short_merge_chars": 18,
+        "ally_tts_short_merge_window_s": 1.15,
+        "ally_tts_rate_limit_window_s": 8.0,
+        "ally_tts_rate_limit_max_plays": 5,
+        "vad_threshold": 0.018,
+    },
+    "cs2_safe": {
+        "label": "CS2 / FPS compétitif (Safe)",
+        "ally_voice_focus_mode": "balanced",
+        "ally_sentence_punct_min_words": 3,
+        "ally_sentence_hard_flush_words": 7,
+        "ally_tts_similarity_play_below": 0.95,
+        "ally_tts_duplicate_window_s": 2.0,
+        "ally_tts_force_min_chars": 10,
+        "ally_tts_min_gap_s": 0.68,
+        "ally_tts_short_merge_words": 4,
+        "ally_tts_short_merge_chars": 22,
+        "ally_tts_short_merge_window_s": 1.35,
+        "ally_tts_rate_limit_window_s": 10.0,
+        "ally_tts_rate_limit_max_plays": 4,
+        "vad_threshold": 0.019,
     },
     "valorant": {
-        "label": "Valorant / FPS tactique",
+        "label": "Valorant / FPS tactique (Agressif)",
         "ally_voice_focus_mode": "aggressive",
         "ally_sentence_punct_min_words": 2,
         "ally_sentence_hard_flush_words": 6,
-        "ally_tts_similarity_play_below": 0.93,
-        "ally_tts_duplicate_window_s": 1.5,
+        "ally_tts_similarity_play_below": 0.91,
+        "ally_tts_duplicate_window_s": 1.9,
         "ally_tts_force_min_chars": 8,
-        "ally_tts_min_gap_s": 0.52,
-        "vad_threshold": 0.016,
+        "ally_tts_min_gap_s": 0.62,
+        "ally_tts_short_merge_words": 3,
+        "ally_tts_short_merge_chars": 18,
+        "ally_tts_short_merge_window_s": 1.25,
+        "ally_tts_rate_limit_window_s": 9.0,
+        "ally_tts_rate_limit_max_plays": 5,
+        "vad_threshold": 0.0185,
+    },
+    "valorant_safe": {
+        "label": "Valorant / FPS tactique (Safe)",
+        "ally_voice_focus_mode": "balanced",
+        "ally_sentence_punct_min_words": 3,
+        "ally_sentence_hard_flush_words": 7,
+        "ally_tts_similarity_play_below": 0.94,
+        "ally_tts_duplicate_window_s": 2.2,
+        "ally_tts_force_min_chars": 10,
+        "ally_tts_min_gap_s": 0.72,
+        "ally_tts_short_merge_words": 4,
+        "ally_tts_short_merge_chars": 22,
+        "ally_tts_short_merge_window_s": 1.35,
+        "ally_tts_rate_limit_window_s": 10.0,
+        "ally_tts_rate_limit_max_plays": 4,
+        "vad_threshold": 0.019,
     },
     "warzone": {
-        "label": "Warzone / FPS bruyant",
+        "label": "Warzone / FPS bruyant (Agressif)",
         "ally_voice_focus_mode": "aggressive",
         "ally_sentence_punct_min_words": 2,
         "ally_sentence_hard_flush_words": 5,
-        "ally_tts_similarity_play_below": 0.95,
-        "ally_tts_duplicate_window_s": 1.2,
+        "ally_tts_similarity_play_below": 0.93,
+        "ally_tts_duplicate_window_s": 1.6,
         "ally_tts_force_min_chars": 7,
-        "ally_tts_min_gap_s": 0.45,
-        "vad_threshold": 0.015,
+        "ally_tts_min_gap_s": 0.58,
+        "ally_tts_short_merge_words": 3,
+        "ally_tts_short_merge_chars": 20,
+        "ally_tts_short_merge_window_s": 1.20,
+        "ally_tts_rate_limit_window_s": 9.0,
+        "ally_tts_rate_limit_max_plays": 4,
+        "vad_threshold": 0.019,
+    },
+    "warzone_safe": {
+        "label": "Warzone / FPS bruyant (Safe)",
+        "ally_voice_focus_mode": "balanced",
+        "ally_sentence_punct_min_words": 3,
+        "ally_sentence_hard_flush_words": 7,
+        "ally_tts_similarity_play_below": 0.95,
+        "ally_tts_duplicate_window_s": 2.0,
+        "ally_tts_force_min_chars": 10,
+        "ally_tts_min_gap_s": 0.66,
+        "ally_tts_short_merge_words": 4,
+        "ally_tts_short_merge_chars": 24,
+        "ally_tts_short_merge_window_s": 1.30,
+        "ally_tts_rate_limit_window_s": 10.0,
+        "ally_tts_rate_limit_max_plays": 4,
+        "vad_threshold": 0.020,
     },
     "fortnite": {
-        "label": "Fortnite / BR",
+        "label": "Fortnite / BR (Agressif)",
         "ally_voice_focus_mode": "aggressive",
         "ally_sentence_punct_min_words": 2,
         "ally_sentence_hard_flush_words": 6,
@@ -6092,7 +6710,28 @@ LISTEN_GAME_PRESETS = {
         "ally_tts_duplicate_window_s": 1.4,
         "ally_tts_force_min_chars": 8,
         "ally_tts_min_gap_s": 0.50,
+        "ally_tts_short_merge_words": 3,
+        "ally_tts_short_merge_chars": 18,
+        "ally_tts_short_merge_window_s": 1.10,
+        "ally_tts_rate_limit_window_s": 8.0,
+        "ally_tts_rate_limit_max_plays": 6,
         "vad_threshold": 0.0175,
+    },
+    "fortnite_safe": {
+        "label": "Fortnite / BR (Safe)",
+        "ally_voice_focus_mode": "balanced",
+        "ally_sentence_punct_min_words": 3,
+        "ally_sentence_hard_flush_words": 7,
+        "ally_tts_similarity_play_below": 0.95,
+        "ally_tts_duplicate_window_s": 1.9,
+        "ally_tts_force_min_chars": 10,
+        "ally_tts_min_gap_s": 0.62,
+        "ally_tts_short_merge_words": 4,
+        "ally_tts_short_merge_chars": 22,
+        "ally_tts_short_merge_window_s": 1.25,
+        "ally_tts_rate_limit_window_s": 10.0,
+        "ally_tts_rate_limit_max_plays": 5,
+        "vad_threshold": 0.0185,
     },
     "apex": {
         "label": "Apex Legends / BR",
@@ -6103,6 +6742,11 @@ LISTEN_GAME_PRESETS = {
         "ally_tts_duplicate_window_s": 1.3,
         "ally_tts_force_min_chars": 8,
         "ally_tts_min_gap_s": 0.48,
+        "ally_tts_short_merge_words": 3,
+        "ally_tts_short_merge_chars": 16,
+        "ally_tts_short_merge_window_s": 1.05,
+        "ally_tts_rate_limit_window_s": 8.0,
+        "ally_tts_rate_limit_max_plays": 6,
         "vad_threshold": 0.0165,
     },
     "overwatch": {
@@ -6114,6 +6758,11 @@ LISTEN_GAME_PRESETS = {
         "ally_tts_duplicate_window_s": 1.5,
         "ally_tts_force_min_chars": 8,
         "ally_tts_min_gap_s": 0.50,
+        "ally_tts_short_merge_words": 3,
+        "ally_tts_short_merge_chars": 18,
+        "ally_tts_short_merge_window_s": 1.10,
+        "ally_tts_rate_limit_window_s": 8.0,
+        "ally_tts_rate_limit_max_plays": 6,
         "vad_threshold": 0.017,
     },
     "r6": {
@@ -6125,6 +6774,11 @@ LISTEN_GAME_PRESETS = {
         "ally_tts_duplicate_window_s": 1.3,
         "ally_tts_force_min_chars": 7,
         "ally_tts_min_gap_s": 0.46,
+        "ally_tts_short_merge_words": 3,
+        "ally_tts_short_merge_chars": 16,
+        "ally_tts_short_merge_window_s": 1.00,
+        "ally_tts_rate_limit_window_s": 7.0,
+        "ally_tts_rate_limit_max_plays": 6,
         "vad_threshold": 0.0155,
     },
     "discord_party": {
@@ -6136,6 +6790,11 @@ LISTEN_GAME_PRESETS = {
         "ally_tts_duplicate_window_s": 1.8,
         "ally_tts_force_min_chars": 8,
         "ally_tts_min_gap_s": 0.55,
+        "ally_tts_short_merge_words": 4,
+        "ally_tts_short_merge_chars": 24,
+        "ally_tts_short_merge_window_s": 1.35,
+        "ally_tts_rate_limit_window_s": 10.0,
+        "ally_tts_rate_limit_max_plays": 5,
         "vad_threshold": 0.020,
     },
 }
@@ -6150,6 +6809,11 @@ LISTEN_PRESET_EXPORT_KEYS = [
     "ally_tts_force_on_speech_final",
     "ally_tts_force_min_chars",
     "ally_tts_min_gap_s",
+    "ally_tts_short_merge_words",
+    "ally_tts_short_merge_chars",
+    "ally_tts_short_merge_window_s",
+    "ally_tts_rate_limit_window_s",
+    "ally_tts_rate_limit_max_plays",
     "ally_voice_focus_mode",
     "ally_autotune_enabled",
     "ally_listen_profile",
@@ -6171,8 +6835,27 @@ def _sanitize_listen_config_guards():
     if AUDIO_CONFIG["ally_voice_focus_mode"] not in {"off", "balanced", "aggressive"}:
         AUDIO_CONFIG["ally_voice_focus_mode"] = "balanced"
     AUDIO_CONFIG["ally_game_preset"] = str(AUDIO_CONFIG.get("ally_game_preset", "custom") or "custom").strip().lower()
-    if AUDIO_CONFIG["ally_game_preset"] not in {"custom", "cs2", "valorant", "warzone", "fortnite", "apex", "overwatch", "r6", "discord_party"}:
+    if AUDIO_CONFIG["ally_game_preset"] not in {
+        "custom",
+        "cs2", "cs2_safe",
+        "valorant", "valorant_safe",
+        "warzone", "warzone_safe",
+        "fortnite", "fortnite_safe",
+        "apex", "overwatch", "r6", "discord_party"
+    }:
         AUDIO_CONFIG["ally_game_preset"] = "custom"
+    try:
+        AUDIO_CONFIG["ally_tts_short_merge_words"] = max(1, min(8, int(AUDIO_CONFIG.get("ally_tts_short_merge_words", 3) or 3)))
+        AUDIO_CONFIG["ally_tts_short_merge_chars"] = max(6, min(80, int(AUDIO_CONFIG.get("ally_tts_short_merge_chars", 18) or 18)))
+        AUDIO_CONFIG["ally_tts_short_merge_window_s"] = max(0.30, min(4.0, float(AUDIO_CONFIG.get("ally_tts_short_merge_window_s", 1.25) or 1.25)))
+        AUDIO_CONFIG["ally_tts_rate_limit_window_s"] = max(2.0, min(30.0, float(AUDIO_CONFIG.get("ally_tts_rate_limit_window_s", 10.0) or 10.0)))
+        AUDIO_CONFIG["ally_tts_rate_limit_max_plays"] = max(1, min(20, int(AUDIO_CONFIG.get("ally_tts_rate_limit_max_plays", 5) or 5)))
+    except Exception:
+        AUDIO_CONFIG["ally_tts_short_merge_words"] = 3
+        AUDIO_CONFIG["ally_tts_short_merge_chars"] = 18
+        AUDIO_CONFIG["ally_tts_short_merge_window_s"] = 1.25
+        AUDIO_CONFIG["ally_tts_rate_limit_window_s"] = 10.0
+        AUDIO_CONFIG["ally_tts_rate_limit_max_plays"] = 5
 
 
 def _is_competitive_listen_locked() -> bool:
@@ -6264,6 +6947,11 @@ def _apply_listen_game_preset(preset_key: str):
     AUDIO_CONFIG["ally_block_french"] = False
     AUDIO_CONFIG["ally_tts_force_on_speech_final"] = True
     AUDIO_CONFIG["ally_autotune_enabled"] = True
+    AUDIO_CONFIG["ally_tts_short_merge_words"] = 3
+    AUDIO_CONFIG["ally_tts_short_merge_chars"] = 18
+    AUDIO_CONFIG["ally_tts_short_merge_window_s"] = 1.20
+    AUDIO_CONFIG["ally_tts_rate_limit_window_s"] = 9.0
+    AUDIO_CONFIG["ally_tts_rate_limit_max_plays"] = 5
     AUDIO_CONFIG["quality_preset"] = "balanced"
     _apply_quality_preset("balanced", emit_log=False)
 
@@ -6275,6 +6963,11 @@ def _apply_listen_game_preset(preset_key: str):
         "ally_tts_duplicate_window_s",
         "ally_tts_force_min_chars",
         "ally_tts_min_gap_s",
+        "ally_tts_short_merge_words",
+        "ally_tts_short_merge_chars",
+        "ally_tts_short_merge_window_s",
+        "ally_tts_rate_limit_window_s",
+        "ally_tts_rate_limit_max_plays",
         "vad_threshold",
     ):
         if k in cfg:
@@ -6314,7 +7007,7 @@ def apply_listen_game_preset():
 def export_listen_custom_preset():
     try:
         payload = {
-            "version": "v4.9",
+            "version": "v5",
             "kind": "listen_preset",
             "name": str(AUDIO_CONFIG.get("ally_game_preset", "custom") or "custom"),
             "created_at": _utc_now_iso(),
@@ -6517,7 +7210,7 @@ def export_listen_preset_library_entry():
         if not item:
             return jsonify({"ok": False, "error": "Preset introuvable"}), 404
         payload = {
-            "version": "v4.9",
+            "version": "v5",
             "kind": "listen_named_preset",
             "name": str(item.get("name") or name),
             "exported_at": _listen_now_utc_iso(),
@@ -6704,6 +7397,57 @@ def reset_listen_runtime():
     try:
         _reset_listen_runtime_stats()
         return jsonify({"ok": True})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@app.route("/audio/listen/health/reset", methods=["POST"])
+def reset_listen_health_runtime():
+    try:
+        _reset_listen_health_runtime()
+        return jsonify({"ok": True})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@app.route("/audio/listen/session_report/export", methods=["GET"])
+def export_listen_session_report():
+    try:
+        listen_health = _build_listen_health_snapshot()
+        report = {
+            "report_type": "kommz_v5_listen_session",
+            "generated_at": _listen_now_utc_iso(),
+            "version": str(CURRENT_VERSION or "5.0"),
+            "edition_profile": str(EDITION_PROFILE or "unknown"),
+            "cloud_features_enabled": bool(CLOUD_FEATURES_ENABLED),
+            "listen_profile": str(AUDIO_CONFIG.get("ally_listen_profile", "default") or "default"),
+            "listen_game_preset": str(AUDIO_CONFIG.get("ally_game_preset", "custom") or "custom"),
+            "quality_preset": _normalize_quality_preset(AUDIO_CONFIG.get("quality_preset", "balanced")),
+            "voice_focus_mode": str(AUDIO_CONFIG.get("ally_voice_focus_mode", "balanced") or "balanced"),
+            "listen_health": listen_health,
+            "listen_runtime": {
+                "ally_text_events": int(_listen_runtime.get("ally_text_events", 0) or 0),
+                "ally_voice_played": int(_listen_runtime.get("ally_voice_played", 0) or 0),
+                "ally_voice_skipped": int(_listen_runtime.get("ally_voice_skipped", 0) or 0),
+                "ally_voice_rate_limited": int(_listen_runtime.get("ally_voice_rate_limited", 0) or 0),
+                "ally_short_merged": int(_listen_runtime.get("ally_short_merged", 0) or 0),
+                "listen_conn_state": str(_listen_runtime.get("listen_conn_state", "idle") or "idle"),
+                "listen_conn_detail": str(_listen_runtime.get("listen_conn_detail", "") or ""),
+                "watchdog_restarts": int(_listen_runtime.get("watchdog_restarts", 0) or 0),
+                "watchdog_flaps": int(_listen_runtime.get("watchdog_flaps", 0) or 0),
+                "watchdog_cooldown_hits": int(_listen_runtime.get("watchdog_cooldown_hits", 0) or 0),
+                "watchdog_idle_restarts": int(_listen_runtime.get("watchdog_idle_restarts", 0) or 0),
+                "watchdog_last_idle_age_s": float(_listen_runtime.get("watchdog_last_idle_age_s", 0.0) or 0.0),
+                "watchdog_last_restart_reason": str(_listen_runtime.get("watchdog_last_restart_reason", "") or ""),
+                "last_event_at": float(_listen_runtime.get("last_event_at", 0.0) or 0.0),
+            },
+            "pipeline_runtime": _build_pipeline_runtime_payload(),
+            "latency_runtime": _build_latency_runtime_payload(),
+            "tts_fallback_runtime": _build_tts_fallback_runtime_payload(),
+            "cloud_endpoints_diag": get_cloud_endpoints_diag(force=True, cache_ttl=0),
+            "quality_log": _build_quality_log_payload()[:20],
+        }
+        return jsonify({"ok": True, "report": _repair_payload_strings(report)})
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
 
@@ -7921,6 +8665,11 @@ def _ensure_ptt_stream_open(target_mic_id: int, native_rate: int, channels: int)
 
 def start_rec():
     global _ptt_stream, _ptt_rec, _ptt_chunks, _ptt_stream_device, _ptt_preroll
+    global _ptt_last_start_ts
+    now = time.time()
+    if (now - float(_ptt_last_start_ts or 0.0)) < 0.08:
+        return
+    _ptt_last_start_ts = now
     
     # Ã¢Å¡Â Ã¯Â¸Â MODIFICATION : On a retirÃƒÂ© le blocage "if bypass return" ici.
     # On veut que ÃƒÂ§a enregistre et transcrive (texte), c'est plus loin qu'on bloquera le son (TTS).
@@ -8714,6 +9463,11 @@ def load_voice_from_id(voice_id, audio_url):
 
 def stop_rec():
     global _ptt_stream, _ptt_rec, _ptt_chunks, LAST_USER_AUDIO_BUFFER, _ptt_stream_device # <--- AJOUT GLOBAL
+    global _ptt_last_stop_ts
+    now_stop = time.time()
+    if (now_stop - float(_ptt_last_stop_ts or 0.0)) < 0.08:
+        return
+    _ptt_last_stop_ts = now_stop
     # Capture a tiny tail after key release to keep final syllables/emotions.
     try:
         tail_ms = int(AUDIO_CONFIG.get("ptt_release_tail_ms", 220) or 220)
@@ -8745,6 +9499,23 @@ def stop_rec():
         # 2. VÃƒÂ©rification rapide
         audio_int16 = np.frombuffer(raw, dtype=np.int16)
         if len(audio_int16) < 1000: return 
+        try:
+            rec_rate = int(AUDIO_CONFIG.get("mic_sample_rate", 48000) or 48000)
+        except Exception:
+            rec_rate = 48000
+        try:
+            rec_ch = int(AUDIO_CONFIG.get("mic_input_channels", 1) or 1)
+        except Exception:
+            rec_ch = 1
+        rec_ch = max(1, min(2, rec_ch))
+        try:
+            min_record_ms = int(AUDIO_CONFIG.get("ptt_min_record_ms", 90) or 90)
+        except Exception:
+            min_record_ms = 90
+        min_record_ms = max(40, min(500, min_record_ms))
+        duration_ms = (float(len(audio_int16)) / float(max(1, rec_rate * rec_ch))) * 1000.0
+        if duration_ms < float(min_record_ms):
+            return
         
         volume = np.abs(audio_int16).mean()
         if volume < 50: return # Seuil
@@ -8815,6 +9586,7 @@ class DeepgramEngine:
         last_printed_text = "" 
         last_audio_norm = ""
         last_audio_ts = 0.0
+        ally_recent_play_ts = collections.deque(maxlen=20)
         last_logged_live_lang = ""
         last_cable_silence_log = 0.0
         last_loopback_retry_ts = 0.0
@@ -9134,7 +9906,7 @@ class DeepgramEngine:
 
                                 def on_msg(h, result, **kwargs):
                                     nonlocal sentence_buffer, last_send_time, last_printed_text
-                                    nonlocal last_audio_norm, last_audio_ts
+                                    nonlocal last_audio_norm, last_audio_ts, ally_recent_play_ts
                                     if not getattr(result, "is_final", False):
                                         return
                                     try:
@@ -9157,6 +9929,20 @@ class DeepgramEngine:
                                     hard_flush_words = int(AUDIO_CONFIG.get("ally_sentence_hard_flush_words", 10) or 10)
                                     punct_min_words = max(1, min(6, punct_min_words))
                                     hard_flush_words = max(3, min(20, hard_flush_words))
+                                    short_merge_words = int(AUDIO_CONFIG.get("ally_tts_short_merge_words", 3) or 3)
+                                    short_merge_chars = int(AUDIO_CONFIG.get("ally_tts_short_merge_chars", 18) or 18)
+                                    short_merge_window_s = float(AUDIO_CONFIG.get("ally_tts_short_merge_window_s", 1.25) or 1.25)
+                                    short_merge_words = max(1, min(8, short_merge_words))
+                                    short_merge_chars = max(6, min(80, short_merge_chars))
+                                    short_merge_window_s = max(0.30, min(4.0, short_merge_window_s))
+                                    now_msg_ts = time.time()
+                                    # Anti-coupures: on retarde les micro-fragments speech_final
+                                    # pour fusionner avec la phrase suivante.
+                                    if speech_final and (not end_punct):
+                                        if (word_count < short_merge_words) and (len(sentence_buffer) < short_merge_chars):
+                                            if (now_msg_ts - last_send_time) < short_merge_window_s:
+                                                _bump_listen_runtime("ally_short_merged")
+                                                return
                                     should_flush = speech_final or (end_punct and word_count >= punct_min_words) or (word_count >= hard_flush_words)
                                     if not should_flush:
                                         return
@@ -9189,6 +9975,10 @@ class DeepgramEngine:
                                     force_min_chars = max(3, min(40, force_min_chars))
                                     min_gap_s = float(AUDIO_CONFIG.get("ally_tts_min_gap_s", 0.55) or 0.55)
                                     min_gap_s = max(0.20, min(2.50, min_gap_s))
+                                    rate_limit_window_s = float(AUDIO_CONFIG.get("ally_tts_rate_limit_window_s", 10.0) or 10.0)
+                                    rate_limit_max_plays = int(AUDIO_CONFIG.get("ally_tts_rate_limit_max_plays", 5) or 5)
+                                    rate_limit_window_s = max(2.0, min(30.0, rate_limit_window_s))
+                                    rate_limit_max_plays = max(1, min(20, rate_limit_max_plays))
                                     autotune_level = int(_listen_autotune_state.get("level", 0) or 0)
                                     if bool(AUDIO_CONFIG.get("ally_autotune_enabled", True)):
                                         if autotune_level >= 2:
@@ -9205,18 +9995,24 @@ class DeepgramEngine:
                                         and (len(norm) >= force_min_chars)
                                         and ((now_ts - last_audio_ts) >= min_gap_s)
                                     )
-                                    should_play_audio = ((ratio < similarity_play_below) or force_short_final) and (not is_audio_dup)
+                                    while ally_recent_play_ts and (now_ts - ally_recent_play_ts[0]) > rate_limit_window_s:
+                                        ally_recent_play_ts.popleft()
+                                    is_rate_limited = len(ally_recent_play_ts) >= rate_limit_max_plays
+                                    should_play_audio = ((ratio < similarity_play_below) or force_short_final) and (not is_audio_dup) and (not is_rate_limited)
                                     if should_play_audio:
                                         stealth_print(f"🗣️ Voix auto allié: {ally_lang} -> {ally_voice}")
                                         gen = windows_natural_generator(trad, voice_override=ally_voice)
                                         threading.Thread(target=resample_and_play, args=(gen, "", "ALLIÉ", 16000)).start()
                                         _bump_listen_runtime("ally_voice_played")
                                         _register_listen_decision(True)
+                                        ally_recent_play_ts.append(now_ts)
                                         last_printed_text = trad
                                         last_audio_norm = norm
                                         last_audio_ts = now_ts
                                     else:
                                         _bump_listen_runtime("ally_voice_skipped")
+                                        if is_rate_limited:
+                                            _bump_listen_runtime("ally_voice_rate_limited")
                                         _register_listen_decision(False)
 
                                     sentence_buffer = ""
@@ -9545,6 +10341,9 @@ def hotkey_loop():
         stealth_print("⚠️ Aucune touche PTT définie -> 'ctrl' par défaut")
 
     last_state = False
+    stable_state = False
+    candidate_state = False
+    candidate_since_ts = time.time()
     last_f3_state = False
 
     while True:
@@ -9567,19 +10366,30 @@ def hotkey_loop():
                 continue
 
             # 3. VÃƒÂ©rification de l'appui
-            is_pressed = is_key_held_v4(PTT_KEY)
+            raw_pressed = bool(is_key_held_v4(PTT_KEY))
+            now = time.time()
+            if raw_pressed != candidate_state:
+                candidate_state = raw_pressed
+                candidate_since_ts = now
+            try:
+                debounce_ms = int(AUDIO_CONFIG.get("ptt_debounce_ms", 35) or 35)
+            except Exception:
+                debounce_ms = 35
+            debounce_s = max(0.01, min(0.20, float(debounce_ms) / 1000.0))
+            if candidate_state != stable_state and (now - candidate_since_ts) >= debounce_s:
+                stable_state = candidate_state
             
             # --- DEBUG VISUEL (Optionnel : aide ÃƒÂ  savoir si la touche est vue) ---
             # Si l'ÃƒÂ©tat change, on l'affiche dans la console pour tester
-            if is_pressed != last_state:
-                if is_pressed:
+            if stable_state != last_state:
+                if stable_state:
                     stealth_print(f"⬇️ TOUCHE ENFONCÉE : {PTT_KEY}")
                 else:
                     stealth_print(f"⬆️ TOUCHE RELÂCHÉE")
-                last_state = is_pressed
+                last_state = stable_state
             # -------------------------------------------------------------------
 
-            if is_pressed:
+            if stable_state:
                 # Si on appuie et que ÃƒÂ§a n'enregistre pas encore -> START
                 if not _ptt_rec:
                     start_rec()
@@ -10074,10 +10884,10 @@ def panic_reset():
 def reset_to_factory():
     global AUDIO_CONFIG
     # Utilisation du nom direct pour ÃƒÂ©viter le NameError
-    if os.path.exists("settings.json"):
+    if os.path.exists(CONFIG_FILE):
         try:
-            os.remove("settings.json")
-            stealth_print("🗑️ Fichier settings.json supprimé.")
+            os.remove(CONFIG_FILE)
+            stealth_print(f"🗑️ Fichier de config supprimé: {CONFIG_FILE}")
         except Exception as e:
             stealth_print(f"❌ Erreur suppression : {e}")
     
@@ -10332,6 +11142,11 @@ if __name__ == "__main__":
     # (Render peut rÃƒÂ©pondre lentement; on laisse l'UI s'ouvrir puis on met ÃƒÂ  jour en arriÃƒÂ¨re-plan.)
     def _refresh_licenses_safe():
         try:
+            if not CLOUD_FEATURES_ENABLED:
+                if AUDIO_CONFIG.get("tts_engine") == "KOMMZ_VOICE":
+                    AUDIO_CONFIG["tts_engine"] = "WINDOWS"
+                    save_settings()
+                return
             if COMMUNITY_EDITION:
                 if AUDIO_CONFIG.get("tts_engine") == "KOMMZ_VOICE":
                     prewarm_kommz_xtts(force=False)
@@ -10349,9 +11164,12 @@ if __name__ == "__main__":
     threading.Thread(target=_refresh_licenses_safe, daemon=True).start()
     threading.Thread(target=_user_pipeline_worker_loop, daemon=True).start()
     
-    # Conserver l'état utilisateur au démarrage.
-    AUDIO_CONFIG["monitoring_enabled"] = bool(AUDIO_CONFIG.get("monitoring_enabled", True))
-    AUDIO_CONFIG["tts_active"] = bool(AUDIO_CONFIG.get("tts_active", True))
+    # Force le logiciel en mode actif par défaut à chaque démarrage.
+    app_state["is_active"] = True
+    AUDIO_CONFIG["is_listening"] = True
+    AUDIO_CONFIG["monitoring_enabled"] = True
+    AUDIO_CONFIG["tts_active"] = True
+    save_settings()
     
     # 2. VÃƒâ€°RIFICATION INTELLIGENTE DU PÃƒâ€°RIPHÃƒâ€°RIQUE (SORTIE)
     try:
@@ -10422,6 +11240,7 @@ if __name__ == "__main__":
         threading.Thread(target=overlay_loop, daemon=True).start()
         threading.Thread(target=audio_bypass_loop, daemon=True).start()
         threading.Thread(target=monitoring_loop, daemon=True).start()
+        threading.Thread(target=listen_watchdog_loop, daemon=True).start()
         threading.Thread(target=hybrid_activation_loop, daemon=True).start()
         threading.Thread(target=scene_auto_apply_loop, daemon=True).start()
         threading.Thread(target=hotkey_loop, daemon=True).start()
@@ -10534,4 +11353,3 @@ if __name__ == "__main__":
         except Exception:
             pass
     sys.exit(0)
-
