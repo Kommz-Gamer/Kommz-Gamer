@@ -582,7 +582,7 @@
 <body>
 
   <aside>
-      <div class="logo">KOMMZ <span style="color:var(--acc); font-size:14px; vertical-align: super;">V5</span></div>
+      <div class="logo">KOMMZ <span style="color:var(--acc); font-size:14px; vertical-align: super;">V5.1</span></div>
     
     <div class="nav-btn active" onclick="showTab('tab-home')">🏠 Accueil</div>
     <div class="nav-btn" onclick="showTab('tab-audio')">🎧 Audio & Micro</div>
@@ -591,9 +591,10 @@
     <div class="nav-btn" onclick="showTab('tab-scenes')">🎬 Scènes</div>
     <div class="nav-btn" onclick="showTab('tab-overlay')">🎨 Overlay & Couleurs</div>
     <div class="nav-btn" onclick="showTab('tab-mods')">⚙️ Modules Système</div>
+    <div class="nav-btn" onclick="showTab('tab-bugs')">🐞 Bugs & QA V5.1</div>
 
     <div style="margin-top: auto; font-size: 11px; color: var(--muted); text-align: center;">
-          Community Edition<br>Build V5
+          Community Edition<br>Build V5.1
     </div>
   </aside>
 
@@ -824,6 +825,7 @@
                             <option value="off">Off</option>
                             <option value="balanced">Normal</option>
                             <option value="aggressive">Agressif</option>
+                            <option value="auto">Auto (V5.1)</option>
                         </select>
                     </div>
                     <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
@@ -842,6 +844,7 @@
                             <option value="overwatch">Overwatch / Hero Shooter</option>
                             <option value="r6">Rainbow Six / Tactical Voice</option>
                             <option value="discord_party">Discord / Party chat</option>
+                            <option value="long_session">V5 / Longue session stable</option>
                         </select>
                         <button id="btnApplyGamePreset" class="btn-secondary" type="button" title="Appliquer le preset jeu sélectionné" style="min-width:102px; padding:8px 14px;">Appliquer</button>
                     </div>
@@ -899,6 +902,8 @@
                             <button id="btnResetListenStats" class="btn-secondary" type="button" title="Remise à zéro des compteurs écoute" style="min-width:106px; padding:8px 14px;">Reset stats</button>
                             <button id="btnResetListenHealth" class="btn-secondary" type="button" title="Remise à zéro des indicateurs santé/watchdog écoute" style="min-width:122px; padding:8px 14px;">Reset santé</button>
                             <button id="btnExportListenSessionReport" class="btn-secondary" type="button" title="Exporter le rapport session test V5 (JSON)" style="min-width:132px; padding:8px 14px;">Rapport session</button>
+                            <button id="btnListenQuickCheckV5" class="btn-secondary" type="button" title="Check rapide V5.1 pour testeurs (copie un résumé)" style="min-width:132px; padding:8px 14px;">Quick Check V5.1</button>
+                            <button id="btnCopyBugTemplateV5" class="btn-secondary" type="button" title="Copier un template bug V5.1 prêt à poster" style="min-width:146px; padding:8px 14px;">Template bug V5.1</button>
                             <button id="btnApplyCompetitiveListen" class="btn-secondary" type="button" title="Applique des réglages optimisés pour le vocal en jeu" style="min-width:122px; padding:8px 14px;">🎮 Profil Jeu</button>
                             <button id="btnListenToggle" class="primary" style="width: 120px;">ACTIVER</button>
                         </div>
@@ -1264,6 +1269,7 @@
                             <button type="button" class="btn-action" data-expressive-preset="roleplay" style="padding:7px 10px; font-size:11px; background:#0f172a; border:1px solid #334155;" onclick="applyExpressiveQuickPreset('roleplay')">Roleplay</button>
                             <button type="button" class="btn-action" data-expressive-preset="streamer" style="padding:7px 10px; font-size:11px; background:#0f172a; border:1px solid #334155;" onclick="applyExpressiveQuickPreset('streamer')">Streamer</button>
                             <button type="button" class="btn-action" data-expressive-preset="competitive" style="padding:7px 10px; font-size:11px; background:#0f172a; border:1px solid #334155;" onclick="applyExpressiveQuickPreset('competitive')">Compétitif</button>
+                            <button type="button" class="btn-action" data-expressive-preset="v5_long_session" style="padding:7px 10px; font-size:11px; background:#0f172a; border:1px solid #334155;" onclick="applyExpressiveV5ServerPreset('v5_long_session_stable')">V5 Long Session</button>
                             <button type="button" class="btn-action" data-expressive-preset="clientdemo" style="padding:7px 10px; font-size:11px; background:#0f172a; border:1px solid #334155;" onclick="applyExpressiveQuickPreset('clientdemo')">Client/Démo</button>
                             <button type="button" class="btn-action" data-expressive-preset="conversation" style="padding:7px 10px; font-size:11px; background:#0f172a; border:1px solid #334155;" onclick="applyExpressiveQuickPreset('conversation')">Conversation</button>
                             <button type="button" class="btn-action" data-expressive-preset="cinematic" style="padding:7px 10px; font-size:11px; background:#0f172a; border:1px solid #334155;" onclick="applyExpressiveQuickPreset('cinematic')">Cinématique</button>
@@ -1677,6 +1683,42 @@
         </div>
       </div>
     </div>
+
+    <div id="tab-bugs" class="section">
+      <h2>🐞 Bugs & QA V5.1</h2>
+
+      <div class="card" style="border-color:#3b82f6;">
+        <label>🧪 Check rapide testeur</label>
+        <div style="font-size:12px; color:var(--muted); margin-top:6px;">
+          Lance un diagnostic V5.1 en 1 clic et copie un résumé prêt à poster sur Discord/GitHub.
+        </div>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:12px;">
+          <button id="btnBugQuickCheckV5" class="btn-secondary" type="button" style="min-width:132px; padding:8px 14px;">Quick Check V5.1</button>
+          <button id="btnBugTemplateV5" class="btn-secondary" type="button" style="min-width:146px; padding:8px 14px;">Template bug V5.1</button>
+          <button id="btnBugDebugBundleV51" class="btn-secondary" type="button" style="min-width:146px; padding:8px 14px;">Pack Debug V5.1</button>
+          <button id="btnBugReportSession" class="btn-secondary" type="button" style="min-width:132px; padding:8px 14px;">Rapport session</button>
+          <button id="btnBugRetestCloud" class="btn-secondary" type="button" style="min-width:136px; padding:8px 14px;">Retest cloud</button>
+        </div>
+      </div>
+
+      <div class="card" style="border-color:#334155; margin-top:12px;">
+        <label>🩺 Santé & remise à zéro</label>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:10px;">
+          <button id="btnBugResetListenStats" class="btn-secondary" type="button" style="min-width:106px; padding:8px 14px;">Reset stats</button>
+          <button id="btnBugResetListenHealth" class="btn-secondary" type="button" style="min-width:122px; padding:8px 14px;">Reset santé</button>
+        </div>
+      </div>
+
+      <div class="card" style="border-color:#334155; margin-top:12px;">
+        <label>📋 Protocole testeur V5.1</label>
+        <div style="font-size:12px; color:var(--muted); margin-top:6px; line-height:1.55;">
+          1) Appliquer un preset jeu puis parler 30 à 60 secondes en situation réelle.<br>
+          2) Cliquer <b>Quick Check V5.1</b> pour valider l'état global.<br>
+          3) Si anomalie: cliquer <b>Pack Debug V5.1</b> puis <b>Template bug V5.1</b>.<br>
+          4) Coller le template + le JSON debug dans Discord <code>#bugs</code> ou une issue GitHub.
+        </div>
+      </div>
+    </div>
 	
 	
 
@@ -1684,7 +1726,7 @@
 
   <div id="startupOverlay" class="startup-overlay">
     <div class="startup-card">
-      <div class="startup-title">KOMMZ GAMER V5 · Initialisation</div>
+      <div class="startup-title">KOMMZ GAMER V5.1 · Initialisation</div>
       <div class="startup-sub">Chargement sécurisé du moteur, audio, licences et modules.</div>
       <div class="startup-progress"><div id="startupBar" class="startup-bar"></div></div>
       <div id="startupLog" class="startup-log">Boot sequence...</div>
@@ -1753,6 +1795,7 @@
     let sceneAutoProcess = "";
     let startupDone = false;
     let lastListenCompetitiveLock = null;
+    let lastExpressivePresetKey = '';
     const UPDATE_TOAST_SEEN_KEY = 'kommz_update_toast_seen';
     const UPDATE_NOTES_SEEN_KEY = 'kommz_update_notes_seen';
     let listenFocusSmoothedRatio = null;
@@ -1860,10 +1903,13 @@
         const lang = String(data?.ally_recognition_lang || 'multi').trim().toLowerCase();
         const blockFr = !!data?.ally_block_french;
         const focus = String(data?.ally_voice_focus_mode || 'balanced').trim().toLowerCase();
-        const focusLabel = (focus === 'aggressive') ? 'voice-focus agressif' : (focus === 'balanced' ? 'voice-focus normal' : 'voice-focus off');
+        const focusEffective = String(data?.ally_voice_focus_effective || focus || 'balanced').trim().toLowerCase();
+        const focusLabel = (focus === 'auto')
+            ? `voice-focus auto (${focusEffective})`
+            : (focus === 'aggressive' ? 'voice-focus agressif' : (focus === 'balanced' ? 'voice-focus normal' : 'voice-focus off'));
         const selFocus = qs('#selListenVoiceFocus');
         if (selFocus && document.activeElement !== selFocus) {
-            if (['off', 'balanced', 'aggressive'].includes(focus)) {
+            if (['off', 'balanced', 'aggressive', 'auto'].includes(focus)) {
                 selFocus.value = focus;
             } else {
                 selFocus.value = 'balanced';
@@ -1878,7 +1924,8 @@
                 'valorant', 'valorant_safe',
                 'warzone', 'warzone_safe',
                 'fortnite', 'fortnite_safe',
-                'apex', 'overwatch', 'r6', 'discord_party'
+                'apex', 'overwatch', 'r6', 'discord_party',
+                'long_session'
             ].includes(gamePreset)) {
                 selPreset.value = gamePreset;
             } else {
@@ -2023,7 +2070,10 @@
         const qEl = qs('#listenFocusQualityHint');
         if (!qEl) return;
         const focusMode = String(data?.ally_voice_focus_mode || 'balanced').toLowerCase();
-        const modeLabel = focusMode === 'aggressive' ? 'Agressif' : (focusMode === 'off' ? 'Off' : 'Normal');
+        const focusEffective = String(data?.ally_voice_focus_effective || focusMode || 'balanced').toLowerCase();
+        const modeLabel = focusMode === 'auto'
+            ? `Auto/${focusEffective === 'aggressive' ? 'Agressif' : 'Normal'}`
+            : (focusMode === 'aggressive' ? 'Agressif' : (focusMode === 'off' ? 'Off' : 'Normal'));
         if (txt <= 0) {
             qEl.textContent = `Qualité focus (${modeLabel}): en attente`;
             qEl.style.color = '#94a3b8';
@@ -2482,8 +2532,8 @@
         `;
     }
 
-    async function retestCloudDiagNow() {
-        const btn = qs('#btnCloudDiagRetest');
+    async function retestCloudDiagNow(btnSelector = '#btnCloudDiagRetest') {
+        const btn = (typeof btnSelector === 'string') ? qs(btnSelector) : btnSelector;
         if (!btn) return;
         const oldTxt = btn.textContent || '🔄 Retest cloud maintenant';
         btn.disabled = true;
@@ -3259,6 +3309,21 @@
                 rts: 'neutral',
                 label: 'Compétitif'
             },
+            v5_long_session: {
+                enabled: true,
+                profile: 'gaming',
+                transcript: 'keep',
+                tts: 'neutral',
+                intensity: 'soft',
+                noise: 'clean',
+                xtts: 'neutral',
+                hybrid: 'neutral',
+                stability: 'stable',
+                fallbackGuard: true,
+                ptt: 'safe',
+                rts: 'safe',
+                label: 'V5 Long Session'
+            },
             clientdemo: {
                 enabled: true,
                 profile: 'pro',
@@ -3322,37 +3387,55 @@
         };
     }
 
-    function detectExpressivePreset(current) {
+    function _expressivePresetMatches(current, p) {
+        return (
+            !!current.enabled === !!p.enabled &&
+            current.profile === p.profile &&
+            current.transcript === p.transcript &&
+            current.tts === p.tts &&
+            current.intensity === p.intensity &&
+            current.noise === p.noise &&
+            current.xtts === p.xtts &&
+            current.hybrid === p.hybrid &&
+            current.stability === (p.stability || 'balanced') &&
+            !!current.fallbackGuard === (p.fallbackGuard !== false) &&
+            current.ptt === (p.ptt || 'full') &&
+            current.rts === (p.rts || 'safe')
+        );
+    }
+
+    function detectExpressivePresetKey(current, preferredKey = '') {
         const presets = getExpressiveQuickPresets();
+        const preferred = String(preferredKey || '').trim().toLowerCase();
+        if (preferred && presets[preferred] && _expressivePresetMatches(current, presets[preferred])) {
+            return preferred;
+        }
         for (const key of Object.keys(presets)) {
             const p = presets[key];
-            if (
-                !!current.enabled === !!p.enabled &&
-                current.profile === p.profile &&
-                current.transcript === p.transcript &&
-                current.tts === p.tts &&
-                current.intensity === p.intensity &&
-                current.noise === p.noise &&
-                current.xtts === p.xtts &&
-                current.hybrid === p.hybrid &&
-                current.stability === (p.stability || 'balanced') &&
-                !!current.fallbackGuard === (p.fallbackGuard !== false) &&
-                current.ptt === (p.ptt || 'full') &&
-                current.rts === (p.rts || 'safe')
-            ) {
-                return p.label;
+            if (_expressivePresetMatches(current, p)) {
+                return key;
             }
         }
         return '';
     }
 
-    function syncExpressivePresetButtons(activeLabel = '') {
+    function detectExpressivePreset(current) {
+        const key = detectExpressivePresetKey(current);
+        const presets = getExpressiveQuickPresets();
+        return key && presets[key] ? presets[key].label : '';
+    }
+
+    function syncExpressivePresetButtons(activeLabel = '', activeKey = '') {
         const active = String(activeLabel || '').trim();
+        const activePresetKey = String(activeKey || '').trim().toLowerCase();
         const presets = getExpressiveQuickPresets();
         document.querySelectorAll('[data-expressive-preset]').forEach(btn => {
             const key = String(btn.getAttribute('data-expressive-preset') || '').trim().toLowerCase();
             const preset = presets[key];
-            const isActive = !!preset && active && preset.label === active;
+            const isActive = !!preset && (
+                (activePresetKey && key === activePresetKey) ||
+                (!activePresetKey && active && preset.label === active)
+            );
             btn.style.background = isActive ? 'linear-gradient(135deg,#2563eb,#7c3aed)' : '#0f172a';
             btn.style.borderColor = isActive ? 'rgba(96,165,250,0.92)' : '#334155';
             btn.style.color = isActive ? '#ffffff' : '#ffffff';
@@ -3372,6 +3455,7 @@
             'roleplay': 'Recommandé pour : roleplay marqué, voix plus incarnée.',
             'streamer': 'Recommandé pour : stream lisible, voix propre et stable.',
             'compétitif': 'Recommandé pour : parties compétitives, priorité à la clarté.',
+            'v5 long session': 'Recommandé pour : sessions longues V5, rendu stable et fatigue audio réduite.',
             'client/démo': 'Recommandé pour : démonstration client, présentation propre et maîtrisée.',
             'conversation': 'Recommandé pour : échanges fluides, ton naturel et posé.',
             'cinématique': 'Recommandé pour : démo immersive, rendu dramatique et plus intense.',
@@ -3435,7 +3519,7 @@
         }
 
         if (badge) {
-            const presetLabel = detectExpressivePreset({
+            const presetKeyDetected = detectExpressivePresetKey({
                 enabled,
                 profile,
                 transcript: transcriptMode,
@@ -3448,15 +3532,20 @@
                 fallbackGuard,
                 ptt: pttMode,
                 rts: rtsMode
-            });
+            }, lastExpressivePresetKey);
+            const presets = getExpressiveQuickPresets();
+            const presetLabel = presetKeyDetected && presets[presetKeyDetected]
+                ? presets[presetKeyDetected].label
+                : '';
+            if (presetKeyDetected) lastExpressivePresetKey = presetKeyDetected;
             badge.textContent = presetLabel ? `Preset actif · ${presetLabel}` : 'Preset libre';
             badge.style.color = presetLabel ? '#86efac' : '#bfdbfe';
             badge.style.borderColor = presetLabel ? 'rgba(34,197,94,0.30)' : 'rgba(59,130,246,0.30)';
             badge.style.background = presetLabel ? 'rgba(20,83,45,0.24)' : 'rgba(30,41,59,0.45)';
-            syncExpressivePresetButtons(presetLabel);
+            syncExpressivePresetButtons(presetLabel, lastExpressivePresetKey);
             if (hint) hint.textContent = getExpressivePresetHint(presetLabel);
         } else {
-            syncExpressivePresetButtons('');
+            syncExpressivePresetButtons('', lastExpressivePresetKey);
             if (hint) hint.textContent = getExpressivePresetHint('');
         }
     }
@@ -3480,6 +3569,7 @@
         const presets = getExpressiveQuickPresets();
 
         const chosen = presets[preset] || presets.naturel;
+        lastExpressivePresetKey = presets[preset] ? preset : 'naturel';
         enabledEl.checked = !!chosen.enabled;
         profileEl.value = chosen.profile;
         transcriptEl.value = chosen.transcript;
@@ -3495,6 +3585,31 @@
         xttsConfigDirty = true;
         updateExpressiveUiState();
         showToast(`🎭 Preset expressif ${chosen.label} appliqué`);
+    }
+
+    async function applyExpressiveV5ServerPreset(presetKey = 'v5_long_session_stable') {
+        try {
+            const preset = String(presetKey || 'v5_long_session_stable').trim().toLowerCase();
+            const r = await fetch(CORE_URL + '/audio/expressive/preset/apply', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ preset })
+            });
+            const d = await r.json().catch(() => ({}));
+            if (!r.ok || !d?.ok) {
+                showToast(`❌ ${d?.error || 'Preset expressif V5 indisponible'}`);
+                return;
+            }
+            lastExpressivePresetKey = 'v5_long_session';
+            const rs = await fetch(CORE_URL + '/status');
+            const ds = await rs.json().catch(() => ({}));
+            if (rs.ok && ds) {
+                updateExpressiveUiState(ds);
+            }
+            showToast(`🎚️ Preset V5 appliqué: ${d?.label || preset}`);
+        } catch (e) {
+            showToast('❌ Erreur preset expressif V5');
+        }
     }
 
     function updateHybridUiState(serverState = null) {
@@ -4531,6 +4646,186 @@
             };
         }
 
+        const btnListenQuickCheckV5 = qs('#btnListenQuickCheckV5');
+        if (btnListenQuickCheckV5) {
+            btnListenQuickCheckV5.onclick = async () => {
+                try {
+                    const r = await fetch(CORE_URL + '/audio/listen/quickcheck');
+                    const d = await r.json().catch(() => ({}));
+                    if (!r.ok || !d.ok) {
+                        showToast(`❌ ${d.error || 'Quick Check V5 indisponible'}`);
+                        return;
+                    }
+                    const checks = Array.isArray(d.checks) ? d.checks : [];
+                    const lines = checks.map(c => {
+                        const st = String(c?.status || 'info').toUpperCase();
+                        const icon = st === 'OK' ? '✅' : (st === 'ERR' ? '❌' : '⚠️');
+                        return `${icon} ${c?.label || 'Check'}: ${c?.detail || ''}`.trim();
+                    });
+                    const txt = [
+                        `Quick Check V5 · ${d.summary || ''}`.trim(),
+                        `Preset: ${d.listen_game_preset || 'custom'} · Profil: ${d.listen_profile || 'default'} · Qualité: ${d.quality_preset || 'balanced'}`,
+                        ...lines
+                    ].join('\n');
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        await navigator.clipboard.writeText(txt);
+                        showToast(`🧪 Quick Check V5: ${d.score_ok || 0}/${d.score_total || checks.length} (copié)`);
+                    } else {
+                        showToast(`🧪 Quick Check V5: ${d.score_ok || 0}/${d.score_total || checks.length}`);
+                    }
+                } catch (e) {
+                    showToast('❌ Erreur Quick Check V5');
+                }
+            };
+        }
+
+        const btnCopyBugTemplateV5 = qs('#btnCopyBugTemplateV5');
+        if (btnCopyBugTemplateV5) {
+            btnCopyBugTemplateV5.onclick = async () => {
+                try {
+                    const [rs, rq] = await Promise.all([
+                        fetch(CORE_URL + '/status'),
+                        fetch(CORE_URL + '/audio/listen/quickcheck')
+                    ]);
+                    const ds = await rs.json().catch(() => ({}));
+                    const qd = await rq.json().catch(() => ({}));
+
+                    const now = new Date().toISOString();
+                    const edition = String(ds?.edition_profile || 'unknown');
+                    const version = String(ds?.current_version || '5.1');
+                    const build = String(ds?.build || 'V5.1');
+                    const preset = String(ds?.ally_game_preset || 'custom');
+                    const profile = String(ds?.ally_listen_profile || 'default');
+                    const quality = String(ds?.quality_preset || 'balanced');
+                    const listenHealth = String(ds?.listen_health_summary || 'Santé écoute indisponible');
+                    const connState = String(ds?.listen_runtime?.listen_conn_state || 'unknown');
+                    const quickLine = (rq.ok && qd?.ok)
+                        ? `${qd.summary || 'Quick Check V5'} (${qd.score_ok || 0}/${qd.score_total || 0})`
+                        : 'Quick Check V5 indisponible';
+
+                    const template = [
+                        '## [BUG V5.1] Titre court',
+                        '',
+                        `Date: ${now}`,
+                        `Version: ${version}`,
+                        `Build: ${build}`,
+                        `Edition: ${edition}`,
+                        `Preset: ${preset}`,
+                        `Profil écoute: ${profile}`,
+                        `Qualité: ${quality}`,
+                        `État écoute: ${connState}`,
+                        `Santé écoute: ${listenHealth}`,
+                        `Quick Check: ${quickLine}`,
+                        '',
+                        '### Étapes pour reproduire',
+                        '1. ',
+                        '2. ',
+                        '3. ',
+                        '',
+                        '### Résultat attendu',
+                        '- ',
+                        '',
+                        '### Résultat observé',
+                        '- ',
+                        '',
+                        '### Logs / Capture',
+                        '- '
+                    ].join('\n');
+
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        await navigator.clipboard.writeText(template);
+                        showToast('📝 Template bug V5 copié');
+                    } else {
+                        showToast('📝 Template bug V5 généré');
+                    }
+                } catch (e) {
+                    showToast('❌ Erreur template bug V5');
+                }
+            };
+        }
+
+        const btnBugQuickCheckV5 = qs('#btnBugQuickCheckV5');
+        if (btnBugQuickCheckV5) {
+            btnBugQuickCheckV5.onclick = async () => {
+                const btnPrimary = qs('#btnListenQuickCheckV5');
+                if (btnPrimary && btnPrimary.onclick) return btnPrimary.onclick();
+                try {
+                    const r = await fetch(CORE_URL + '/audio/listen/quickcheck');
+                    const d = await r.json().catch(() => ({}));
+                    if (!r.ok || !d.ok) return showToast(`❌ ${d.error || 'Quick Check V5 indisponible'}`);
+                    showToast(`🧪 Quick Check V5: ${d.score_ok || 0}/${d.score_total || 0}`);
+                } catch (_) {
+                    showToast('❌ Erreur Quick Check V5');
+                }
+            };
+        }
+
+        const btnBugTemplateV5 = qs('#btnBugTemplateV5');
+        if (btnBugTemplateV5) {
+            btnBugTemplateV5.onclick = async () => {
+                const btnPrimary = qs('#btnCopyBugTemplateV5');
+                if (btnPrimary && btnPrimary.onclick) return btnPrimary.onclick();
+                showToast('⚠️ Template bug indisponible');
+            };
+        }
+
+        const btnBugReportSession = qs('#btnBugReportSession');
+        if (btnBugReportSession) {
+            btnBugReportSession.onclick = async () => {
+                const btnPrimary = qs('#btnExportListenSessionReport');
+                if (btnPrimary && btnPrimary.onclick) return btnPrimary.onclick();
+                showToast('⚠️ Rapport session indisponible');
+            };
+        }
+
+        const btnBugDebugBundleV51 = qs('#btnBugDebugBundleV51');
+        if (btnBugDebugBundleV51) {
+            btnBugDebugBundleV51.onclick = async () => {
+                try {
+                    const r = await fetch(CORE_URL + '/audio/listen/debug_bundle');
+                    const d = await r.json().catch(() => ({}));
+                    if (!r.ok || !d?.ok || !d?.bundle) {
+                        showToast(`❌ ${d?.error || 'Pack debug indisponible'}`);
+                        return;
+                    }
+                    const txt = JSON.stringify(d.bundle, null, 2);
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        await navigator.clipboard.writeText(txt);
+                        showToast('🧰 Pack Debug V5.1 copié (JSON)');
+                    } else {
+                        showToast('🧰 Pack Debug V5.1 généré');
+                    }
+                } catch (e) {
+                    showToast('❌ Erreur Pack Debug V5.1');
+                }
+            };
+        }
+
+        const btnBugResetListenStats = qs('#btnBugResetListenStats');
+        if (btnBugResetListenStats) {
+            btnBugResetListenStats.onclick = async () => {
+                const btnPrimary = qs('#btnResetListenStats');
+                if (btnPrimary && btnPrimary.onclick) return btnPrimary.onclick();
+                showToast('⚠️ Reset stats indisponible');
+            };
+        }
+
+        const btnBugResetListenHealth = qs('#btnBugResetListenHealth');
+        if (btnBugResetListenHealth) {
+            btnBugResetListenHealth.onclick = async () => {
+                const btnPrimary = qs('#btnResetListenHealth');
+                if (btnPrimary && btnPrimary.onclick) return btnPrimary.onclick();
+                showToast('⚠️ Reset santé indisponible');
+            };
+        }
+
+        const btnBugRetestCloud = qs('#btnBugRetestCloud');
+        if (btnBugRetestCloud) {
+            btnBugRetestCloud.onclick = async () => {
+                await retestCloudDiagNow(btnBugRetestCloud);
+            };
+        }
+
         const selListenVoiceFocus = qs('#selListenVoiceFocus');
         if (selListenVoiceFocus) {
             selListenVoiceFocus.onchange = async () => {
@@ -4546,7 +4841,7 @@
                         showToast(`❌ ${d.error || 'Réglage Voice Focus indisponible'}`);
                         return;
                     }
-                    const lbl = mode === 'aggressive' ? 'Agressif' : (mode === 'balanced' ? 'Normal' : 'Off');
+                    const lbl = mode === 'aggressive' ? 'Agressif' : (mode === 'balanced' ? 'Normal' : (mode === 'auto' ? 'Auto' : 'Off'));
                     showToast(`🎛️ Voice Focus: ${lbl}`);
                     lastModClickTime = 0;
                 } catch (e) {

@@ -1,4 +1,14 @@
-# CHANGELOG
+﻿# CHANGELOG
+
+## Kommz Gamer 5.1 - 2026-05-04
+
+### V5.1 Stabilisation terrain et QA
+- Passage explicite du client en V5.1 (version backend, badge UI, build affiché).
+- Nouveau preset jeu `long_session` pour les sessions longues (stabilité watchdog + rendu alliés plus sobre).
+- Nouveau preset expressif serveur `v5_long_session_stable` appliquable en un clic.
+- Ajout d'un onglet dédié `Bugs & QA V5.1` dans l'interface.
+- Ajout du `Quick Check V5` (score testeur) et du `Template bug V5.1` copiable pour Discord/GitHub.
+- Consolidation des actions QA dans l'onglet dédié (rapport session, retest cloud, reset stats/santé).
 
 ## Kommz Gamer 5.0 - 2026-04-27
 
@@ -49,8 +59,8 @@
 - Stabilisation du mode Hybrid Activation pour reutiliser un micro valide et coherent avec la configuration en cours.
 
 ### Modules et interface
-- Nouvel onglet `Sc�nes Vocales` pour sauvegarder/appliquer des presets complets (langue, moteur, modules, voix) en un clic.
-- Mode auto-apply par process actif (ex: `cod.exe`) pour charger automatiquement la sc�ne adapt�e.
+- Nouvel onglet `Scènes Vocales` pour sauvegarder/appliquer des presets complets (langue, moteur, modules, voix) en un clic.
+- Mode auto-apply par process actif (ex: `cod.exe`) pour charger automatiquement la scène adaptée.
 - Fusion visuelle complete des 16 modules dans une seule grille compacte dans l'onglet Modules.
 - Hybrid Activation est maintenant integre dans la meme vue runtime que les autres modules (plus de separation en deux blocs).
 - Nouvel onglet `Voix Studio` pour enregistrer, activer, tester et supprimer des profils vocaux (`voice_id`) directement depuis l'interface.
@@ -76,54 +86,55 @@
 - Outillage de release conserve et compatible avec la nouvelle version.
 ## Kommz Gamer 4.4 - 2026-03-18
 
-### Nouveaut�s majeures
+### Nouveautés majeures
 - Renforcement important du mode Hybrid `GPT-SoVITS -> XTTS`.
-- Meilleure fid�lit� du timbre et rendu vocal plus naturel en usage r�el.
-- Support Hybrid �tendu sur plusieurs langues cibles : `FR`, `EN`, `JA`, `KO`, `ZH`.
-- Int�gration d�un pipeline distant plus coh�rent avec `Whisper Modal`, `GPT-SoVITS Modal` et `XTTS Modal`.
+- Meilleure fidélité du timbre et rendu vocal plus naturel en usage réel.
+- Support Hybrid étendu sur plusieurs langues cibles : `FR`, `EN`, `JA`, `KO`, `ZH`.
+- Intégration d’un pipeline distant plus cohérent avec `Whisper Modal`, `GPT-SoVITS Modal` et `XTTS Modal`.
 
 ### Infrastructure IA
-- `Whisper Modal` utilis� en priorit� pour la transcription.
-- `GPT-SoVITS Modal` int�gr� au mode Hybrid pour limiter la d�pendance au local.
-- `XTTS Modal` consolid� pour la synth�se finale.
-- Am�lioration des fallbacks automatiques en cas d�indisponibilit� d�un service.
-- Meilleure gestion des r�f�rences audio GPT-SoVITS c�t� serveur.
+- `Whisper Modal` utilisé en priorité pour la transcription.
+- `GPT-SoVITS Modal` intégré au mode Hybrid pour limiter la dépendance au local.
+- `XTTS Modal` consolidé pour la synthèse finale.
+- Amélioration des fallbacks automatiques en cas d’indisponibilité d’un service.
+- Meilleure gestion des références audio GPT-SoVITS côté serveur.
 
 ### Interface
-- Interface Hybrid simplifi�e et moins encombrante.
-- Meilleure lisibilit� des r�glages avanc�s.
-- Am�lioration de la coh�rence entre les r�glages XTTS et le mode Hybrid.
-- Correction de la persistance du preset XTTS dans l�interface.
+- Interface Hybrid simplifiée et moins encombrante.
+- Meilleure lisibilité des réglages avancés.
+- Amélioration de la cohérence entre les réglages XTTS et le mode Hybrid.
+- Correction de la persistance du preset XTTS dans l’interface.
 
 ### Moteur et logique
-- Am�lioration du routage entre `voice_id`, clone direct et pipeline Hybrid.
-- Meilleure gestion des langues non support�es c�t� XTTS.
-- Am�lioration du comportement en temps r�el sur les flux PTT.
-- Auto Whisper am�lior� pour le remplissage des champs Hybrid.
+- Amélioration du routage entre `voice_id`, clone direct et pipeline Hybrid.
+- Meilleure gestion des langues non supportées côté XTTS.
+- Amélioration du comportement en temps réel sur les flux PTT.
+- Auto Whisper amélioré pour le remplissage des champs Hybrid.
 
 ### Modules
-- `Team-Sync AI` d�sormais branch� c�t� runtime.
-- `Shadow AI` d�sormais branch� c�t� runtime.
-- `Profil e-sport` d�sormais branch� c�t� runtime.
-- `Polyglot` d�sormais branch� c�t� runtime.
+- `Team-Sync AI` désormais branché côté runtime.
+- `Shadow AI` désormais branché côté runtime.
+- `Profil e-sport` désormais branché côté runtime.
+- `Polyglot` désormais branché côté runtime.
 
-### Mise � jour logicielle
-- Syst�me de mise � jour am�lior�.
-- Meilleur affichage des nouveaut�s et du changelog.
-- Comportement de d�tection de version et d�ouverture des notes de version retravaill�.
+### Mise à jour logicielle
+- Système de mise à jour amélioré.
+- Meilleur affichage des nouveautés et du changelog.
+- Comportement de détection de version et d’ouverture des notes de version retravaillé.
 
-### S�curit�
-- Durcissement de l�authentification backend et meilleure gestion des secrets c�t� serveur.
+### Sécurité
+- Durcissement de l’authentification backend et meilleure gestion des secrets côté serveur.
 - Migration progressive du stockage des mots de passe vers `bcrypt`.
-- Stockage des r�f�rences audio priv� par d�faut avec une base plus saine pour les URLs sign�es.
-- Renforcement des cookies de session et nettoyage de certains endpoints sensibles c�t� administration.
+- Stockage des références audio privé par défaut avec une base plus saine pour les URLs signées.
+- Renforcement des cookies de session et nettoyage de certains endpoints sensibles côté administration.
 
 ### Corrections
-- Correction de plusieurs probl�mes d�encodage et d�affichage de caract�res.
-- Correction de plusieurs comportements incoh�rents du mode Hybrid.
-- Correction de probl�mes de fallback sur certains cas multilingues.
-- Am�lioration de la robustesse globale du pipeline temps r�el.
-- Stabilisation g�n�rale du logiciel sur les sc�narios de test r�cents.
+- Correction de plusieurs problèmes d’encodage et d’affichage de caractères.
+- Correction de plusieurs comportements incohérents du mode Hybrid.
+- Correction de problèmes de fallback sur certains cas multilingues.
+- Amélioration de la robustesse globale du pipeline temps réel.
+- Stabilisation générale du logiciel sur les scénarios de test récents.
+
 
 
 

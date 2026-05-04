@@ -225,7 +225,7 @@ AUDIO_CONFIG = {
     "ally_tts_rate_limit_window_s": 10.0,
     "ally_tts_rate_limit_max_plays": 5,
     # Focus voix (écoute joueurs): limite le son jeu dans la transcription.
-    # off | balanced | aggressive
+    # off | balanced | aggressive | auto
     "ally_voice_focus_mode": "balanced",
     # Auto-tune écoute: assouplit temporairement les filtres si trop de textes
     # sont détectés sans restitution vocale alliée.
@@ -255,6 +255,9 @@ AUDIO_CONFIG = {
     "ptt_debounce_ms": 35,
     # Ignore les captures trop courtes (parasites de touche).
     "ptt_min_record_ms": 90,
+    # Watchdog écoute longue session: anti faux-positifs en silence prolongé.
+    "listen_watchdog_idle_threshold_s": 75,
+    "listen_watchdog_stream_stale_s": 22,
     "is_capturing": False,
     # Suivi local du quota cloud en mode essai (30 min = 1800s).
     "trial_voice_seconds_used_local": 0
@@ -1696,6 +1699,39 @@ def _apply_voice_focus_signal(mono, sample_rate, mode="off"):
             return x, 0.0
 
         m = str(mode or "off").strip().lower()
+        if m == "auto":
+            rms = float(np.sqrt(np.mean(np.square(x)))) if x.size else 0.0
+            peak_raw = float(np.max(np.abs(x))) if x.size else 0.0
+            crest = (peak_raw / max(rms, 1e-6)) if peak_raw > 0 else 1.0
+
+            prev_rms = float(_listen_focus_auto_state.get("noise_rms_ema", 0.0) or 0.0)
+            prev_crest = float(_listen_focus_auto_state.get("crest_ema", 0.0) or 0.0)
+            rms_ema = (prev_rms * 0.86) + (rms * 0.14)
+            crest_ema = (prev_crest * 0.82) + (crest * 0.18) if prev_crest > 0 else crest
+            _listen_focus_auto_state["noise_rms_ema"] = rms_ema
+            _listen_focus_auto_state["crest_ema"] = crest_ema
+
+            now_auto = time.time()
+            prev_mode_eff = str(_listen_focus_auto_state.get("mode_effective", "balanced") or "balanced")
+            mode_eff = prev_mode_eff
+            should_aggressive = (rms_ema >= 0.0145 and crest_ema <= 3.4) or (rms_ema >= 0.0200)
+            should_balanced = (rms_ema <= 0.0105 and crest_ema >= 3.9)
+            if should_aggressive:
+                mode_eff = "aggressive"
+            elif should_balanced:
+                mode_eff = "balanced"
+
+            last_sw = float(_listen_focus_auto_state.get("last_switch_at", 0.0) or 0.0)
+            if mode_eff != prev_mode_eff:
+                if (now_auto - last_sw) >= 2.5:
+                    _listen_focus_auto_state["mode_effective"] = mode_eff
+                    _listen_focus_auto_state["last_switch_at"] = now_auto
+                else:
+                    mode_eff = prev_mode_eff
+            else:
+                _listen_focus_auto_state["mode_effective"] = mode_eff
+            m = mode_eff
+
         if m in ("off", "none", "0", "false"):
             peak = float(np.max(np.abs(x))) if x.size else 0.0
             return x, peak
@@ -1751,7 +1787,7 @@ VOICES_LIBRARY = {
 DEFAULT_VOICE_ID = ""
 VTP_CORE_PORT = 8770
 UPDATE_URL = "https://pastebin.com/raw/dummy" 
-APP_BUILD_VERSION = "5.0"
+APP_BUILD_VERSION = "5.1"
 
 def _load_current_version(default: str = APP_BUILD_VERSION) -> str:
     # In packaged builds, rely on the embedded build version instead of an
@@ -3626,6 +3662,8 @@ _listen_runtime = {
     "watchdog_last_tick_at": 0.0,
     "watchdog_idle_restarts": 0,
     "watchdog_last_idle_age_s": 0.0,
+    "watchdog_stream_stale_restarts": 0,
+    "last_audio_seen_at": 0.0,
 }
 _listen_decisions = collections.deque(maxlen=24)  # 1=played, 0=skipped
 _listen_autotune_state = {
@@ -3636,6 +3674,12 @@ _listen_autotune_state = {
 _listen_engine_guard = threading.Lock()
 _listen_engine_active = False
 _listen_watchdog_last_restart_ts = 0.0
+_listen_focus_auto_state = {
+    "mode_effective": "balanced",
+    "noise_rms_ema": 0.0,
+    "crest_ema": 0.0,
+    "last_switch_at": 0.0,
+}
 
 
 def _bump_listen_runtime(kind: str):
@@ -3672,6 +3716,8 @@ def _reset_listen_runtime_stats():
         _listen_runtime["watchdog_last_tick_at"] = time.time()
         _listen_runtime["watchdog_idle_restarts"] = 0
         _listen_runtime["watchdog_last_idle_age_s"] = 0.0
+        _listen_runtime["watchdog_stream_stale_restarts"] = 0
+        _listen_runtime["last_audio_seen_at"] = 0.0
     except Exception:
         pass
 
@@ -3686,6 +3732,7 @@ def _reset_listen_health_runtime():
         _listen_runtime["watchdog_last_restart_reason"] = ""
         _listen_runtime["watchdog_last_idle_age_s"] = 0.0
         _listen_runtime["watchdog_last_tick_at"] = time.time()
+        _listen_runtime["watchdog_stream_stale_restarts"] = 0
     except Exception:
         pass
 
@@ -3728,6 +3775,8 @@ def _build_listen_health_snapshot() -> dict:
         voice_played = int(_listen_runtime.get("ally_voice_played", 0) or 0)
         voice_skipped = int(_listen_runtime.get("ally_voice_skipped", 0) or 0)
         idle_age = float(_listen_runtime.get("watchdog_last_idle_age_s", 0.0) or 0.0)
+        stream_age = max(0.0, time.time() - float(_listen_runtime.get("last_audio_seen_at", 0.0) or 0.0))
+        stale_restarts = int(_listen_runtime.get("watchdog_stream_stale_restarts", 0) or 0)
 
         level = "ok"
         summary = "Écoute stable"
@@ -3746,6 +3795,12 @@ def _build_listen_health_snapshot() -> dict:
         if (voice_played + voice_skipped) == 0 and idle_age > 120 and state in {"connected", "waiting_audio"}:
             level = "warn"
             summary = "Aucun événement voix récent (session silencieuse)"
+        if stale_restarts >= 2:
+            level = "warn"
+            summary = f"Écoute auto-réparée (stale stream: {stale_restarts})"
+        if state == "connected" and stream_age > 90 and level == "ok":
+            level = "warn"
+            summary = "Flux audio inactif prolongé (surveillance active)"
         return {
             "level": level,
             "summary": summary,
@@ -3824,6 +3879,11 @@ def listen_watchdog_loop():
                 last_evt = 0.0
             idle_age = (now_ts - last_evt) if last_evt > 0 else 999999.0
             _listen_runtime["watchdog_last_idle_age_s"] = max(0.0, float(idle_age))
+            try:
+                last_audio_seen_at = float(_listen_runtime.get("last_audio_seen_at", 0.0) or 0.0)
+            except Exception:
+                last_audio_seen_at = 0.0
+            stream_age = (now_ts - last_audio_seen_at) if last_audio_seen_at > 0 else 999999.0
             if state in {"connecting", "reconnecting"}:
                 threshold = max(14.0, retry_after + 8.0)
                 if age > threshold:
@@ -3847,6 +3907,27 @@ def listen_watchdog_loop():
                     if _restart_listen_engine(f"idle {state} depuis {int(idle_age)}s"):
                         try:
                             _listen_runtime["watchdog_idle_restarts"] = int(_listen_runtime.get("watchdog_idle_restarts", 0) or 0) + 1
+                        except Exception:
+                            pass
+                # Flux "connecté" mais aucune trame audio envoyée depuis trop longtemps:
+                # relance préventive pour les longues sessions.
+                try:
+                    stale_threshold_s = int(AUDIO_CONFIG.get("listen_watchdog_stream_stale_s", 22) or 22)
+                except Exception:
+                    stale_threshold_s = 22
+                stale_threshold_s = max(12, min(90, stale_threshold_s))
+                if (
+                    state == "connected"
+                    and stream_age > stale_threshold_s
+                    and (not _ptt_rec)
+                    and (not _hybrid_running)
+                    and (not _is_speaking)
+                ):
+                    if _restart_listen_engine(f"stream stale depuis {int(stream_age)}s"):
+                        try:
+                            _listen_runtime["watchdog_stream_stale_restarts"] = int(
+                                _listen_runtime.get("watchdog_stream_stale_restarts", 0) or 0
+                            ) + 1
                         except Exception:
                             pass
         except Exception:
@@ -4204,6 +4285,9 @@ def status_core():
         "ally_recognition_lang": str(AUDIO_CONFIG.get("ally_recognition_lang", "multi") or "multi").strip(),
         "ally_block_french": bool(AUDIO_CONFIG.get("ally_block_french", False)),
         "ally_voice_focus_mode": str(AUDIO_CONFIG.get("ally_voice_focus_mode", "balanced") or "balanced").strip().lower(),
+        "ally_voice_focus_effective": str(_listen_focus_auto_state.get("mode_effective", "balanced") or "balanced"),
+        "ally_voice_focus_auto_noise_rms": float(_listen_focus_auto_state.get("noise_rms_ema", 0.0) or 0.0),
+        "ally_voice_focus_auto_crest": float(_listen_focus_auto_state.get("crest_ema", 0.0) or 0.0),
         "ally_listen_profile": str(AUDIO_CONFIG.get("ally_listen_profile", "default") or "default").strip().lower(),
         "ally_game_preset": str(AUDIO_CONFIG.get("ally_game_preset", "custom") or "custom").strip().lower(),
         "ally_competitive_lock": bool(AUDIO_CONFIG.get("ally_competitive_lock", False)),
@@ -4236,7 +4320,9 @@ def status_core():
             "watchdog_flaps": int(_listen_runtime.get("watchdog_flaps", 0) or 0),
             "watchdog_cooldown_hits": int(_listen_runtime.get("watchdog_cooldown_hits", 0) or 0),
             "watchdog_idle_restarts": int(_listen_runtime.get("watchdog_idle_restarts", 0) or 0),
+            "watchdog_stream_stale_restarts": int(_listen_runtime.get("watchdog_stream_stale_restarts", 0) or 0),
             "watchdog_last_idle_age_s": float(_listen_runtime.get("watchdog_last_idle_age_s", 0.0) or 0.0),
+            "last_audio_seen_at": float(_listen_runtime.get("last_audio_seen_at", 0.0) or 0.0),
             "watchdog_last_restart_at": float(_listen_runtime.get("watchdog_last_restart_at", 0.0) or 0.0),
             "watchdog_last_restart_reason": str(_listen_runtime.get("watchdog_last_restart_reason", "") or ""),
             "watchdog_last_tick_at": float(_listen_runtime.get("watchdog_last_tick_at", 0.0) or 0.0),
@@ -5498,7 +5584,7 @@ def scenes_duplicate():
 def scenes_export():
     try:
         data = {
-            "version": "5.0",
+            "version": "5.1",
             "exported_at": _scene_now_utc_iso(),
             "active_name": str(AUDIO_CONFIG.get("scene_active_name") or ""),
             "last_applied_at": str(AUDIO_CONFIG.get("scene_last_applied_at") or ""),
@@ -6671,7 +6757,7 @@ LISTEN_GAME_PRESETS = {
     },
     "warzone": {
         "label": "Warzone / FPS bruyant (Agressif)",
-        "ally_voice_focus_mode": "aggressive",
+        "ally_voice_focus_mode": "auto",
         "ally_sentence_punct_min_words": 2,
         "ally_sentence_hard_flush_words": 5,
         "ally_tts_similarity_play_below": 0.93,
@@ -6703,7 +6789,7 @@ LISTEN_GAME_PRESETS = {
     },
     "fortnite": {
         "label": "Fortnite / BR (Agressif)",
-        "ally_voice_focus_mode": "aggressive",
+        "ally_voice_focus_mode": "auto",
         "ally_sentence_punct_min_words": 2,
         "ally_sentence_hard_flush_words": 6,
         "ally_tts_similarity_play_below": 0.93,
@@ -6735,7 +6821,7 @@ LISTEN_GAME_PRESETS = {
     },
     "apex": {
         "label": "Apex Legends / BR",
-        "ally_voice_focus_mode": "aggressive",
+        "ally_voice_focus_mode": "auto",
         "ally_sentence_punct_min_words": 2,
         "ally_sentence_hard_flush_words": 6,
         "ally_tts_similarity_play_below": 0.94,
@@ -6751,7 +6837,7 @@ LISTEN_GAME_PRESETS = {
     },
     "overwatch": {
         "label": "Overwatch / Hero Shooter",
-        "ally_voice_focus_mode": "aggressive",
+        "ally_voice_focus_mode": "auto",
         "ally_sentence_punct_min_words": 2,
         "ally_sentence_hard_flush_words": 6,
         "ally_tts_similarity_play_below": 0.93,
@@ -6767,7 +6853,7 @@ LISTEN_GAME_PRESETS = {
     },
     "r6": {
         "label": "Rainbow Six / Tactical Voice",
-        "ally_voice_focus_mode": "aggressive",
+        "ally_voice_focus_mode": "auto",
         "ally_sentence_punct_min_words": 2,
         "ally_sentence_hard_flush_words": 5,
         "ally_tts_similarity_play_below": 0.95,
@@ -6797,6 +6883,24 @@ LISTEN_GAME_PRESETS = {
         "ally_tts_rate_limit_max_plays": 5,
         "vad_threshold": 0.020,
     },
+    "long_session": {
+        "label": "Longue session / Stable",
+        "ally_voice_focus_mode": "balanced",
+        "ally_sentence_punct_min_words": 3,
+        "ally_sentence_hard_flush_words": 8,
+        "ally_tts_similarity_play_below": 0.95,
+        "ally_tts_duplicate_window_s": 2.4,
+        "ally_tts_force_min_chars": 10,
+        "ally_tts_min_gap_s": 0.72,
+        "ally_tts_short_merge_words": 4,
+        "ally_tts_short_merge_chars": 22,
+        "ally_tts_short_merge_window_s": 1.35,
+        "ally_tts_rate_limit_window_s": 12.0,
+        "ally_tts_rate_limit_max_plays": 4,
+        "vad_threshold": 0.019,
+        "listen_watchdog_idle_threshold_s": 95,
+        "listen_watchdog_stream_stale_s": 28,
+    },
 }
 
 LISTEN_PRESET_EXPORT_KEYS = [
@@ -6825,6 +6929,39 @@ LISTEN_PRESET_EXPORT_KEYS = [
 LISTEN_PRESET_NAME_MAX = 40
 LISTEN_PRESET_LIBRARY_MAX = 30
 
+EXPRESSIVE_V5_PRESETS = {
+    "v5_balanced": {
+        "label": "V5 Balanced",
+        "expressive_sounds_enabled": True,
+        "expressive_profile": "gaming",
+        "expressive_transcript_mode": "keep",
+        "expressive_tts_mode": "styled",
+        "expressive_intensity_mode": "auto",
+        "expressive_noise_mode": "smart",
+        "expressive_xtts_mode": "auto",
+        "expressive_hybrid_mode": "auto",
+        "expressive_stability_mode": "balanced",
+        "expressive_fallback_guard": True,
+        "expressive_ptt_mode": "full",
+        "expressive_rts_mode": "safe",
+    },
+    "v5_long_session_stable": {
+        "label": "V5 Long Session Stable",
+        "expressive_sounds_enabled": True,
+        "expressive_profile": "gaming",
+        "expressive_transcript_mode": "keep",
+        "expressive_tts_mode": "neutral",
+        "expressive_intensity_mode": "soft",
+        "expressive_noise_mode": "clean",
+        "expressive_xtts_mode": "neutral",
+        "expressive_hybrid_mode": "neutral",
+        "expressive_stability_mode": "stable",
+        "expressive_fallback_guard": True,
+        "expressive_ptt_mode": "safe",
+        "expressive_rts_mode": "safe",
+    },
+}
+
 
 def _listen_now_utc_iso() -> str:
     return _utc_now_iso()
@@ -6832,7 +6969,7 @@ def _listen_now_utc_iso() -> str:
 
 def _sanitize_listen_config_guards():
     AUDIO_CONFIG["ally_voice_focus_mode"] = str(AUDIO_CONFIG.get("ally_voice_focus_mode", "balanced") or "balanced").strip().lower()
-    if AUDIO_CONFIG["ally_voice_focus_mode"] not in {"off", "balanced", "aggressive"}:
+    if AUDIO_CONFIG["ally_voice_focus_mode"] not in {"off", "balanced", "aggressive", "auto"}:
         AUDIO_CONFIG["ally_voice_focus_mode"] = "balanced"
     AUDIO_CONFIG["ally_game_preset"] = str(AUDIO_CONFIG.get("ally_game_preset", "custom") or "custom").strip().lower()
     if AUDIO_CONFIG["ally_game_preset"] not in {
@@ -6841,7 +6978,8 @@ def _sanitize_listen_config_guards():
         "valorant", "valorant_safe",
         "warzone", "warzone_safe",
         "fortnite", "fortnite_safe",
-        "apex", "overwatch", "r6", "discord_party"
+        "apex", "overwatch", "r6", "discord_party",
+        "long_session"
     }:
         AUDIO_CONFIG["ally_game_preset"] = "custom"
     try:
@@ -6952,6 +7090,8 @@ def _apply_listen_game_preset(preset_key: str):
     AUDIO_CONFIG["ally_tts_short_merge_window_s"] = 1.20
     AUDIO_CONFIG["ally_tts_rate_limit_window_s"] = 9.0
     AUDIO_CONFIG["ally_tts_rate_limit_max_plays"] = 5
+    AUDIO_CONFIG["listen_watchdog_idle_threshold_s"] = 75
+    AUDIO_CONFIG["listen_watchdog_stream_stale_s"] = 22
     AUDIO_CONFIG["quality_preset"] = "balanced"
     _apply_quality_preset("balanced", emit_log=False)
 
@@ -6969,6 +7109,8 @@ def _apply_listen_game_preset(preset_key: str):
         "ally_tts_rate_limit_window_s",
         "ally_tts_rate_limit_max_plays",
         "vad_threshold",
+        "listen_watchdog_idle_threshold_s",
+        "listen_watchdog_stream_stale_s",
     ):
         if k in cfg:
             AUDIO_CONFIG[k] = cfg[k]
@@ -6978,6 +7120,19 @@ def _apply_listen_game_preset(preset_key: str):
     _maybe_enable_competitive_lock_auto()
     save_settings()
     return True, cfg.get("label", key)
+
+
+def _apply_expressive_v5_preset(preset_key: str):
+    key = str(preset_key or "").strip().lower()
+    cfg = EXPRESSIVE_V5_PRESETS.get(key)
+    if not cfg:
+        return False, "Preset expressif inconnu"
+    for k, v in cfg.items():
+        if k == "label":
+            continue
+        AUDIO_CONFIG[k] = v
+    save_settings()
+    return True, str(cfg.get("label", key) or key)
 
 
 @app.route("/audio/listen/preset/apply", methods=["POST"])
@@ -7003,11 +7158,37 @@ def apply_listen_game_preset():
         return jsonify({"ok": False, "error": str(e)}), 500
 
 
+@app.route("/audio/expressive/preset/apply", methods=["POST"])
+def apply_expressive_v5_preset():
+    try:
+        data = request.get_json(silent=True) or {}
+        key = str(data.get("preset", "") or "").strip().lower()
+        ok, info = _apply_expressive_v5_preset(key)
+        if not ok:
+            return jsonify({"ok": False, "error": info}), 400
+        stealth_print(f"🎚️ Preset expressif appliqué: {info} ({key})")
+        return jsonify({
+            "ok": True,
+            "preset": key,
+            "label": info,
+            "expressive_profile": str(AUDIO_CONFIG.get("expressive_profile", "gaming") or "gaming"),
+            "expressive_tts_mode": str(AUDIO_CONFIG.get("expressive_tts_mode", "styled") or "styled"),
+            "expressive_intensity_mode": str(AUDIO_CONFIG.get("expressive_intensity_mode", "auto") or "auto"),
+            "expressive_noise_mode": str(AUDIO_CONFIG.get("expressive_noise_mode", "smart") or "smart"),
+            "expressive_stability_mode": str(AUDIO_CONFIG.get("expressive_stability_mode", "balanced") or "balanced"),
+            "expressive_ptt_mode": str(AUDIO_CONFIG.get("expressive_ptt_mode", "full") or "full"),
+            "expressive_rts_mode": str(AUDIO_CONFIG.get("expressive_rts_mode", "safe") or "safe"),
+        })
+    except Exception as e:
+        stealth_print(f"❌ Erreur preset expressif V5: {e}")
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
 @app.route("/audio/listen/preset/export", methods=["GET"])
 def export_listen_custom_preset():
     try:
         payload = {
-            "version": "v5",
+            "version": "v5.1",
             "kind": "listen_preset",
             "name": str(AUDIO_CONFIG.get("ally_game_preset", "custom") or "custom"),
             "created_at": _utc_now_iso(),
@@ -7210,7 +7391,7 @@ def export_listen_preset_library_entry():
         if not item:
             return jsonify({"ok": False, "error": "Preset introuvable"}), 404
         payload = {
-            "version": "v5",
+            "version": "v5.1",
             "kind": "listen_named_preset",
             "name": str(item.get("name") or name),
             "exported_at": _listen_now_utc_iso(),
@@ -7301,13 +7482,13 @@ def apply_default_listen_profile():
 
 @app.route("/audio/listen/focus", methods=["POST"])
 def set_listen_voice_focus():
-    """Réglage direct du filtre vocal écoute (off|balanced|aggressive)."""
+    """Réglage direct du filtre vocal écoute (off|balanced|aggressive|auto)."""
     try:
         if _is_competitive_listen_locked():
             return _listen_lock_block_response()
         data = request.get_json(silent=True) or {}
         mode = str(data.get("mode", "balanced") or "balanced").strip().lower()
-        if mode not in {"off", "balanced", "aggressive"}:
+        if mode not in {"off", "balanced", "aggressive", "auto"}:
             return jsonify({"ok": False, "error": "Mode invalide"}), 400
 
         AUDIO_CONFIG["ally_voice_focus_mode"] = mode
@@ -7317,6 +7498,7 @@ def set_listen_voice_focus():
             "ok": True,
             "mode": mode,
             "ally_voice_focus_mode": AUDIO_CONFIG["ally_voice_focus_mode"],
+            "ally_voice_focus_effective": str(_listen_focus_auto_state.get("mode_effective", "balanced") or "balanced"),
         })
     except Exception as e:
         stealth_print(f"❌ Erreur réglage Voice Focus: {e}")
@@ -7417,7 +7599,7 @@ def export_listen_session_report():
         report = {
             "report_type": "kommz_v5_listen_session",
             "generated_at": _listen_now_utc_iso(),
-            "version": str(CURRENT_VERSION or "5.0"),
+            "version": str(CURRENT_VERSION or "5.1"),
             "edition_profile": str(EDITION_PROFILE or "unknown"),
             "cloud_features_enabled": bool(CLOUD_FEATURES_ENABLED),
             "listen_profile": str(AUDIO_CONFIG.get("ally_listen_profile", "default") or "default"),
@@ -7448,6 +7630,146 @@ def export_listen_session_report():
             "quality_log": _build_quality_log_payload()[:20],
         }
         return jsonify({"ok": True, "report": _repair_payload_strings(report)})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@app.route("/audio/listen/quickcheck", methods=["GET"])
+def listen_quickcheck_v5():
+    try:
+        listen_health = _build_listen_health_snapshot()
+        conn_state = str(_listen_runtime.get("listen_conn_state", "idle") or "idle").strip().lower()
+        wd_flaps = int(_listen_runtime.get("watchdog_flaps", 0) or 0)
+        wd_cooldowns = int(_listen_runtime.get("watchdog_cooldown_hits", 0) or 0)
+        wd_idle = int(_listen_runtime.get("watchdog_idle_restarts", 0) or 0)
+        wd_stale = int(_listen_runtime.get("watchdog_stream_stale_restarts", 0) or 0)
+        voice_played = int(_listen_runtime.get("ally_voice_played", 0) or 0)
+        voice_skipped = int(_listen_runtime.get("ally_voice_skipped", 0) or 0)
+        rate_limited = int(_listen_runtime.get("ally_voice_rate_limited", 0) or 0)
+
+        checks = []
+
+        is_listening = bool(AUDIO_CONFIG.get("is_listening", True))
+        checks.append({
+            "id": "listen_enabled",
+            "label": "Mode écoute activé",
+            "status": "ok" if is_listening else "warn",
+            "detail": "Actif" if is_listening else "Désactivé",
+        })
+
+        conn_ok = conn_state in {"connected", "waiting_audio", "paused"}
+        checks.append({
+            "id": "listen_conn_state",
+            "label": "État connexion écoute",
+            "status": "ok" if conn_ok else "warn",
+            "detail": conn_state or "unknown",
+        })
+
+        health_level = str(listen_health.get("level", "info") or "info").strip().lower()
+        checks.append({
+            "id": "listen_health",
+            "label": "Santé écoute",
+            "status": "ok" if health_level == "ok" else ("warn" if health_level in {"warn", "info"} else "err"),
+            "detail": str(listen_health.get("summary", "") or ""),
+        })
+
+        watchdog_ok = (wd_flaps <= 2 and wd_cooldowns <= 3 and wd_idle <= 3 and wd_stale <= 3)
+        checks.append({
+            "id": "watchdog_stability",
+            "label": "Stabilité watchdog",
+            "status": "ok" if watchdog_ok else "warn",
+            "detail": f"flaps={wd_flaps}, cooldown={wd_cooldowns}, idle={wd_idle}, stale={wd_stale}",
+        })
+
+        audio_activity_ok = (voice_played + voice_skipped) > 0
+        checks.append({
+            "id": "voice_activity",
+            "label": "Activité voix alliés",
+            "status": "ok" if audio_activity_ok else "warn",
+            "detail": f"played={voice_played}, skipped={voice_skipped}, rate_limited={rate_limited}",
+        })
+
+        cloud_diag = get_cloud_endpoints_diag(force=False, cache_ttl=20)
+        cloud_summary = str(cloud_diag.get("summary", "Diagnostic cloud indisponible") or "Diagnostic cloud indisponible")
+        if CLOUD_FEATURES_ENABLED:
+            cloud_ok = str(cloud_diag.get("level", "warn") or "warn").strip().lower() in {"ok", "info"}
+            checks.append({
+                "id": "cloud_diag",
+                "label": "Diagnostic cloud",
+                "status": "ok" if cloud_ok else "warn",
+                "detail": cloud_summary,
+            })
+
+        score_ok = len([c for c in checks if c.get("status") == "ok"])
+        score_total = len(checks)
+        global_status = "ok" if all(c.get("status") == "ok" for c in checks) else "warn"
+        if any(c.get("status") == "err" for c in checks):
+            global_status = "err"
+
+        return jsonify({
+            "ok": True,
+            "status": global_status,
+            "score_ok": score_ok,
+            "score_total": score_total,
+            "summary": f"Quick Check V5: {score_ok}/{score_total}",
+            "checks": checks,
+            "listen_profile": str(AUDIO_CONFIG.get("ally_listen_profile", "default") or "default"),
+            "listen_game_preset": str(AUDIO_CONFIG.get("ally_game_preset", "custom") or "custom"),
+            "quality_preset": _normalize_quality_preset(AUDIO_CONFIG.get("quality_preset", "balanced")),
+        })
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@app.route("/audio/listen/debug_bundle", methods=["GET"])
+def listen_debug_bundle_v51():
+    try:
+        quick_resp = listen_quickcheck_v5()
+        quick_payload = {}
+        if hasattr(quick_resp, "get_json"):
+            quick_payload = quick_resp.get_json(silent=True) or {}
+
+        listen_health = _build_listen_health_snapshot()
+        bundle = {
+            "bundle_type": "kommz_v5.1_debug_bundle",
+            "generated_at": _listen_now_utc_iso(),
+            "version": str(CURRENT_VERSION or "5.1"),
+            "edition_profile": str(EDITION_PROFILE or "unknown"),
+            "cloud_features_enabled": bool(CLOUD_FEATURES_ENABLED),
+            "quickcheck": quick_payload if isinstance(quick_payload, dict) else {},
+            "listen_health": listen_health,
+            "listen_config": {
+                "listen_profile": str(AUDIO_CONFIG.get("ally_listen_profile", "default") or "default"),
+                "listen_game_preset": str(AUDIO_CONFIG.get("ally_game_preset", "custom") or "custom"),
+                "voice_focus_mode": str(AUDIO_CONFIG.get("ally_voice_focus_mode", "balanced") or "balanced"),
+                "voice_focus_effective": str(_listen_focus_auto_state.get("mode_effective", "balanced") or "balanced"),
+                "quality_preset": _normalize_quality_preset(AUDIO_CONFIG.get("quality_preset", "balanced")),
+                "watchdog_idle_threshold_s": int(AUDIO_CONFIG.get("listen_watchdog_idle_threshold_s", 75) or 75),
+                "watchdog_stream_stale_s": int(AUDIO_CONFIG.get("listen_watchdog_stream_stale_s", 22) or 22),
+            },
+            "listen_runtime": {
+                "ally_text_events": int(_listen_runtime.get("ally_text_events", 0) or 0),
+                "ally_voice_played": int(_listen_runtime.get("ally_voice_played", 0) or 0),
+                "ally_voice_skipped": int(_listen_runtime.get("ally_voice_skipped", 0) or 0),
+                "ally_voice_rate_limited": int(_listen_runtime.get("ally_voice_rate_limited", 0) or 0),
+                "ally_short_merged": int(_listen_runtime.get("ally_short_merged", 0) or 0),
+                "listen_conn_state": str(_listen_runtime.get("listen_conn_state", "idle") or "idle"),
+                "listen_conn_detail": str(_listen_runtime.get("listen_conn_detail", "") or ""),
+                "watchdog_restarts": int(_listen_runtime.get("watchdog_restarts", 0) or 0),
+                "watchdog_flaps": int(_listen_runtime.get("watchdog_flaps", 0) or 0),
+                "watchdog_cooldown_hits": int(_listen_runtime.get("watchdog_cooldown_hits", 0) or 0),
+                "watchdog_idle_restarts": int(_listen_runtime.get("watchdog_idle_restarts", 0) or 0),
+                "watchdog_stream_stale_restarts": int(_listen_runtime.get("watchdog_stream_stale_restarts", 0) or 0),
+                "watchdog_last_idle_age_s": float(_listen_runtime.get("watchdog_last_idle_age_s", 0.0) or 0.0),
+                "watchdog_last_restart_reason": str(_listen_runtime.get("watchdog_last_restart_reason", "") or ""),
+                "last_event_at": float(_listen_runtime.get("last_event_at", 0.0) or 0.0),
+            },
+            "cloud_endpoints_diag": get_cloud_endpoints_diag(force=False, cache_ttl=15),
+            "tts_fallback_runtime": _build_tts_fallback_runtime_payload(),
+            "latency_runtime": _build_latency_runtime_payload(),
+            "quality_log_tail": _build_quality_log_payload()[:15],
+        }
+        return jsonify({"ok": True, "bundle": _repair_payload_strings(bundle)})
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
 
@@ -9869,6 +10191,7 @@ class DeepgramEngine:
                         update_teamsync_input_level(vol)
                         if vol > vol_threshold:
                             last_non_silent_ts = time.time()
+                            _listen_runtime["last_audio_seen_at"] = last_non_silent_ts
                         elif (not use_loopback) and ((time.time() - last_non_silent_ts) > silence_fallback_after):
                             # Si le CABLE est silencieux trop longtemps, on passe en loopback
                             # pour capter le son systÃƒÂ¨me (ex: YouTube navigateur).
@@ -10093,6 +10416,7 @@ class DeepgramEngine:
                                 mono_safe = np.nan_to_num(mono_stt, nan=0.0, posinf=0.0, neginf=0.0)
                                 audio_bytes = (np.clip(mono_safe, -1, 1) * 32767).astype(np.int16).tobytes()
                                 dg_conn.send(audio_bytes)
+                                _listen_runtime["last_audio_seen_at"] = time.time()
                                 # Si long silence, on ferme proprement et on revient en attente audio.
                                 if vol <= vol_threshold and (time.time() - last_non_silent_ts > 10):
                                     try:
