@@ -6867,6 +6867,101 @@ LISTEN_GAME_PRESETS = {
         "ally_tts_rate_limit_max_plays": 6,
         "vad_threshold": 0.0155,
     },
+    "tarkov": {
+        "label": "Escape from Tarkov / Mil-Sim",
+        "ally_voice_focus_mode": "auto",
+        "ally_sentence_punct_min_words": 2,
+        "ally_sentence_hard_flush_words": 5,
+        "ally_tts_similarity_play_below": 0.94,
+        "ally_tts_duplicate_window_s": 1.5,
+        "ally_tts_force_min_chars": 7,
+        "ally_tts_min_gap_s": 0.48,
+        "ally_tts_short_merge_words": 3,
+        "ally_tts_short_merge_chars": 16,
+        "ally_tts_short_merge_window_s": 1.05,
+        "ally_tts_rate_limit_window_s": 8.0,
+        "ally_tts_rate_limit_max_plays": 6,
+        "vad_threshold": 0.0165,
+        "game_noise_profile": "combat_mixed",
+        "listen_watchdog_idle_threshold_s": 90,
+        "listen_watchdog_stream_stale_s": 26,
+    },
+    "rust": {
+        "label": "Rust / Survival PvP",
+        "ally_voice_focus_mode": "auto",
+        "ally_sentence_punct_min_words": 2,
+        "ally_sentence_hard_flush_words": 5,
+        "ally_tts_similarity_play_below": 0.93,
+        "ally_tts_duplicate_window_s": 1.4,
+        "ally_tts_force_min_chars": 7,
+        "ally_tts_min_gap_s": 0.46,
+        "ally_tts_short_merge_words": 3,
+        "ally_tts_short_merge_chars": 16,
+        "ally_tts_short_merge_window_s": 1.00,
+        "ally_tts_rate_limit_window_s": 7.0,
+        "ally_tts_rate_limit_max_plays": 6,
+        "vad_threshold": 0.0155,
+        "game_noise_profile": "survival",
+        "listen_watchdog_idle_threshold_s": 85,
+        "listen_watchdog_stream_stale_s": 24,
+    },
+    "pubg": {
+        "label": "PUBG / BR Militaire",
+        "ally_voice_focus_mode": "auto",
+        "ally_sentence_punct_min_words": 2,
+        "ally_sentence_hard_flush_words": 6,
+        "ally_tts_similarity_play_below": 0.93,
+        "ally_tts_duplicate_window_s": 1.6,
+        "ally_tts_force_min_chars": 8,
+        "ally_tts_min_gap_s": 0.52,
+        "ally_tts_short_merge_words": 3,
+        "ally_tts_short_merge_chars": 18,
+        "ally_tts_short_merge_window_s": 1.15,
+        "ally_tts_rate_limit_window_s": 8.0,
+        "ally_tts_rate_limit_max_plays": 5,
+        "vad_threshold": 0.0175,
+        "game_noise_profile": "br_large",
+        "listen_watchdog_idle_threshold_s": 90,
+        "listen_watchdog_stream_stale_s": 26,
+    },
+    "lol": {
+        "label": "League of Legends / MOBA",
+        "ally_voice_focus_mode": "balanced",
+        "ally_sentence_punct_min_words": 2,
+        "ally_sentence_hard_flush_words": 7,
+        "ally_tts_similarity_play_below": 0.91,
+        "ally_tts_duplicate_window_s": 1.8,
+        "ally_tts_force_min_chars": 8,
+        "ally_tts_min_gap_s": 0.55,
+        "ally_tts_short_merge_words": 4,
+        "ally_tts_short_merge_chars": 20,
+        "ally_tts_short_merge_window_s": 1.30,
+        "ally_tts_rate_limit_window_s": 10.0,
+        "ally_tts_rate_limit_max_plays": 5,
+        "vad_threshold": 0.020,
+        "game_noise_profile": "moba",
+        "listen_watchdog_idle_threshold_s": 80,
+        "listen_watchdog_stream_stale_s": 24,
+    },
+    "dota2": {
+        "label": "Dota 2 / MOBA",
+        "ally_voice_focus_mode": "balanced",
+        "ally_sentence_punct_min_words": 2,
+        "ally_sentence_hard_flush_words": 7,
+        "ally_tts_similarity_play_below": 0.91,
+        "ally_tts_duplicate_window_s": 1.8,
+        "ally_tts_force_min_chars": 8,
+        "ally_tts_min_gap_s": 0.55,
+        "ally_tts_short_merge_words": 4,
+        "ally_tts_short_merge_chars": 20,
+        "ally_tts_short_merge_window_s": 1.30,
+        "ally_tts_rate_limit_window_s": 10.0,
+        "ally_tts_rate_limit_max_plays": 5,
+        "vad_threshold": 0.020,
+        "game_noise_profile": "moba",
+        "listen_watchdog_idle_threshold_s": 80,
+        "listen_watchdog_stream_stale_s": 24,
+    },
     "discord_party": {
         "label": "Discord / Party chat",
         "ally_voice_focus_mode": "balanced",
@@ -6884,7 +6979,7 @@ LISTEN_GAME_PRESETS = {
         "vad_threshold": 0.020,
     },
     "long_session": {
-        "label": "Longue session / Stable",
+        "label": "Longue session / Stable V5.2",
         "ally_voice_focus_mode": "balanced",
         "ally_sentence_punct_min_words": 3,
         "ally_sentence_hard_flush_words": 8,
@@ -6898,8 +6993,9 @@ LISTEN_GAME_PRESETS = {
         "ally_tts_rate_limit_window_s": 12.0,
         "ally_tts_rate_limit_max_plays": 4,
         "vad_threshold": 0.019,
-        "listen_watchdog_idle_threshold_s": 95,
-        "listen_watchdog_stream_stale_s": 28,
+        "game_noise_profile": "stable",
+        "listen_watchdog_idle_threshold_s": 100,
+        "listen_watchdog_stream_stale_s": 30,
     },
 }
 
@@ -6924,7 +7020,52 @@ LISTEN_PRESET_EXPORT_KEYS = [
     "ally_game_preset",
     "vad_threshold",
     "quality_preset",
+    "game_noise_profile",
+    "listen_watchdog_idle_threshold_s",
+    "listen_watchdog_stream_stale_s",
 ]
+
+# V5.2: Dernier preset expressif appliqué (pour le support template)
+last_expressive_preset_key = ""
+
+# V5.2: Profils de séparation voix/bruit par type de jeu
+GAME_NOISE_PROFILES = {
+    "combat_mixed": {
+        "label": "Combat mixte (FPS tactique)",
+        "noise_floor_ema_alpha": 0.18,
+        "voice_snr_threshold": 2.8,
+        "transient_suppress_ms": 48,
+        "steady_noise_reduce_db": 3.5,
+    },
+    "survival": {
+        "label": "Survival (ambiant variable)",
+        "noise_floor_ema_alpha": 0.15,
+        "voice_snr_threshold": 2.5,
+        "transient_suppress_ms": 55,
+        "steady_noise_reduce_db": 4.0,
+    },
+    "br_large": {
+        "label": "Battle Royale large (véhicules + armes)",
+        "noise_floor_ema_alpha": 0.16,
+        "voice_snr_threshold": 3.0,
+        "transient_suppress_ms": 42,
+        "steady_noise_reduce_db": 3.0,
+    },
+    "moba": {
+        "label": "MOBA (effets + musique)",
+        "noise_floor_ema_alpha": 0.22,
+        "voice_snr_threshold": 3.2,
+        "transient_suppress_ms": 35,
+        "steady_noise_reduce_db": 2.0,
+    },
+    "stable": {
+        "label": "Stable (longue session)",
+        "noise_floor_ema_alpha": 0.25,
+        "voice_snr_threshold": 3.5,
+        "transient_suppress_ms": 60,
+        "steady_noise_reduce_db": 5.0,
+    },
+}
 
 LISTEN_PRESET_NAME_MAX = 40
 LISTEN_PRESET_LIBRARY_MAX = 30
@@ -6960,6 +7101,51 @@ EXPRESSIVE_V5_PRESETS = {
         "expressive_ptt_mode": "safe",
         "expressive_rts_mode": "safe",
     },
+    "v5_aggressive": {
+        "label": "V5.2 Agressif",
+        "expressive_sounds_enabled": True,
+        "expressive_profile": "gaming",
+        "expressive_transcript_mode": "keep",
+        "expressive_tts_mode": "styled",
+        "expressive_intensity_mode": "strong",
+        "expressive_noise_mode": "keep",
+        "expressive_xtts_mode": "styled",
+        "expressive_hybrid_mode": "styled",
+        "expressive_stability_mode": "reactive",
+        "expressive_fallback_guard": True,
+        "expressive_ptt_mode": "full",
+        "expressive_rts_mode": "full",
+    },
+    "v5_cinematic": {
+        "label": "V5.2 Cinématique",
+        "expressive_sounds_enabled": True,
+        "expressive_profile": "gaming",
+        "expressive_transcript_mode": "keep",
+        "expressive_tts_mode": "styled",
+        "expressive_intensity_mode": "strong",
+        "expressive_noise_mode": "clean",
+        "expressive_xtts_mode": "styled",
+        "expressive_hybrid_mode": "styled",
+        "expressive_stability_mode": "balanced",
+        "expressive_fallback_guard": True,
+        "expressive_ptt_mode": "full",
+        "expressive_rts_mode": "full",
+    },
+    "v5_streamer": {
+        "label": "V5.2 Streamer",
+        "expressive_sounds_enabled": True,
+        "expressive_profile": "gaming",
+        "expressive_transcript_mode": "ignore",
+        "expressive_tts_mode": "styled",
+        "expressive_intensity_mode": "medium",
+        "expressive_noise_mode": "clean",
+        "expressive_xtts_mode": "styled",
+        "expressive_hybrid_mode": "auto",
+        "expressive_stability_mode": "balanced",
+        "expressive_fallback_guard": True,
+        "expressive_ptt_mode": "full",
+        "expressive_rts_mode": "safe",
+    },
 }
 
 
@@ -6979,7 +7165,8 @@ def _sanitize_listen_config_guards():
         "warzone", "warzone_safe",
         "fortnite", "fortnite_safe",
         "apex", "overwatch", "r6", "discord_party",
-        "long_session"
+        "long_session",
+        "tarkov", "rust", "pubg", "lol", "dota2"
     }:
         AUDIO_CONFIG["ally_game_preset"] = "custom"
     try:
@@ -7166,6 +7353,8 @@ def apply_expressive_v5_preset():
         ok, info = _apply_expressive_v5_preset(key)
         if not ok:
             return jsonify({"ok": False, "error": info}), 400
+        global last_expressive_preset_key
+        last_expressive_preset_key = key
         stealth_print(f"🎚️ Preset expressif appliqué: {info} ({key})")
         return jsonify({
             "ok": True,
@@ -7770,6 +7959,131 @@ def listen_debug_bundle_v51():
             "quality_log_tail": _build_quality_log_payload()[:15],
         }
         return jsonify({"ok": True, "bundle": _repair_payload_strings(bundle)})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+# V5.2: Auto-détection jeu depuis le processus foreground
+@app.route("/audio/listen/detect_game", methods=["GET"])
+def detect_current_game():
+    try:
+        proc = _get_foreground_process_name()
+        detected = None
+        proc_lower = str(proc or "").strip().lower()
+        game_map = {
+            "cod": "warzone", "modernwarfare": "warzone", "warzone": "warzone",
+            "cs2": "cs2", "csgo": "cs2", "counterstrike2": "cs2",
+            "valorant": "valorant", "riotclient": "valorant",
+            "fortnite": "fortnite", "fortniteclient-win64-shipping": "fortnite",
+            "r5apex": "apex", "apex": "apex",
+            "overwatch": "overwatch",
+            "rainbowsix": "r6", "rainbow six": "r6",
+            "escapefromtarkov": "tarkov", "tarkov": "tarkov",
+            "rust": "rust", "rustclient": "rust",
+            "tslgame": "pubg", "pubg": "pubg",
+            "league of legends": "lol", "leagueclient": "lol",
+            "dota2": "dota2", "dota": "dota2",
+        }
+        for key, preset in game_map.items():
+            if key in proc_lower:
+                detected = preset
+                break
+        current_preset = str(AUDIO_CONFIG.get("ally_game_preset", "custom") or "custom")
+        return jsonify({
+            "ok": True,
+            "foreground_process": proc,
+            "detected_game": detected,
+            "current_preset": current_preset,
+            "match": (detected and detected == current_preset),
+            "hint": "Utilise POST /audio/listen/game_preset/apply pour appliquer automatiquement" if detected and detected != current_preset else None,
+        })
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+# V5.2: Récupérer le profil de bruit du preset jeu actif
+@app.route("/audio/listen/game_noise_profile", methods=["GET"])
+def get_game_noise_profile():
+    try:
+        preset_key = str(AUDIO_CONFIG.get("ally_game_preset", "custom") or "custom").strip().lower()
+        preset = LISTEN_GAME_PRESETS.get(preset_key)
+        noise_key = str((preset or {}).get("game_noise_profile", "") or "").strip().lower()
+        noise = GAME_NOISE_PROFILES.get(noise_key) if noise_key else None
+        return jsonify({
+            "ok": True,
+            "game_preset": preset_key,
+            "noise_profile_key": noise_key or None,
+            "noise_profile": noise,
+            "watchdog_idle_threshold_s": int(preset.get("listen_watchdog_idle_threshold_s", AUDIO_CONFIG.get("listen_watchdog_idle_threshold_s", 75)) if preset else AUDIO_CONFIG.get("listen_watchdog_idle_threshold_s", 75)),
+            "watchdog_stream_stale_s": int(preset.get("listen_watchdog_stream_stale_s", AUDIO_CONFIG.get("listen_watchdog_stream_stale_s", 22)) if preset else AUDIO_CONFIG.get("listen_watchdog_stream_stale_s", 22)),
+        })
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+# V5.2: Onboarding / support flow — template Discord prêt à poster
+@app.route("/audio/listen/support_template", methods=["GET"])
+def get_support_template():
+    try:
+        from platform import system, release, version
+        quick_resp = listen_quickcheck_v5()
+        quick_payload = {}
+        if hasattr(quick_resp, "get_json"):
+            quick_payload = quick_resp.get_json(silent=True) or {}
+        game_preset = str(AUDIO_CONFIG.get("ally_game_preset", "custom") or "custom")
+        expressive_key = str(last_expressive_preset_key or "libre")
+        template = {
+            "discord_title": "**Bug Report V5.2**",
+            "discord_body": f"""**Jeu**: {game_preset}
+**Preset expressif**: {expressive_key}
+**Quick Check**: {quick_payload.get('summary', 'N/A')} ({quick_payload.get('score_ok', '?')}/{quick_payload.get('score_total', '?')})
+**Version**: 5.2 Community
+**OS**: {system()} {release()}
+**Description**: [Décris ce que tu as observé]
+**Étapes pour reproduire**: [Explique comment reproduire le bug]
+""",
+            "github_title": f"[V5.2] Bug: [résumé rapide]",
+            "github_body": f"""## Description
+[Décris le bug ici]
+
+## Configuration
+- **Version**: Kommz Gamer V5.2 Community
+- **Preset jeu**: {game_preset}
+- **Preset expressif**: {expressive_key}
+- **OS**: {system()} {release()}
+- **Quick Check**: {quick_payload.get('summary', 'N/A')}
+
+## Étapes pour reproduire
+1. 
+2. 
+3. 
+
+## Comportement attendu
+
+
+## Comportement observé
+
+
+## Pack Debug
+Voir fichier joint ou demander à @Nico
+""",
+            "quickcheck": quick_payload if isinstance(quick_payload, dict) else {},
+        }
+        return jsonify({"ok": True, "template": _repair_payload_strings(template)})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+# V5.2: Support links centralisés
+@app.route("/audio/listen/support_links", methods=["GET"])
+def get_support_links():
+    try:
+        return jsonify({
+            "ok": True,
+            "links": {
+                "discord": "https://discord.gg/kommz-gamer",
+                "github_issues": "https://github.com/Kommz-Innovations/Kommz-Gamer-Community/issues/new?template=bug_report.md",
+                "github_discussions": "https://github.com/Kommz-Innovations/Kommz-Gamer-Community/discussions",
+                "patreon": "https://patreon.com/KommzInnovations",
+                "docs": "https://docs.kommz.app",
+            }
+        })
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
 

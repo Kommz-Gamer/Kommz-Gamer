@@ -594,7 +594,12 @@
     <div class="nav-btn" onclick="showTab('tab-bugs')">🐞 Bugs & QA V5.2</div>
 
     <div style="margin-top: auto; font-size: 11px; color: var(--muted); text-align: center;">
-          Community Edition<br>Build V5.2
+          Community Edition<br>Build V5.2<br>
+          <div style="margin-top:10px; display:flex; flex-direction:column; gap:6px;">
+            <a href="https://discord.gg/kommz-gamer" target="_blank" rel="noopener noreferrer" style="color:#5865f2; text-decoration:none; font-size:11px; display:flex; align-items:center; gap:6px; justify-content:center;">💬 Discord</a>
+            <a href="https://github.com/Kommz-Innovations/Kommz-Gamer-Community/issues" target="_blank" rel="noopener noreferrer" style="color:#8b949e; text-decoration:none; font-size:11px; display:flex; align-items:center; gap:6px; justify-content:center;">🐙 GitHub</a>
+            <a href="https://patreon.com/KommzInnovations" target="_blank" rel="noopener noreferrer" style="color:#f96854; text-decoration:none; font-size:11px; display:flex; align-items:center; gap:6px; justify-content:center;">❤️ Patreon</a>
+          </div>
     </div>
   </aside>
 
@@ -844,7 +849,12 @@
                             <option value="overwatch">Overwatch / Hero Shooter</option>
                             <option value="r6">Rainbow Six / Tactical Voice</option>
                             <option value="discord_party">Discord / Party chat</option>
-                            <option value="long_session">V5 / Longue session stable</option>
+                            <option value="long_session">V5.2 / Longue session stable</option>
+                            <option value="tarkov">Tarkov / Mil-Sim</option>
+                            <option value="rust">Rust / Survival PvP</option>
+                            <option value="pubg">PUBG / BR Militaire</option>
+                            <option value="lol">League of Legends / MOBA</option>
+                            <option value="dota2">Dota 2 / MOBA</option>
                         </select>
                         <button id="btnApplyGamePreset" class="btn-secondary" type="button" title="Appliquer le preset jeu sélectionné" style="min-width:102px; padding:8px 14px;">Appliquer</button>
                     </div>
@@ -1273,6 +1283,9 @@
                             <button type="button" class="btn-action" data-expressive-preset="clientdemo" style="padding:7px 10px; font-size:11px; background:#0f172a; border:1px solid #334155;" onclick="applyExpressiveQuickPreset('clientdemo')">Client/Démo</button>
                             <button type="button" class="btn-action" data-expressive-preset="conversation" style="padding:7px 10px; font-size:11px; background:#0f172a; border:1px solid #334155;" onclick="applyExpressiveQuickPreset('conversation')">Conversation</button>
                             <button type="button" class="btn-action" data-expressive-preset="cinematic" style="padding:7px 10px; font-size:11px; background:#0f172a; border:1px solid #334155;" onclick="applyExpressiveQuickPreset('cinematic')">Cinématique</button>
+                            <button type="button" class="btn-action" data-expressive-preset="v5_aggressive" style="padding:7px 10px; font-size:11px; background:#1a0a2e; border:1px solid #7c3aed;" onclick="applyExpressiveV5ServerPreset('v5_aggressive')">V5.2 Agressif</button>
+                            <button type="button" class="btn-action" data-expressive-preset="v5_cinematic" style="padding:7px 10px; font-size:11px; background:#1a0a2e; border:1px solid #7c3aed;" onclick="applyExpressiveV5ServerPreset('v5_cinematic')">V5.2 Cinéma</button>
+                            <button type="button" class="btn-action" data-expressive-preset="v5_streamer" style="padding:7px 10px; font-size:11px; background:#1a0a2e; border:1px solid #7c3aed;" onclick="applyExpressiveV5ServerPreset('v5_streamer')">V5.2 Streamer</button>
                         </div>
                         <details style="margin-top:10px; border:1px solid #334155; border-radius:8px; background:rgba(2,6,23,0.25);">
                             <summary style="padding:10px 12px; cursor:pointer; font-size:12px; color:#cbd5e1;">🎛️ Réglages fins expressivité</summary>
@@ -1687,6 +1700,18 @@
     <div id="tab-bugs" class="section">
       <h2>🐞 Bugs & QA V5.2</h2>
 
+      <div class="card" style="border-color:#8b5cf6;">
+        <label>🚀 Onboarding testeur V5.2</label>
+        <div style="font-size:12px; color:var(--muted); margin-top:6px;">
+          Détecte automatiquement ton jeu, applique le preset optimal, et prépare le rapport.
+        </div>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:12px;">
+          <button id="btnBugDetectGame" class="btn-secondary" type="button" style="min-width:160px; padding:8px 14px; background:#8b5cf6; border-color:#8b5cf6; color:#fff;">🔍 Détecter mon jeu</button>
+          <button id="btnBugApplyDetectedGame" class="btn-secondary" type="button" style="min-width:180px; padding:8px 14px; display:none;">🎮 Appliquer preset détecté</button>
+          <span id="bugDetectedGame" style="font-size:12px; color:#a78bfa; display:none;"></span>
+        </div>
+      </div>
+
       <div class="card" style="border-color:#3b82f6;">
         <label>🧪 Check rapide testeur</label>
         <div style="font-size:12px; color:var(--muted); margin-top:6px;">
@@ -1698,6 +1723,7 @@
           <button id="btnBugDebugBundleV51" class="btn-secondary" type="button" style="min-width:146px; padding:8px 14px;">Pack Debug V5.2</button>
           <button id="btnBugReportSession" class="btn-secondary" type="button" style="min-width:132px; padding:8px 14px;">Rapport session</button>
           <button id="btnBugRetestCloud" class="btn-secondary" type="button" style="min-width:136px; padding:8px 14px;">Retest cloud</button>
+          <button id="btnBugCopyAllDiscord" class="btn-secondary" type="button" style="min-width:160px; padding:8px 14px; background:#5865f2; border-color:#5865f2; color:#fff;">📋 Copy All Discord</button>
         </div>
       </div>
 
@@ -1712,10 +1738,12 @@
       <div class="card" style="border-color:#334155; margin-top:12px;">
         <label>📋 Protocole testeur V5.2</label>
         <div style="font-size:12px; color:var(--muted); margin-top:6px; line-height:1.55;">
-          1) Appliquer un preset jeu puis parler 30 à 60 secondes en situation réelle.<br>
-          2) Cliquer <b>Quick Check V5.2</b> pour valider l'état global.<br>
-          3) Si anomalie: cliquer <b>Pack Debug V5.2</b> puis <b>Template bug V5.2</b>.<br>
-          4) Coller le template + le JSON debug dans Discord <code>#bugs</code> ou une issue GitHub.
+          1) Cliquer <b>🔍 Détecter mon jeu</b> puis <b>Appliquer preset détecté</b>.<br>
+          2) Parler 30-60s en situation réelle avec le preset.<br>
+          3) Cliquer <b>Quick Check V5.2</b> pour valider l'état.<br>
+          4) Si anomalie: cliquer <b>📋 Copy All Discord</b> pour tout copier en un clic.<br>
+          5) Coller dans Discord <code>#bugs</code> ou une issue GitHub.<br>
+          6) Joindre le <b>Pack Debug V5.2</b> si demandé.
         </div>
       </div>
     </div>
@@ -4823,6 +4851,109 @@
         if (btnBugRetestCloud) {
             btnBugRetestCloud.onclick = async () => {
                 await retestCloudDiagNow(btnBugRetestCloud);
+            };
+        }
+
+        // V5.2: Auto-détection jeu + apply
+        let bugDetectedGamePreset = null;
+        const btnBugDetectGame = qs('#btnBugDetectGame');
+        const btnBugApplyDetectedGame = qs('#btnBugApplyDetectedGame');
+        const bugDetectedGameSpan = qs('#bugDetectedGame');
+        if (btnBugDetectGame) {
+            btnBugDetectGame.onclick = async () => {
+                try {
+                    btnBugDetectGame.disabled = true;
+                    btnBugDetectGame.textContent = '🔍 Scan en cours...';
+                    const r = await fetch(CORE_URL + '/audio/listen/detect_game');
+                    const d = await r.json().catch(() => ({}));
+                    btnBugDetectGame.disabled = false;
+                    btnBugDetectGame.textContent = '🔍 Détecter mon jeu';
+                    if (!r.ok || !d.ok) {
+                        showToast(`❌ ${d.error || 'Détection indisponible'}`);
+                        return;
+                    }
+                    if (d.detected_game) {
+                        bugDetectedGamePreset = d.detected_game;
+                        const matched = d.match ? ' (déjà appliqué ✅)' : '';
+                        bugDetectedGameSpan.textContent = `Détecté: ${d.detected_game}${matched} | Process: ${d.foreground_process || '?'}`;
+                        bugDetectedGameSpan.style.display = 'inline';
+                        if (!d.match) {
+                            btnBugApplyDetectedGame.style.display = 'inline-block';
+                        } else {
+                            btnBugApplyDetectedGame.style.display = 'none';
+                        }
+                        showToast(`🎮 Jeu détecté: ${d.detected_game}${matched}`);
+                    } else {
+                        bugDetectedGameSpan.textContent = `Aucun jeu reconnu (process: ${d.foreground_process || 'inconnu'})`;
+                        bugDetectedGameSpan.style.display = 'inline';
+                        btnBugApplyDetectedGame.style.display = 'none';
+                        showToast('⚠️ Aucun jeu reconnu');
+                    }
+                } catch (e) {
+                    btnBugDetectGame.disabled = false;
+                    btnBugDetectGame.textContent = '🔍 Détecter mon jeu';
+                    showToast('❌ Erreur détection jeu');
+                }
+            };
+        }
+        if (btnBugApplyDetectedGame) {
+            btnBugApplyDetectedGame.onclick = async () => {
+                if (!bugDetectedGamePreset) return showToast('⚠️ Détecte d\'abord un jeu');
+                try {
+                    const r = await fetch(CORE_URL + '/audio/listen/preset/apply', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ preset: bugDetectedGamePreset })
+                    });
+                    const d = await r.json().catch(() => ({}));
+                    if (!r.ok || !d.ok) {
+                        showToast(`❌ ${d.error || 'Impossible d\'appliquer le preset'}`);
+                        return;
+                    }
+                    showToast(`✅ Preset ${d.label || bugDetectedGamePreset} appliqué`);
+                    btnBugApplyDetectedGame.style.display = 'none';
+                    bugDetectedGameSpan.textContent = `Appliqué: ${bugDetectedGamePreset} ✅`;
+                } catch (e) {
+                    showToast('❌ Erreur application preset');
+                }
+            };
+        }
+
+        // V5.2: Copy ALL for Discord (quickcheck + template + debug bundle)
+        const btnBugCopyAllDiscord = qs('#btnBugCopyAllDiscord');
+        if (btnBugCopyAllDiscord) {
+            btnBugCopyAllDiscord.onclick = async () => {
+                try {
+                    btnBugCopyAllDiscord.disabled = true;
+                    btnBugCopyAllDiscord.textContent = '⏳ Copie...';
+                    const [rDebug, rTemplate] = await Promise.all([
+                        fetch(CORE_URL + '/audio/listen/debug_bundle'),
+                        fetch(CORE_URL + '/audio/listen/support_template')
+                    ]);
+                    const debugData = await rDebug.json().catch(() => ({}));
+                    const tmplData = await rTemplate.json().catch(() => ({}));
+                    let content = '';
+                    if (tmplData?.ok && tmplData?.template?.discord_body) {
+                        content += tmplData.template.discord_body;
+                        content += '\n**Pack Debug (JSON ci-dessous)**\n```json\n';
+                        content += JSON.stringify(debugData?.bundle || debugData, null, 2);
+                        content += '\n```';
+                    } else {
+                        content = JSON.stringify({ template: tmplData, debug: debugData }, null, 2);
+                    }
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        await navigator.clipboard.writeText(content);
+                        showToast('📋 Full report V5.2 copié (Discord prêt)');
+                    } else {
+                        showToast('📋 Full report généré');
+                    }
+                    btnBugCopyAllDiscord.disabled = false;
+                    btnBugCopyAllDiscord.textContent = '📋 Copy All Discord';
+                } catch (e) {
+                    btnBugCopyAllDiscord.disabled = false;
+                    btnBugCopyAllDiscord.textContent = '📋 Copy All Discord';
+                    showToast('❌ Erreur Copy All');
+                }
             };
         }
 

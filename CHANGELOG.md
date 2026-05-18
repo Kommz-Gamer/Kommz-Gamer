@@ -2,8 +2,36 @@
 
 ## Kommz Gamer 5.2 - 2026-05-18
 
-### V5.2 — En cours
-- 
+### V5.2 — Améliorations terrain, presets, onboarding et support flow
+
+#### Presets jeux V5.2
+- Nouveaux presets jeu: **Tarkov** (Mil-Sim), **Rust** (Survival PvP), **PUBG** (BR Militaire), **League of Legends** (MOBA), **Dota 2** (MOBA).
+- Ajout d'un profil de bruit par type de jeu (`game_noise_profile`) : `combat_mixed`, `survival`, `br_large`, `moba`, `stable`.
+- Seuils watchdog par preset jeu (`listen_watchdog_idle_threshold_s`, `listen_watchdog_stream_stale_s`) adaptés au rythme de chaque titre.
+- Preset `long_session` V5.2: seuils watchdog relevés (100s/30s) pour les sessions marathon.
+
+#### Expressivité vocale V5.2
+- Nouveaux presets expressifs serveur: **V5.2 Agressif** (réactif, intensité forte), **V5.2 Cinématique** (style fort + bruit nettoyé), **V5.2 Streamer** (transcription lissée, rendu sobre pour le stream).
+- Boutons UI dédiés pour chaque preset V5.2 avec visuel violet distinctif.
+
+#### Onboarding testeurs & QA
+- Nouveau bloc **Onboarding testeur V5.2** dans l'onglet Bugs & QA.
+- **Détection automatique du jeu** via le processus foreground (endpoint `/audio/listen/detect_game`).
+- Application en un clic du preset détecté si différent du preset actif.
+- Bouton **Copy All Discord**: combine Quick Check + Template + Pack Debug en un seul copier-coller.
+- **Support template** avec format Discord et GitHub prêts à poster (endpoint `/audio/listen/support_template`).
+- Profil de bruit jeu consultable via `/audio/listen/game_noise_profile`.
+
+#### Flux support
+- Liens directs **Discord**, **GitHub** et **Patreon** dans la sidebar.
+- Endpoint `/audio/listen/support_links` centralisant toutes les URLs communautaires.
+- Protocole testeur mis à jour avec l'auto-détection et le Copy All.
+
+#### Architecture
+- Nouveau dictionnaire `GAME_NOISE_PROFILES` avec 5 profils (combat_mixed, survival, br_large, moba, stable).
+- Clés `game_noise_profile`, `listen_watchdog_idle_threshold_s`, `listen_watchdog_stream_stale_s` ajoutées aux exports de presets.
+- Variable globale `last_expressive_preset_key` pour le suivi du dernier preset appliqué.
+- Nettoyage et normalisation des nouveaux presets dans `_sanitize_listen_config_guards`.
 
 ## Kommz Gamer 5.1 - 2026-05-04
 
