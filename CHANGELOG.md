@@ -1,5 +1,10 @@
 ﻿# CHANGELOG
 
+## Kommz Gamer 5.2 - 2026-05-18
+
+### V5.2 — En cours
+- 
+
 ## Kommz Gamer 5.1 - 2026-05-04
 
 ### V5.1 Stabilisation terrain et QA

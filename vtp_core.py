@@ -1787,7 +1787,7 @@ VOICES_LIBRARY = {
 DEFAULT_VOICE_ID = ""
 VTP_CORE_PORT = 8770
 UPDATE_URL = "https://pastebin.com/raw/dummy" 
-APP_BUILD_VERSION = "5.1"
+APP_BUILD_VERSION = "5.2"
 
 def _load_current_version(default: str = APP_BUILD_VERSION) -> str:
     # In packaged builds, rely on the embedded build version instead of an
@@ -5584,7 +5584,7 @@ def scenes_duplicate():
 def scenes_export():
     try:
         data = {
-            "version": "5.1",
+            "version": "5.2",
             "exported_at": _scene_now_utc_iso(),
             "active_name": str(AUDIO_CONFIG.get("scene_active_name") or ""),
             "last_applied_at": str(AUDIO_CONFIG.get("scene_last_applied_at") or ""),
@@ -7188,7 +7188,7 @@ def apply_expressive_v5_preset():
 def export_listen_custom_preset():
     try:
         payload = {
-            "version": "v5.1",
+            "version": "v5.2",
             "kind": "listen_preset",
             "name": str(AUDIO_CONFIG.get("ally_game_preset", "custom") or "custom"),
             "created_at": _utc_now_iso(),
@@ -7391,7 +7391,7 @@ def export_listen_preset_library_entry():
         if not item:
             return jsonify({"ok": False, "error": "Preset introuvable"}), 404
         payload = {
-            "version": "v5.1",
+            "version": "v5.2",
             "kind": "listen_named_preset",
             "name": str(item.get("name") or name),
             "exported_at": _listen_now_utc_iso(),
@@ -7599,7 +7599,7 @@ def export_listen_session_report():
         report = {
             "report_type": "kommz_v5_listen_session",
             "generated_at": _listen_now_utc_iso(),
-            "version": str(CURRENT_VERSION or "5.1"),
+            "version": str(CURRENT_VERSION or "5.2"),
             "edition_profile": str(EDITION_PROFILE or "unknown"),
             "cloud_features_enabled": bool(CLOUD_FEATURES_ENABLED),
             "listen_profile": str(AUDIO_CONFIG.get("ally_listen_profile", "default") or "default"),
@@ -7731,9 +7731,9 @@ def listen_debug_bundle_v51():
 
         listen_health = _build_listen_health_snapshot()
         bundle = {
-            "bundle_type": "kommz_v5.1_debug_bundle",
+            "bundle_type": "kommz_v5.2_debug_bundle",
             "generated_at": _listen_now_utc_iso(),
-            "version": str(CURRENT_VERSION or "5.1"),
+            "version": str(CURRENT_VERSION or "5.2"),
             "edition_profile": str(EDITION_PROFILE or "unknown"),
             "cloud_features_enabled": bool(CLOUD_FEATURES_ENABLED),
             "quickcheck": quick_payload if isinstance(quick_payload, dict) else {},
