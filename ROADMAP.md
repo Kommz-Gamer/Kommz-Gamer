@@ -66,7 +66,7 @@
 
 ---
 
-## V5.3 — INTELLIGENCE AUDIO & AUTO (courant)
+## V5.3 — INTELLIGENCE AUDIO & AUTO (En cours)
 
 ### Objectif : zero config manuelle, tout s'adapte automatiquement
 
