@@ -22,7 +22,7 @@
 
 ---
 
-## V5.2 — FINALISATION & POLISH (courant)
+## V5.2 — FINALISATION & POLISH (✅ terminé)
 
 ### Déjà fait
 - [x] 5 nouveaux presets jeux (Tarkov, Rust, PUBG, LoL, Dota 2)
@@ -66,7 +66,7 @@
 
 ---
 
-## V5.3 — INTELLIGENCE AUDIO & AUTO
+## V5.3 — INTELLIGENCE AUDIO & AUTO (courant)
 
 ### Objectif : zero config manuelle, tout s'adapte automatiquement
 
