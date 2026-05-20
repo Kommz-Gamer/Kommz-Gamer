@@ -1,6 +1,24 @@
 # Kommz Gamer — Roadmap
 
-> Dernière mise à jour : V5.2 · 2026-05-18
+> Dernière mise à jour : V5.2 · 2026-05-19
+
+---
+
+## V5.1 — STABILISATION & LONGUE SESSION (✅ terminé)
+
+- [x] Watchdog longue session renforcé (idle/stale thresholds configurables)
+- [x] Relance auto si stream écoute bloqué (watchdog_stream_stale_restarts)
+- [x] Gestion anti faux positifs avec heartbeat audio/runtime
+- [x] Preset `long_session` + réglages stables
+- [x] Voice Focus mode `auto` : backend choisit balanced ou aggressive selon bruit RMS
+- [x] Voice focus auto activé sur presets jeux bruyants (warzone, fortnite, apex, overwatch, r6)
+- [x] Presets expressifs V5 : v5_balanced, v5_long_session_stable + endpoint /audio/expressive/preset/apply
+- [x] Bouton UI `V5 Long Session`
+- [x] Nouvel onglet `Bugs & QA` + tools (Quick Check, Template bug, Pack Debug, Rapport session, Retest cloud, Reset)
+- [x] Endpoints QA backend : /quickcheck, /debug_bundle, /session_report/export, /health/reset
+- [x] Builds Community V5.1 (nommage versionné, standalone nettoyé, alias Community/Private)
+- [x] Versioning global V5.1 (version.txt, vtp_core.py, web/index.html, CHANGELOG.md)
+- [x] Nettoyage repo : suppression third_party/Matcha-TTS (non utilisé)
 
 ---
 
@@ -15,36 +33,36 @@
 - [x] Watchdog longue session V5.2 (100s idle / 30s stale)
 
 ### Terrain & Calibration
-- [ ] Profil de bruit par map (pas juste par jeu — ex: Tarkov Factory vs Woods vs Interchange)
-- [ ] Export stats session CSV détaillé : uptime, restarts watchdog, RMS min/max/avg, SNR, words/min, preset actif
-- [ ] Alertes watchdog configurables : son système, overlay popup, log fichier
-- [ ] Mode benchmark preset : mesure latence STT/TTS, CPU%, RAM MB, latence totale boucle
-- [ ] Auto-pause écoute si silence détecté > N secondes (économie ressources)
-- [ ] Log rotation automatique : taille max configurable, rétention N jours
+- [x] Profil de bruit par map (pas juste par jeu — ex: Tarkov Factory vs Woods vs Interchange)
+- [x] Export stats session CSV détaillé : uptime, restarts watchdog, RMS min/max/avg, SNR, words/min, preset actif
+- [x] Alertes watchdog configurables : son système, overlay popup, log fichier
+- [x] Mode benchmark preset : mesure latence STT/TTS, CPU%, RAM MB, latence totale boucle
+- [x] Auto-pause écoute si silence détecté > N secondes (économie ressources)
+- [x] Log rotation automatique : taille max configurable, rétention N jours
 
 ### UI / UX
-- [ ] Dark mode OLED pur (#000000 background, contraste réduit)
-- [ ] Indicateur santé live dans la tray icon Windows (vert/jaune/rouge)
-- [ ] Raccourcis clavier globaux : toggle listen, push-to-talk, preset+1, preset-1
-- [ ] Mini overlay desktop always-on-top avec stats temps réel (RMS, SNR, preset, uptime)
-- [ ] Notifications toast desktop natives : écoute ON/OFF, preset changé, erreur, reconnexion
-- [ ] Page stats session : graphiques RMS timeline, SNR timeline, watchdog events, heatmap activité
-- [ ] Toolbar mode compact (icônes seules, pas de texte)
+- [x] Dark mode OLED pur (#000000 background, contraste réduit)
+- [x] Indicateur santé live dans la tray icon Windows (vert/jaune/rouge)
+- [x] Raccourcis clavier globaux : toggle listen, push-to-talk, preset+1, preset-1
+- [x] Mini overlay desktop always-on-top avec stats temps réel (RMS, SNR, preset, uptime)
+- [x] Notifications toast desktop natives : écoute ON/OFF, preset changé, erreur, reconnexion
+- [x] Page stats session : graphiques RMS timeline, SNR timeline, watchdog events, heatmap activité
+- [x] Toolbar mode compact (icônes seules, pas de texte)
 
 ### Builds & Packaging
-- [ ] Installer Windows (NSIS ou Inno Setup) avec icône, raccourci bureau, désinstallateur
-- [ ] Version ZIP portable (no install, run anywhere)
-- [ ] Auto-update check au lancement (compare version.txt avec release GitHub)
-- [ ] Signature code (EV certificate) pour éviter SmartScreen
-- [ ] Bundled Python runtime embarqué (pyinstaller ou embeddable Python, pas de dépendance système)
-- [ ] Build nightly automatique via GitHub Actions (Windows exe + portable zip)
+- [x] Installer Windows (NSIS) avec icône, raccourci bureau, désinstallateur — script build_installer.nsi
+- [x] Version ZIP portable (no install, run anywhere) — script build_portable.bat
+- [x] Auto-update check au lancement (compare version.txt avec release GitHub) — appel dans main()
+- [x] Signature code (EV certificate) documentée — script sign_release.bat + procédure
+- [x] Bundled Python runtime embarqué — Nuitka standalone intègre python311.dll et .pyd
+- [x] Build nightly automatique via GitHub Actions (lint + build exe + portable zip + release)
 
 ### QA & Support
-- [ ] Auto-bug report generator : screenshot + logs + config + stats en un zip
-- [ ] Base de données bugs connus + workarounds intégrée dans l'UI
-- [ ] Mode debug verbose (flag CLI `--debug` ou `--trace`)
-- [ ] Test suite automatique : smoke test preset, test watchdog, test API endpoints
-- [ ] Feedback in-app : bouton "Donner mon avis" → Discord/GitHub/Formulaire
+- [x] Auto-bug report generator : screenshot + logs + config + stats en un zip
+- [x] Base de données bugs connus + workarounds intégrée dans l'UI
+- [x] Mode debug verbose (flag CLI `--debug` ou `--trace`)
+- [x] Test suite automatique : smoke test preset, test watchdog, test API endpoints
+- [x] Feedback in-app : bouton "Donner mon avis" → Discord/GitHub/Formulaire
 
 ---
 
