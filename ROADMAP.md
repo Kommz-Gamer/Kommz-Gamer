@@ -1,6 +1,6 @@
 # Kommz Gamer — Roadmap
 
-> Dernière mise à jour : V5.2 · 2026-05-19
+> Dernière mise à jour : V5.3 · 2026-05-27
 
 ---
 
@@ -66,48 +66,61 @@
 
 ---
 
-## V5.3 — INTELLIGENCE AUDIO & AUTO (en cours)
+## V5.3 — INTELLIGENCE AUDIO & AUTO (✅ terminé — 2026-05-20)
 
 ### Objectif : zero config manuelle, tout s'adapte automatiquement
 
 ### Game Detection V2
-- [ ] Fingerprint audio : détection auto du jeu en 2-3s via analyse spectrale du flux audio
-- [ ] Fallback chaîne : process name → window title → audio fingerprint → prompt manuel
-- [ ] Base de données fingerprints locale (JSON/YAML) + cloud sync optionnelle
-- [ ] Mode "Auto" dans la liste des presets : détecte tout et applique le bon preset sans clic
-- [ ] Détection multi-jeu : si alt-tab vers un autre jeu, détecte et propose de switcher
-- [ ] Log historique des jeux détectés (timeline de la session)
-- [ ] Contribution communautaire de fingerprints (upload depuis l'app)
+- [✅] Fingerprint audio : détection auto du jeu en 2-3s via analyse spectrale du flux audio
+- [✅] Fallback chaîne : process name → window title → audio fingerprint → prompt manuel
+- [✅] Base de données fingerprints locale (JSON/YAML) + cloud sync optionnelle
+- [✅] Mode "Auto" dans la liste des presets : détecte tout et applique le bon preset sans clic
+- [✅] Détection multi-jeu : si alt-tab vers un autre jeu, détecte et propose de switcher
+- [✅] Log historique des jeux détectés (timeline de la session)
+- [✅] Contribution communautaire de fingerprints (upload depuis l'app)
 
 ### Voice Focus V3
-- [ ] Apprentissage adaptatif : 30s d'écoute initiale → calibre auto gain, noise gate, SNR threshold
-- [ ] Réduction bruit par bande de fréquence : low (<250Hz), mid (250-4kHz), high (>4kHz)
-- [ ] Dé-essing (sifflantes), dé-clicking (clics souris/clavier), dé-clipping (saturation micro)
-- [ ] Auto-gain riding : normalisation lissée du volume voix (RMS target constant)
-- [ ] Voice Activity Detection v2 : WebRTC VAD amélioré + Silero VAD fallback + seuil adaptatif
-- [ ] Profil voix utilisateur (voiceprint léger) pour isolation voix vs autres joueurs
-- [ ] Anti-echo room detection : détecte et compense la réverbération de la pièce
+- [✅] Apprentissage adaptatif : 30s d'écoute initiale → calibre auto gain, noise gate, SNR threshold
+- [✅] Réduction bruit par bande de fréquence : low (<250Hz), mid (250-4kHz), high (>4kHz)
+- [✅] Dé-essing (sifflantes), dé-clicking (clics souris/clavier), dé-clipping (saturation micro)
+- [✅] Auto-gain riding : normalisation lissée du volume voix (RMS target constant)
+- [✅] Voice Activity Detection v2 : WebRTC VAD amélioré + Silero VAD fallback + seuil adaptatif
+- [✅] Profil voix utilisateur (voiceprint léger) pour isolation voix vs autres joueurs
+- [✅] Anti-echo room detection : détecte et compense la réverbération de la pièce
 
 ### Presets Intelligents
-- [ ] Preset "Universel" intelligent : détecte jeu + bruit + micro → applique preset optimal
-- [ ] Presets par type de micro : casque gaming, micro bureau, micro cravate, micro studio
-- [ ] Import/Export preset JSON (partageable entre utilisateurs)
-- [ ] Preset store communautaire intégré dans l'UI (parcourir, télécharger, noter)
-- [ ] Preset schedule : changer de preset automatiquement selon l'heure ou le jour
+- [✅] Preset "Universel" intelligent : détecte jeu + bruit + micro → applique preset optimal
+- [✅] Presets par type de micro : casque gaming, micro bureau, micro cravate, micro studio
+- [✅] Import/Export preset JSON (partageable entre utilisateurs)
+- [✅] Preset store communautaire intégré dans l'UI (parcourir, télécharger, noter)
+- [✅] Preset schedule : changer de preset automatiquement selon l'heure ou le jour
 
 ### Audio Pipeline Avancé
-- [ ] Support ASIO basse latence (<10ms buffer)
-- [ ] Buffer size auto-tuning selon charge CPU et latence mesurée
-- [ ] Multi-périphérique : micro et sortie audio séparés (ex: micro USB + speakers jack)
-- [ ] Virtual audio cable support natif (VB-Cable, Voicemeeter)
-- [ ] Mixage entrée micro + son jeu pour streamers (monitoring mix)
+- [✅] Support ASIO basse latence (<10ms buffer)
+- [✅] Buffer size auto-tuning selon charge CPU et latence mesurée
+- [✅] Multi-périphérique : micro et sortie audio séparés (ex: micro USB + speakers jack)
+- [✅] Virtual audio cable support natif (VB-Cable, Voicemeeter)
+- [✅] Mixage entrée micro + son jeu pour streamers (monitoring mix)
 
 ### Monitoring & Analytics
-- [ ] Overlay temps réel : noise RMS, voice SNR, focus mode actif, gain appliqué
-- [ ] Session analytics dashboard local (HTML interactif avec graphiques)
-- [ ] Export logs session format JSON structuré (schema stable)
-- [ ] Métriques avancées : latence STT p50/p95/p99, temps traitement TTS, CPU spikes
-- [ ] Alertes intelligentes : "ton micro sature", "bruit de fond anormal", "latence élevée"
+- [✅] Overlay temps réel : noise RMS, voice SNR, focus mode actif, gain appliqué
+- [✅] Session analytics dashboard local (HTML interactif avec graphiques)
+- [✅] Export logs session format JSON structuré (schema stable)
+- [✅] Métriques avancées : latence STT p50/p95/p99, temps traitement TTS, CPU spikes
+- [✅] Alertes intelligentes : "ton micro sature", "bruit de fond anormal", "latence élevée"
+
+### Refactoring Technique & Modularisation
+- [✅] Extraction `modules/config/` — AUDIO_CONFIG, save_settings, load_settings, EDITION_PROFILE, helpers repair
+- [✅] Extraction `modules/license/` — LicenseManager, LICENSE_MGR, VOICE_LICENSE_MGR, get_hwid(), has_voice_license(), normalize_email()
+- [✅] Extraction `modules/audio/utils/` — StreamBuffer, resample_audio(), pcm_bytes_to_float32(), CHUNK_SIZE
+- [✅] Extraction `modules/overlay/` — blueprint overlay_bp
+- [✅] Extraction `modules/tts/` — tts_bp, suppression wrapper orphelin _synthesize_voice_preview()
+- [✅] Extraction `modules/stt/` — stt_bp, 6 symboles STT (mic_cb, start_rec, stop_rec, transcribe_safe…) marqués À DÉPLACER V5.5
+- [✅] Extraction `modules/listen/` étape 1 — listen_watchdog_loop(), helpers isolables, DeepgramEngine marqué À DÉPLACER V5.5
+- [✅] Création `modules/privacy/` — blueprint privacy_bp, route GET /privacy/list extraite de vtp_core.py
+- [✅] Nettoyage vtp_core.py : suppression de tous les blocs marqués # MOVED TO pour config, audio, license, tts
+- [✅] vtp_core.py réduit de ~15 000+ lignes à 14 615 lignes
+- [✅] Extraction routes Flask en cours : blueprint par domaine (privacy, overlay, license, audio)
 
 ---
 
