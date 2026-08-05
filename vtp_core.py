@@ -197,6 +197,7 @@ AUDIO_CONFIG = {
     
     # --- CORRECTIONS SONORE ---
     "monitoring_enabled": True,  # <--- METTRE SUR TRUE (Sinon tu n'entends rien au casque !)
+    "monitoring_output_device": None,
     "tts_active": True,          # <--- F2 : Activé par défaut
     
     "tts_engine": "WINDOWS",
@@ -1228,6 +1229,56 @@ def get_device_index(target_name, as_output=False):
                     return i
                 if (not as_output) and int(dev.get("max_input_channels", 0)) > 0:
                     return i
+        return None
+    except Exception:
+        return None
+
+
+def _normalize_device_signature(name, hostapi):
+    n = _norm_dev_name(name)
+    h = _norm_dev_name(hostapi)
+    return f"{h}::{n}" if h else f"::{n}"
+
+
+def _device_runtime_payload(idx):
+    devs = sd.query_devices()
+    hostapis = sd.query_hostapis()
+    dev = devs[int(idx)]
+    hidx = int(dev.get("hostapi", -1))
+    hname = str(hostapis[hidx].get("name", "")) if 0 <= hidx < len(hostapis) else ""
+    return {
+        "index": int(idx),
+        "name": str(dev.get("name", "")),
+        "hostapi": hname,
+    }
+
+
+def _resolve_device_signature(signature, as_output=False):
+    """signature => runtime payload dict or None."""
+    try:
+        if not signature:
+            return None
+        sig = str(signature).strip()
+        if not sig:
+            return None
+        devs = sd.query_devices()
+        hostapis = sd.query_hostapis()
+        if "::" in sig:
+            host_part, name_part = sig.split("::", 1)
+            host_part = _norm_dev_name(host_part)
+            name_part = _norm_dev_name(name_part)
+        else:
+            host_part, name_part = "", _norm_dev_name(sig)
+        for i, dev in enumerate(devs):
+            if as_output and int(dev.get("max_output_channels", 0)) <= 0:
+                continue
+            if (not as_output) and int(dev.get("max_input_channels", 0)) <= 0:
+                continue
+            d_name = _norm_dev_name(dev.get("name", ""))
+            hidx = int(dev.get("hostapi", -1))
+            hname = _norm_dev_name(hostapis[hidx].get("name", "")) if 0 <= hidx < len(hostapis) else ""
+            if name_part and name_part in d_name and (not host_part or host_part == hname):
+                return _device_runtime_payload(i)
         return None
     except Exception:
         return None
@@ -4428,10 +4479,16 @@ def save_audio_api():
     try:
         # On ne convertit que si la clé existe et n'est pas vide
         if data.get('game_output_index') is not None and str(data['game_output_index']).isdigit():
-            AUDIO_CONFIG["game_output_device"] = int(data['game_output_index'])
-            
+            AUDIO_CONFIG["game_output_device_key"] = str(data.get('game_output_key') or "")
+            AUDIO_CONFIG["game_output_device_runtime"] = _resolve_device_signature(
+                AUDIO_CONFIG["game_output_device_key"], as_output=True
+            ) or {}
+
         if data.get('game_input_index') is not None and str(data['game_input_index']).isdigit():
-            AUDIO_CONFIG["game_input_device"] = int(data['game_input_index'])
+            AUDIO_CONFIG["game_input_device_key"] = str(data.get('game_input_key') or "")
+            AUDIO_CONFIG["game_input_device_runtime"] = _resolve_device_signature(
+                AUDIO_CONFIG["game_input_device_key"], as_output=False
+            ) or {}
 
         if data.get('tts_volume') is not None:
             try:
@@ -4445,8 +4502,8 @@ def save_audio_api():
         
         stealth_print(
             f"✅ RÉGLAGES AUDIO VALIDÉS : "
-            f"Sortie={AUDIO_CONFIG['game_output_device']}, "
-            f"Entrée={AUDIO_CONFIG['game_input_device']}, "
+            f"Sortie={AUDIO_CONFIG.get('game_output_device_key')}, "
+            f"Entrée={AUDIO_CONFIG.get('game_input_device_key')}, "
             f"Volume TTS={int(float(AUDIO_CONFIG.get('tts_volume', 1.0) or 1.0) * 100)}%"
         )
         return jsonify({"ok": True})
@@ -4691,8 +4748,10 @@ def status_core():
         "hybrid_fr_ref_exists": bool(hybrid_cfg.get("ref_exists")),
         "recording": _ptt_rec, 
         "ptt_key": AUDIO_CONFIG.get("ptt_hotkey", "ctrl+shift"),
-        "game_output_index": safe_int(AUDIO_CONFIG.get("game_output_device")),
-        "game_input_index": safe_int(AUDIO_CONFIG.get("game_input_device")),
+        "game_output_device_key": str(AUDIO_CONFIG.get("game_output_device_key") or ""),
+        "game_input_device_key": str(AUDIO_CONFIG.get("game_input_device_key") or ""),
+        "game_output_index": safe_int((AUDIO_CONFIG.get("game_output_device_runtime") or {}).get("index")),
+        "game_input_index": safe_int((AUDIO_CONFIG.get("game_input_device_runtime") or {}).get("index")),
         "tts_volume": float(AUDIO_CONFIG.get("tts_volume", 1.0) or 1.0),
         "edge_voice": AUDIO_CONFIG.get("edge_voice", ""),
         "current_voice_id": AUDIO_CONFIG.get("edge_voice", ""),
@@ -10143,22 +10202,15 @@ def monitoring_loop():
 
             cable_out = find_cable_output_device()
             dst_out = None
-            preferred_out = resolve_output_device_cfg(AUDIO_CONFIG.get("game_output_device", 0))
-            if preferred_out is not None:
+            monitoring_device = AUDIO_CONFIG.get("monitoring_output_device")
+            if monitoring_device is not None:
                 try:
-                    preferred_out = int(preferred_out)
-                    excluded = {int(x) for x in [cable_out, src_in] if x is not None}
-                    if preferred_out not in excluded:
-                        dst_out = preferred_out
+                    dst_out = int(monitoring_device)
                 except Exception:
                     dst_out = None
+
             if dst_out is None:
-                monitor_targets = get_monitor_output_device_ids(exclude_ids=[cable_out, src_in], max_devices=1)
-                dst_out = int(monitor_targets[0]) if monitor_targets else None
-            if dst_out is None:
-                dflt = get_default_output_device_id()
-                if dflt is not None and int(dflt) != int(cable_out):
-                    dst_out = int(dflt)
+                dst_out = get_default_output_device_id()
             if dst_out is None:
                 time.sleep(0.8)
                 continue
@@ -10185,6 +10237,11 @@ def monitoring_loop():
                         stream_out.close()
                     except Exception:
                         pass
+
+                print(f"[DEBUG F3] monitoring_output_device config: {AUDIO_CONFIG.get('monitoring_output_device')}", flush=True)
+                print(f"[DEBUG F3] dst_out sélectionné: {dst_out}", flush=True)
+                print(f"[DEBUG F3] src_in (CABLE): {src_in}", flush=True)
+                print(f"[DEBUG F3] tentative ouverture stream {src_in} -> {dst_out}", flush=True)
 
                 stream_in = sd.InputStream(
                     device=int(src_in),
@@ -10215,6 +10272,7 @@ def monitoring_loop():
             stream_out.write(payload)
 
         except Exception as e:
+            print(f"[DEBUG F3] ERREUR ouverture stream: {e}", flush=True)
             stealth_print(f"⚠️ Monitoring loop error: {e}")
             if stream_in is not None:
                 try:
@@ -10518,7 +10576,7 @@ def hybrid_activation_loop():
                 tid = resolve_input_device_cfg(sd.default.device[0])
             if tid is None:
                 raise RuntimeError("Aucun micro valide pour Hybrid.")
-            AUDIO_CONFIG["game_input_device"] = int(tid)
+            AUDIO_CONFIG["game_input_device_runtime"] = _device_runtime_payload(tid)
             info = sd.query_devices(tid)
             rate = int(info['default_samplerate'])
             
@@ -10792,10 +10850,9 @@ def get_default_output_device_id():
                 return None
             # sounddevice >=0.5 peut exposer un _InputOutputPair
             # (itérable mais non tuple/list) avec attributs input/output.
-            if hasattr(v, "__getitem__") and hasattr(v, "__len__"):
+            if hasattr(v, "__getitem__"):
                 try:
-                    if len(v) >= 2:
-                        return int(v[1])
+                    return int(v[1])
                 except Exception:
                     pass
             if hasattr(v, "output"):
@@ -11205,7 +11262,7 @@ def start_rec():
     if target_mic_id is None:
         stealth_print("❌ Aucun micro d'entrée valide détecté.")
         return
-    AUDIO_CONFIG["game_input_device"] = int(target_mic_id)
+    AUDIO_CONFIG["game_input_device_runtime"] = _device_runtime_payload(target_mic_id)
 
     with _ptt_lock:
         if _ptt_rec: return 
@@ -12656,13 +12713,13 @@ def select_microphone_at_startup():
     stealth_print("="*50)
 
     # Priorité: micro sauvegardé dans la configuration utilisateur.
-    saved_mic = resolve_input_device_cfg(AUDIO_CONFIG.get("game_input_device"))
+    saved_mic_sig = AUDIO_CONFIG.get("game_input_device_key") or AUDIO_CONFIG.get("game_input_device")
+    saved_mic = _resolve_device_signature(saved_mic_sig, as_output=False)
     if saved_mic is not None:
         try:
-            devices = sd.query_devices()
-            SELECTED_MIC_ID = int(saved_mic)
-            SELECTED_MIC_NAME = devices[SELECTED_MIC_ID]["name"]
-            AUDIO_CONFIG["game_input_device"] = int(SELECTED_MIC_ID)
+            SELECTED_MIC_ID = int(saved_mic["index"])
+            SELECTED_MIC_NAME = saved_mic["name"]
+            AUDIO_CONFIG["game_input_device_runtime"] = saved_mic
             stealth_print(f"🎯 CIBLE UTILISÉE : {SELECTED_MIC_NAME} (ID {SELECTED_MIC_ID}) [config]")
             stealth_print("="*50 + "\n")
             return
@@ -12689,9 +12746,9 @@ def select_microphone_at_startup():
                 SELECTED_MIC_NAME = dev['name']
                 break
 
-    # Synchronise la configuration avec le micro résolu.
-    AUDIO_CONFIG["game_input_device"] = int(SELECTED_MIC_ID)
-    
+    # Synchronise la configuration avec le micro résolu (cache runtime uniquement).
+    AUDIO_CONFIG["game_input_device_runtime"] = _device_runtime_payload(SELECTED_MIC_ID)
+
     stealth_print(f"🎯 CIBLE UTILISÉE : {SELECTED_MIC_NAME} (ID {SELECTED_MIC_ID})")
     stealth_print("="*50 + "\n")
 
@@ -13507,9 +13564,15 @@ except Exception as e:
 class JSApi:
     def save_audio_config(self, tts_name, listen_name, ptt_key):
         global AUDIO_CONFIG
-        
-        AUDIO_CONFIG["game_output_device"] = tts_name
-        AUDIO_CONFIG["game_input_device"] = listen_name
+
+        AUDIO_CONFIG["game_output_device_key"] = _normalize_device_signature(tts_name, "")
+        AUDIO_CONFIG["game_input_device_key"] = _normalize_device_signature(listen_name, "")
+        AUDIO_CONFIG["game_output_device_runtime"] = _resolve_device_signature(
+            AUDIO_CONFIG["game_output_device_key"], as_output=True
+        ) or {}
+        AUDIO_CONFIG["game_input_device_runtime"] = _resolve_device_signature(
+            AUDIO_CONFIG["game_input_device_key"], as_output=False
+        ) or {}
         AUDIO_CONFIG["ptt_hotkey"] = ptt_key # On met à jour la touche
         
         save_settings()
@@ -13880,12 +13943,9 @@ if __name__ == "__main__":
     save_settings()
     
     # 2. VÉRIFICATION INTELLIGENTE DU PÉRIPHÉRIQUE (SORTIE)
-    try:
-        saved_out = int(AUDIO_CONFIG.get("game_output_device", 0))
-    except:
-        saved_out = 0
-        AUDIO_CONFIG["game_output_device"] = 0
-    if saved_out == 0:
+    saved_out_sig = AUDIO_CONFIG.get("game_output_device_key") or AUDIO_CONFIG.get("game_output_device")
+    saved_out = _resolve_device_signature(saved_out_sig, as_output=True)
+    if saved_out is None:
         stealth_print("🔍 Premier lancement ? Recherche auto CABLE Input...")
         found_cable = None
         try:
@@ -13894,25 +13954,29 @@ if __name__ == "__main__":
                     found_cable = i
                     break
             if found_cable is not None:
-                AUDIO_CONFIG["game_output_device"] = found_cable
+                AUDIO_CONFIG["game_output_device_runtime"] = _device_runtime_payload(found_cable)
                 stealth_print(f"✅ Câble trouvé et configuré sur ID {found_cable}")
                 save_settings()
         except: pass
     else:
-        stealth_print(f"✅ Chargement Sortie sauvegardée : ID {saved_out}")
+        AUDIO_CONFIG["game_output_device_runtime"] = saved_out
+        stealth_print(f"✅ Chargement Sortie sauvegardée : ID {saved_out['index']}")
 
     # 3. VÉRIFICATION DU MICRO (ne pas écraser la config utilisateur)
-    in_id = resolve_input_device_cfg(AUDIO_CONFIG.get("game_input_device"))
+    in_sig = AUDIO_CONFIG.get("game_input_device_key") or AUDIO_CONFIG.get("game_input_device")
+    in_resolved = _resolve_device_signature(in_sig, as_output=False)
+    in_id = in_resolved["index"] if in_resolved else None
     if in_id is None:
         in_id = resolve_input_device_cfg(sd.default.device[0])
     if in_id is None:
         select_microphone_at_startup()
-        in_id = resolve_input_device_cfg(AUDIO_CONFIG.get("game_input_device"))
+        in_resolved = AUDIO_CONFIG.get("game_input_device_runtime") or {}
+        in_id = in_resolved.get("index")
     if in_id is None:
         in_id = 0
-    AUDIO_CONFIG["game_input_device"] = int(in_id)
+    AUDIO_CONFIG["game_input_device_runtime"] = _device_runtime_payload(in_id)
 
-    stealth_print(f"✅ START: Micro {in_id} | Sortie Jeu {AUDIO_CONFIG.get('game_output_device')}")
+    stealth_print(f"✅ START: Micro {in_id} | Sortie Jeu {AUDIO_CONFIG.get('game_output_device_key')}")
 
     # 4. LANCEMENT DES THREADS
     try:
