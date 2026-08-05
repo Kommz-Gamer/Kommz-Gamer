@@ -101,6 +101,13 @@
 - [✅] BUG 10 — Création compte KommzVoice : validation license_key
 - [✅] BUG 11 — F2/F3 muets : handlers corrigés
 
+### Bugfix stabilisation V5.3
+- [x] Phase 1 : Audit symboles manquants dans les blueprints → RAS
+- [x] Phase 2A : Doublon _listen_now_utc_iso supprimé (listen_bp.py)
+- [x] Phase 2B : _mobile_connected propagé correctement vers vtp_core
+- [x] Phase 3 : Audit contrôles de licence → architecture saine, RAS
+- [x] Phase 4 : IDs audio canoniques (WASAPI::NOM) — commits f529d43 / dc72b3d
+
 ---
 
 ## V5.4 — SOCIAL, STREAMING & MULTIJOUEUR (🔄 en cours)
