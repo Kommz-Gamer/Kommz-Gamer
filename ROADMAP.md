@@ -1,22 +1,18 @@
 # Kommz Gamer — Roadmap
 
-> Dernière mise à jour : V5.3 · 2026-05-29
+> Dernière mise à jour : V5.4 démarrée · 2026-07-05
 
 ---
 
 ## V5.1 — STABILISATION & LONGUE SESSION (✅ terminé)
 
-- [✅] Watchdog longue session renforcé (idle/stale thresholds configurables)
+- [✅] Watchdog longue session renforcé
 - [✅] Relance auto si stream écoute bloqué
 - [✅] Heartbeat audio/runtime
-- [✅] Preset `long_session`
-- [✅] Voice Focus mode `auto`
-- [✅] Voice focus auto sur presets jeux bruyants
+- [✅] Preset `long_session`, Voice Focus Auto
 - [✅] Presets expressifs V5
-- [✅] Bouton UI `V5 Long Session`
 - [✅] Onglet `Bugs & QA` + endpoints QA backend
-- [✅] Builds Community V5.1
-- [✅] Versioning global V5.1
+- [✅] Builds Community V5.1 + versioning global
 - [✅] Nettoyage repo : suppression third_party/Matcha-TTS
 
 ---
@@ -24,117 +20,90 @@
 ## V5.2 — FINALISATION & POLISH (✅ terminé)
 
 - [✅] 5 nouveaux presets jeux (Tarkov, Rust, PUBG, LoL, Dota 2)
-- [✅] Séparation voix/bruit par jeu — 5 profils de bruit
+- [✅] Séparation voix/bruit — 5 profils de bruit
 - [✅] 3 nouveaux presets expressifs (Agressif, Cinématique, Streamer)
-- [✅] Onboarding testeurs amélioré
-- [✅] Flux support centralisé (Discord, GitHub, Patreon)
-- [✅] Watchdog longue session V5.2
-- [✅] Profil de bruit par map
-- [✅] Export stats session CSV détaillé
-- [✅] Alertes watchdog configurables
-- [✅] Mode benchmark preset
-- [✅] Auto-pause si silence
-- [✅] Log rotation automatique
-- [✅] Dark mode OLED
-- [✅] Indicateur santé dans la tray icon
-- [✅] Raccourcis clavier globaux
-- [✅] Mini overlay desktop always-on-top
-- [✅] Notifications toast desktop natives
-- [✅] Page stats session avec graphiques
-- [✅] Toolbar mode compact
-- [✅] Installer Windows (NSIS)
-- [✅] Version ZIP portable
-- [✅] Auto-update check au lancement
-- [✅] Signature code documentée
-- [✅] Bundled Python runtime embarqué
-- [✅] Build nightly GitHub Actions
-- [✅] Auto-bug report zip
-- [✅] Base de données bugs connus intégrée
-- [✅] Mode debug verbose
-- [✅] Test suite automatique
-- [✅] Feedback in-app
+- [✅] Onboarding testeurs + flux support centralisé
+- [✅] Watchdog V5.2, profils de bruit par map
+- [✅] Export stats session CSV, alertes watchdog configurables
+- [✅] Mode benchmark preset, auto-pause si silence, log rotation
+- [✅] Dark mode OLED, tray icon santé, raccourcis clavier globaux
+- [✅] Mini overlay desktop, toasts natifs, page stats avec graphiques
+- [✅] Installer Windows NSIS + ZIP portable
+- [✅] Auto-update check, runtime Python embarqué, nightly GitHub Actions
+- [✅] Auto-bug report zip, base bugs connus, mode debug verbose
+- [✅] Tests automatiques, feedback in-app
 
 ---
 
-## V5.3 — INTELLIGENCE AUDIO & AUTO (🔄 en cours — refactoring Flask actif)
+## V5.3 — INTELLIGENCE AUDIO & REFACTORING (✅ terminé)
 
-### Game Detection V2 (✅ terminé)
+### Game Detection V2
 - [✅] Fingerprint audio : détection auto du jeu en 2-3s
 - [✅] Fallback chaîne : process → window title → fingerprint → manuel
-- [✅] Base de données fingerprints locale + cloud sync optionnelle
-- [✅] Mode preset `Auto`
-- [✅] Détection multi-jeu / alt-tab
-- [✅] Log historique des jeux détectés
-- [✅] Contribution communautaire de fingerprints
+- [✅] Base fingerprints locale + cloud sync optionnelle
+- [✅] Mode preset `Auto`, détection multi-jeu / alt-tab
+- [✅] Historique jeux détectés, contribution communautaire fingerprints
 
-### Voice Focus V3 (✅ terminé)
-- [✅] Calibration auto : 30s d'écoute initiale
-- [✅] Réduction bruit par bande de fréquence (low/mid/high)
+### Voice Focus V3
+- [✅] Calibration auto (30s écoute initiale)
+- [✅] Réduction bruit par bande de fréquence
 - [✅] Dé-essing, dé-clicking, dé-clipping
-- [✅] Auto-gain riding (RMS target constant)
-- [✅] VAD v2 : WebRTC + Silero VAD fallback
-- [✅] Voiceprint léger utilisateur
-- [✅] Anti-réverbération pièce
+- [✅] Auto-gain riding, VAD v2 + Silero fallback
+- [✅] Voiceprint léger utilisateur, anti-réverbération pièce
 
-### Presets Intelligents (✅ terminé)
+### Presets Intelligents
 - [✅] Preset "Universel" intelligent
 - [✅] Presets par type de micro
 - [✅] Import/Export preset JSON
 - [✅] Preset store communautaire
 - [✅] Preset schedule
 
-### Audio Pipeline Avancé (✅ terminé)
+### Audio Pipeline Avancé
 - [✅] Support ASIO basse latence
 - [✅] Buffer size auto-tuning
-- [✅] Multi-périphérique
-- [✅] Virtual audio cable support natif (VB-Cable, Voicemeeter)
-- [✅] Mixage entrée micro + son jeu
+- [✅] Multi-périphérique, VB-Cable / Voicemeeter natif
+- [✅] Mix micro + son jeu
 
-### Monitoring & Analytics (✅ terminé)
+### Monitoring & Analytics
 - [✅] Overlay temps réel enrichi
-- [✅] Session analytics dashboard local HTML
+- [✅] Dashboard analytics local HTML
 - [✅] Export logs session JSON structuré
 - [✅] Métriques avancées latence / CPU / RAM
 - [✅] Alertes intelligentes
 
-### Nettoyage Repo (✅ terminé)
-- [✅] Suppression ~436 fichiers morts
-- [✅] ~92 450 fichiers, ~3,6 Go libérés
-- [✅] modules/ ne contient plus que les modules actifs
-- [✅] Scripts de lancement corrigés
+### Refactoring Flask / Modularisation
+- [✅] 13 blueprints créés : config, license, audio, overlay, tts, stt, listen, privacy, scenes, ui, remote, cloud, subs
+- [✅] ~81 routes extraites de vtp_core.py
+- [✅] vtp_core.py : **24 `@app.route` restantes** (départ : ~105)
+- [✅] python -m py_compile vtp_core.py → exit code 0
+- [✅] Nettoyage repo : ~436 fichiers morts, ~3,6 Go libérés
+- [✅] module license.py : code mort Supabase supprimé
+- [✅] listen.py (doublon) supprimé
 
-### Refactoring Flask / Modularisation (🔄 EN COURS ACTIF)
+### Bugs résolus
+- [✅] Config non sauvegardée (réassignation AUDIO_CONFIG)
+- [✅] load_settings() : filtre destructeur supprimé (92 params perdus)
+- [✅] Licence non persistante au démarrage (sync_license_mgr_from_config)
+- [✅] Monitoring casque : dtype mismatch float64/float32
+- [✅] HUD flottant figé : timeout poll 0.8s → 2s
+- [✅] Overlay sous-titres expérimental retiré proprement
 
-**Modules extraits — terminés :**
-- [✅] `modules/config/` — config_bp
-- [✅] `modules/license/` — license_bp
-- [✅] `modules/audio/` — audio_bp
-- [✅] `modules/overlay/` — overlay_bp
-- [✅] `modules/tts/` — tts_bp
-- [✅] `modules/stt/` — stt_bp
-- [✅] `modules/listen/` — listen_bp (`__init__.py` + `listen.py`)
-- [✅] `modules/privacy/` — privacy_bp
-- [✅] `modules/scenes/` — scenes_bp
-- [✅] `modules/ui/` — ui_bp ✅ créé vague 3
-
-**Routes extraites — terminées (~37 routes) :**
-- [✅] Vague 1 (12 routes) : GET /privacy/list, /audio/monitoring_mix/status, /hud/status, /hud_overlay.html, /license/hwid, /license/status, /scenes/list + listen support/preset/latency
-- [✅] Vague 2 (18 routes) : listen game_timeline, game_noise_profile, fingerprint/db/stats, fingerprint/db/export, detect_game, detect_game_v2, smart_alerts, analytics/v3/dashboard, analytics/v3/smart_alerts, auto_bug_report + audio devices/asio, pipeline/multi_device
-- [✅] Vague 3 (7 routes) : listen benchmark, session_report/export, quickcheck, debug_bundle + update/changelog, ui/toasts/pending, audio/pipeline/latency
-
-**État actuel :**
-- Routes restantes dans vtp_core.py : **86 `@app.route`**
-- Import listen_bp dans vtp_core.py : ligne 149
-- `python -m py_compile vtp_core.py` → ✅ exit code 0
-
-**Route laissée intentionnellement :**
-- `GET /dialog/select-audio-file` — dépend de `tkinter` + effets de bord sur `AUDIO_CONFIG`, non déplaçable sans refonte
-
-**Prochain objectif : passer sous les 80 routes avant de clore V5.3**
+### Bugfix stabilisation post-refactoring — ✅ complet
+- [✅] BUG 1 — Crash lancement : doublon route_hud_overlay_pos supprimé
+- [✅] BUG 2 — Settings : 7 clés manquantes ajoutées dans AUDIO_CONFIG defaults
+- [✅] BUG 3 — Licence VTP/VCV : endpoint + payload + champ réponse corrigés
+- [✅] BUG 4 — Trial expiré accepté : vérification timestamp 24h ajoutée
+- [✅] BUG 5 — Monitoring -9997 : rate_in/rate_out séparés + soxr VHQ
+- [✅] BUG 6 — Sous-titres absents : garde overlay_loop étendue
+- [✅] BUG 7 — Messages SYS non violet : tk.Text avec tags couleur
+- [✅] BUG 8 — Device invalide -9996 : skip silencieux
+- [✅] BUG 9 — Grésillements monitoring : détection sample rate dynamique
+- [✅] BUG 10 — Création compte KommzVoice : validation license_key
+- [✅] BUG 11 — F2/F3 muets : handlers corrigés
 
 ---
 
-## V5.4 — SOCIAL, STREAMING & MULTIJOUEUR (⏳ pas encore commencé)
+## V5.4 — SOCIAL, STREAMING & MULTIJOUEUR (🔄 en cours)
 
 ### Overlay OBS / Streaming
 - [ ] Overlay HTML5 natif pour OBS Studio
@@ -156,27 +125,25 @@
 
 ### Voice Profiles & Équipe
 - [ ] Reconnaissance vocale du joueur (voiceprint matching)
-- [ ] Profil vocal par contact
-- [ ] Icônes + couleurs par joueur dans l'overlay
+- [ ] Profil vocal par contact, icônes/couleurs par joueur
 - [ ] Log "qui a dit quoi" exportable
 - [ ] Mode Squad Sync
 - [ ] Partage de preset entre amis
 
 ### TTS & Soundboard
 - [ ] TTS thématiques par jeu
-- [ ] Soundboard intégrée (sons custom, hotkeys)
+- [ ] Soundboard intégrée (sons custom, hotkeys F1-F12)
 - [ ] Banque de sons communautaire
 - [ ] TTS personnalisé (pitch, speed, modèle vocal)
 - [ ] Voice changer léger temps réel
 
-### Intégrations Externes
-- [ ] Discord Rich Presence (jeu détecté, preset actif, langue)
-- [ ] Discord bot slash commands (/stats, /preset, /langue)
-- [ ] Discord webhooks sortants (état session → serveur custom)
+### Intégrations Discord
+- [ ] Rich Presence (jeu détecté, preset actif, langue)
+- [ ] Bot slash commands (/stats, /preset, /langue)
+- [ ] Webhooks sortants (état session → serveur Discord custom)
 - [ ] Twitch/YouTube chat → TTS casque
 - [ ] Intégration Stream Deck
 - [ ] Ducking Spotify automatique
-- [ ] Discord bot slash commands distants
 
 ---
 
@@ -186,13 +153,11 @@
 - [ ] SDK développeur (API Python + JS + doc)
 - [ ] Sandbox plugins (permissions, sécurité)
 - [ ] API REST stable v1 (OpenAPI/Swagger)
-- [ ] API Keys avec rate limiting
 - [ ] WebSocket API (flux audio, état, événements)
 - [ ] SDKs officiels : Python, JS/TS, C#/.NET
 - [ ] App companion Android + iOS
 - [ ] Compte Kommz (inscription, connexion, profil)
-- [ ] Sync presets cloud
-- [ ] Sync config cloud
+- [ ] Sync presets + config cloud
 - [ ] Cloud stats dashboard web
 - [ ] Leaderboard communautaire
 - [ ] Patreon intégration native
@@ -214,6 +179,5 @@
 - [ ] Séparation de sources audio (demucs)
 - [ ] Intégration console (PS5, Xbox via carte acquisition)
 - [ ] Mode Coach IA (analyse callouts, suggestions tactiques)
-- [ ] Intégration hardware (Stream Deck natif, pédales, mixeurs)
 - [ ] Traduction temps réel <200ms
 - [ ] Parties clés open source + programme contributeurs
