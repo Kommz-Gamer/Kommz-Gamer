@@ -2,6 +2,14 @@
 
 [Français](CHANGELOG.md) | [English](CHANGELOG.en.md)
 
+## Kommz Gamer 5.3 - 2026-08-05
+
+### Stabilization bugfix
+- Phase 1 — Audited blueprints (`modules/listen`, `modules/guide`, `modules/remote`, `modules/scenes`) for missing symbols: zero missing symbols confirmed in `vtp_core.py`.
+- Phase 2 — Removed the duplicate `_listen_now_utc_iso` (`listen_bp.py`); fixed `_mobile_connected` to propagate correctly to `vtp_core` instead of a local `globals()` write.
+- Phase 3 — Audited license checks: already centralized in `modules/license/license.py`, no rework needed.
+- Phase 4 — Migrated audio device IDs (`game_input_device` / `game_output_device`) from raw PortAudio index to a canonical stable signature `"{hostapi}::{name}"` (e.g. `WASAPI::CABLE OUTPUT`), with a separate runtime cache and full backward compatibility for existing configs.
+
 ## Kommz Gamer 4.6 - 2026-03-22
 
 ### Audio and stability
